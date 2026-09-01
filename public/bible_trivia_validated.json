@@ -1,0 +1,5602 @@
+[
+  {
+    "question_number": 201,
+    "question": "According to John 3:16, who did God give so that whoever believes in him shall not perish?",
+    "options": [
+      "An angel",
+      "His only Son",
+      "A prophet",
+      "A king"
+    ],
+    "answer": "His only Son",
+    "id": "bible-201",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 202,
+    "question": "In Proverbs 3:5, what are we told to trust in with all our heart?",
+    "options": [
+      "Our own understanding",
+      "The Lord",
+      "Wealth",
+      "Family"
+    ],
+    "answer": "The Lord",
+    "id": "bible-202",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 203,
+    "question": "What does Psalm 23:1 declare the Lord is?",
+    "options": [
+      "My shepherd",
+      "My king",
+      "My rock",
+      "My father"
+    ],
+    "answer": "My shepherd",
+    "id": "bible-203",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 204,
+    "question": "According to Philippians 4:13, through whom can I do all things?",
+    "options": [
+      "Myself",
+      "The saints",
+      "Christ who strengthens me",
+      "The angels"
+    ],
+    "answer": "Christ who strengthens me",
+    "id": "bible-204",
+    "category": "Bible Basics",
+    "answer_index": 2
+  },
+  {
+    "question_number": 205,
+    "question": "In Romans 6:23, what is the wages of sin?",
+    "options": [
+      "Death",
+      "Pain",
+      "Sorrow",
+      "Exile"
+    ],
+    "answer": "Death",
+    "id": "bible-205",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 206,
+    "question": "According to Genesis 1:1, when did God create the heavens and the earth?",
+    "options": [
+      "In the beginning",
+      "On the first day",
+      "Before time",
+      "In the evening"
+    ],
+    "answer": "In the beginning",
+    "id": "bible-206",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 207,
+    "question": "In Galatians 5:22-23, which of these is a fruit of the Spirit?",
+    "options": [
+      "Anger",
+      "Joy",
+      "Pride",
+      "Jealousy"
+    ],
+    "answer": "Joy",
+    "id": "bible-207",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 208,
+    "question": "What does Ephesians 2:8 say we have been saved by?",
+    "options": [
+      "Good works",
+      "Grace through faith",
+      "Sacrifices",
+      "The law"
+    ],
+    "answer": "Grace through faith",
+    "id": "bible-208",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 209,
+    "question": "According to Psalm 119:105, what is a lamp to my feet?",
+    "options": [
+      "The sun",
+      "The Holy Spirit",
+      "Your word",
+      "Wisdom"
+    ],
+    "answer": "Your word",
+    "id": "bible-209",
+    "category": "Old Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 210,
+    "question": "In Matthew 28:19, what are the disciples commanded to make?",
+    "options": [
+      "Churches",
+      "Disciples of all nations",
+      "Peace",
+      "Sacrifices"
+    ],
+    "answer": "Disciples of all nations",
+    "id": "bible-210",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 211,
+    "question": "According to 1 Corinthians 13:13, what is the greatest of these: faith, hope, and love?",
+    "options": [
+      "Faith",
+      "Hope",
+      "Love",
+      "All are equal"
+    ],
+    "answer": "Love",
+    "id": "bible-211",
+    "category": "Bible Basics",
+    "answer_index": 2
+  },
+  {
+    "question_number": 212,
+    "question": "In Romans 8:28, for whom do all things work together for good?",
+    "options": [
+      "Everyone",
+      "Those who love God",
+      "The rich",
+      "The Israelites"
+    ],
+    "answer": "Those who love God",
+    "id": "bible-212",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 213,
+    "question": "According to Isaiah 9:6, what shall the child born to us be called?",
+    "options": [
+      "Prince of Peace",
+      "King of Kings",
+      "Lord of Lords",
+      "Son of Man"
+    ],
+    "answer": "Prince of Peace",
+    "id": "bible-213",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 214,
+    "question": "In Jeremiah 29:11, what kind of plans does God say He has for His people?",
+    "options": [
+      "Plans for harm",
+      "Plans to prosper",
+      "Plans for war",
+      "Plans to hide"
+    ],
+    "answer": "Plans to prosper",
+    "id": "bible-214",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 215,
+    "question": "According to Matthew 6:33, what should we seek first?",
+    "options": [
+      "Wealth",
+      "The kingdom of God and his righteousness",
+      "Food and clothing",
+      "Peace"
+    ],
+    "answer": "The kingdom of God and his righteousness",
+    "id": "bible-215",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 216,
+    "question": "In Joshua 1:9, what is the command given to Joshua?",
+    "options": [
+      "Be strong and courageous",
+      "Flee to Egypt",
+      "Build a temple",
+      "Write the law"
+    ],
+    "answer": "Be strong and courageous",
+    "id": "bible-216",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 217,
+    "question": "According to 1 John 1:9, if we confess our sins, God is faithful and just to do what?",
+    "options": [
+      "Punish us",
+      "Forgive us our sins",
+      "Ignore us",
+      "Test us"
+    ],
+    "answer": "Forgive us our sins",
+    "id": "bible-217",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 218,
+    "question": "In Proverbs 1:7, what is the beginning of knowledge?",
+    "options": [
+      "The fear of the Lord",
+      "Reading books",
+      "Listening to elders",
+      "Hard work"
+    ],
+    "answer": "The fear of the Lord",
+    "id": "bible-218",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 219,
+    "question": "According to Romans 3:23, who has sinned and fall short of the glory of God?",
+    "options": [
+      "All",
+      "Some",
+      "Only the Gentiles",
+      "Only the Jews"
+    ],
+    "answer": "All",
+    "id": "bible-219",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 220,
+    "question": "In Hebrews 11:1, faith is the assurance of things hoped for, the conviction of things...",
+    "options": [
+      "In the past",
+      "Not seen",
+      "Already happened",
+      "In the Bible"
+    ],
+    "answer": "Not seen",
+    "id": "bible-220",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 221,
+    "question": "According to James 1:5, what should any of you lack that you should ask God for?",
+    "options": [
+      "Money",
+      "Wisdom",
+      "Power",
+      "Patience"
+    ],
+    "answer": "Wisdom",
+    "id": "bible-221",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 222,
+    "question": "In 2 Timothy 3:16, all Scripture is breathed out by whom?",
+    "options": [
+      "Prophets",
+      "God",
+      "Angels",
+      "Apostles"
+    ],
+    "answer": "God",
+    "id": "bible-222",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 223,
+    "question": "According to Revelation 21:4, what will God wipe away from their eyes?",
+    "options": [
+      "Every tear",
+      "All blindness",
+      "Sin",
+      "Sleep"
+    ],
+    "answer": "Every tear",
+    "id": "bible-223",
+    "category": "Revelation",
+    "answer_index": 0
+  },
+  {
+    "question_number": 224,
+    "question": "In Matthew 5:9, who are called the sons of God?",
+    "options": [
+      "The meek",
+      "The peacemakers",
+      "The merciful",
+      "The pure in heart"
+    ],
+    "answer": "The peacemakers",
+    "id": "bible-224",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 225,
+    "question": "According to Psalm 46:1, God is our refuge and what?",
+    "options": [
+      "Strength",
+      "Shield",
+      "Fortress",
+      "King"
+    ],
+    "answer": "Strength",
+    "id": "bible-225",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 226,
+    "question": "In Micah 6:8, what does the Lord require of you?",
+    "options": [
+      "To build an altar",
+      "To do justice, love kindness, walk humbly",
+      "To sacrifice daily",
+      "To fast often"
+    ],
+    "answer": "To do justice, love kindness, walk humbly",
+    "id": "bible-226",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 227,
+    "question": "According to Romans 12:2, do not be conformed to this world, but be transformed by what?",
+    "options": [
+      "The Holy Spirit",
+      "The renewal of your mind",
+      "Good deeds",
+      "Prayer"
+    ],
+    "answer": "The renewal of your mind",
+    "id": "bible-227",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 228,
+    "question": "In 1 Peter 5:7, what are we told to cast on Him because He cares for us?",
+    "options": [
+      "Our sins",
+      "All our anxieties",
+      "Our wealth",
+      "Our nets"
+    ],
+    "answer": "All our anxieties",
+    "id": "bible-228",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 229,
+    "question": "According to Colossians 3:23, whatever you do, work heartily, as for whom?",
+    "options": [
+      "Your master",
+      "Your family",
+      "The Lord",
+      "Yourself"
+    ],
+    "answer": "The Lord",
+    "id": "bible-229",
+    "category": "Bible Basics",
+    "answer_index": 2
+  },
+  {
+    "question_number": 230,
+    "question": "In Matthew 11:28, Jesus says, 'Come to me, all who labor and are heavy laden, and I will give you...'",
+    "options": [
+      "Money",
+      "Rest",
+      "Food",
+      "Shelter"
+    ],
+    "answer": "Rest",
+    "id": "bible-230",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 231,
+    "question": "What is the name of the angel who appeared to Mary to announce the birth of Jesus?",
+    "options": [
+      "Michael",
+      "Gabriel",
+      "Raphael",
+      "Uriel"
+    ],
+    "answer": "Gabriel",
+    "id": "bible-231",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 232,
+    "question": "Which of these is NOT a book in the New Testament?",
+    "options": [
+      "Titus",
+      "Philemon",
+      "Malachi",
+      "Jude"
+    ],
+    "answer": "Malachi",
+    "id": "bible-232",
+    "category": "Bible Basics",
+    "answer_index": 2
+  },
+  {
+    "question_number": 233,
+    "question": "How many tribes of Israel were there?",
+    "options": [
+      "10",
+      "12",
+      "14",
+      "7"
+    ],
+    "answer": "12",
+    "id": "bible-233",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 234,
+    "question": "Who was the oldest person in the Bible?",
+    "options": [
+      "Adam",
+      "Noah",
+      "Methuselah",
+      "Enoch"
+    ],
+    "answer": "Methuselah",
+    "id": "bible-234",
+    "category": "Bible Basics",
+    "answer_index": 2
+  },
+  {
+    "question_number": 235,
+    "question": "What did David use to defeat Goliath?",
+    "options": [
+      "A sword",
+      "A spear",
+      "A sling and a stone",
+      "A bow and arrow"
+    ],
+    "answer": "A sling and a stone",
+    "id": "bible-235",
+    "category": "Old Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 236,
+    "question": "Who was the father of King Solomon?",
+    "options": [
+      "Saul",
+      "David",
+      "Samuel",
+      "Jesse"
+    ],
+    "answer": "David",
+    "id": "bible-236",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 237,
+    "question": "In what city were the believers first called Christians?",
+    "options": [
+      "Jerusalem",
+      "Rome",
+      "Antioch",
+      "Ephesus"
+    ],
+    "answer": "Antioch",
+    "id": "bible-237",
+    "category": "New Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 238,
+    "question": "Who was the tax collector that became a disciple of Jesus?",
+    "options": [
+      "Matthew",
+      "Luke",
+      "Mark",
+      "John"
+    ],
+    "answer": "Matthew",
+    "id": "bible-238",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 239,
+    "question": "What was the name of the blind beggar Jesus healed outside Jericho?",
+    "options": [
+      "Bartimaeus",
+      "Lazarus",
+      "Zacchaeus",
+      "Nicodemus"
+    ],
+    "answer": "Bartimaeus",
+    "id": "bible-239",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 240,
+    "question": "Who wrote the book of Acts?",
+    "options": [
+      "Paul",
+      "Peter",
+      "Luke",
+      "John"
+    ],
+    "answer": "Luke",
+    "id": "bible-240",
+    "category": "New Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 241,
+    "question": "Which prophet was swallowed by a great fish?",
+    "options": [
+      "Isaiah",
+      "Ezekiel",
+      "Jonah",
+      "Amos"
+    ],
+    "answer": "Jonah",
+    "id": "bible-241",
+    "category": "Old Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 242,
+    "question": "Who was the first king of Israel?",
+    "options": [
+      "David",
+      "Solomon",
+      "Saul",
+      "Samuel"
+    ],
+    "answer": "Saul",
+    "id": "bible-242",
+    "category": "Old Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 243,
+    "question": "What did Jesus multiply to feed the 5,000?",
+    "options": [
+      "5 loaves and 2 fish",
+      "7 loaves and a few fish",
+      "12 loaves",
+      "Water into wine"
+    ],
+    "answer": "5 loaves and 2 fish",
+    "id": "bible-243",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 244,
+    "question": "Who betrayed Jesus to the religious leaders?",
+    "options": [
+      "Peter",
+      "Thomas",
+      "Judas Iscariot",
+      "John"
+    ],
+    "answer": "Judas Iscariot",
+    "id": "bible-244",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 245,
+    "question": "What was the name of Moses' brother?",
+    "options": [
+      "Joshua",
+      "Caleb",
+      "Aaron",
+      "Hur"
+    ],
+    "answer": "Aaron",
+    "id": "bible-245",
+    "category": "Old Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 246,
+    "question": "Who was the sister of Moses and Aaron?",
+    "options": [
+      "Miriam",
+      "Zipporah",
+      "Rachel",
+      "Leah"
+    ],
+    "answer": "Miriam",
+    "id": "bible-246",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 247,
+    "question": "What did the Israelites eat in the wilderness?",
+    "options": [
+      "Apples",
+      "Manna",
+      "Figs",
+      "Olives"
+    ],
+    "answer": "Manna",
+    "id": "bible-247",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 248,
+    "question": "Who led the Israelites into the Promised Land?",
+    "options": [
+      "Moses",
+      "Aaron",
+      "Joshua",
+      "Caleb"
+    ],
+    "answer": "Joshua",
+    "id": "bible-248",
+    "category": "Old Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 249,
+    "question": "What city's walls fell down after the Israelites marched around them?",
+    "options": [
+      "Jerusalem",
+      "Jericho",
+      "Babylon",
+      "Nineveh"
+    ],
+    "answer": "Jericho",
+    "id": "bible-249",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 250,
+    "question": "Who was the strong man whose hair was cut by Delilah?",
+    "options": [
+      "David",
+      "Goliath",
+      "Samson",
+      "Solomon"
+    ],
+    "answer": "Samson",
+    "id": "bible-250",
+    "category": "Bible Basics",
+    "answer_index": 2
+  },
+  {
+    "question_number": 251,
+    "question": "What was the name of Ruth's mother-in-law?",
+    "options": [
+      "Naomi",
+      "Orpah",
+      "Hannah",
+      "Sarah"
+    ],
+    "answer": "Naomi",
+    "id": "bible-251",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 252,
+    "question": "Who was the boy that heard God calling him in the night?",
+    "options": [
+      "David",
+      "Samuel",
+      "Solomon",
+      "Josiah"
+    ],
+    "answer": "Samuel",
+    "id": "bible-252",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 253,
+    "question": "Who was thrown into the lions' den?",
+    "options": [
+      "Shadrach",
+      "Meshach",
+      "Abednego",
+      "Daniel"
+    ],
+    "answer": "Daniel",
+    "id": "bible-253",
+    "category": "Bible Basics",
+    "answer_index": 3
+  },
+  {
+    "question_number": 254,
+    "question": "Which queen saved her people from destruction?",
+    "options": [
+      "Vashti",
+      "Esther",
+      "Jezebel",
+      "Athaliah"
+    ],
+    "answer": "Esther",
+    "id": "bible-254",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 255,
+    "question": "Who was the giant that David killed?",
+    "options": [
+      "Goliath",
+      "Og",
+      "Sihon",
+      "Agag"
+    ],
+    "answer": "Goliath",
+    "id": "bible-255",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 256,
+    "question": "What was the name of David's best friend?",
+    "options": [
+      "Saul",
+      "Jonathan",
+      "Joab",
+      "Abner"
+    ],
+    "answer": "Jonathan",
+    "id": "bible-256",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 257,
+    "question": "Who built the first temple in Jerusalem?",
+    "options": [
+      "David",
+      "Solomon",
+      "Hezekiah",
+      "Josiah"
+    ],
+    "answer": "Solomon",
+    "id": "bible-257",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 258,
+    "question": "Which prophet confronted King Ahab and the prophets of Baal?",
+    "options": [
+      "Elisha",
+      "Elijah",
+      "Isaiah",
+      "Jeremiah"
+    ],
+    "answer": "Elijah",
+    "id": "bible-258",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 259,
+    "question": "Who succeeded Elijah as prophet?",
+    "options": [
+      "Isaiah",
+      "Jeremiah",
+      "Elisha",
+      "Ezekiel"
+    ],
+    "answer": "Elisha",
+    "id": "bible-259",
+    "category": "Old Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 260,
+    "question": "Who was known as the 'weeping prophet'?",
+    "options": [
+      "Isaiah",
+      "Jeremiah",
+      "Ezekiel",
+      "Daniel"
+    ],
+    "answer": "Jeremiah",
+    "id": "bible-260",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 261,
+    "question": "What was the name of the place where Jesus was crucified?",
+    "options": [
+      "Gethsemane",
+      "Golgotha",
+      "Bethlehem",
+      "Nazareth"
+    ],
+    "answer": "Golgotha",
+    "id": "bible-261",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 262,
+    "question": "Who denied knowing Jesus three times?",
+    "options": [
+      "John",
+      "James",
+      "Peter",
+      "Thomas"
+    ],
+    "answer": "Peter",
+    "id": "bible-262",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 263,
+    "question": "Who was the first person to see the resurrected Jesus?",
+    "options": [
+      "Peter",
+      "John",
+      "Mary Magdalene",
+      "Mary the mother of Jesus"
+    ],
+    "answer": "Mary Magdalene",
+    "id": "bible-263",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 264,
+    "question": "Which disciple doubted that Jesus had risen until he touched his wounds?",
+    "options": [
+      "Peter",
+      "John",
+      "Thomas",
+      "Philip"
+    ],
+    "answer": "Thomas",
+    "id": "bible-264",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 265,
+    "question": "What was the profession of Simon Peter before he followed Jesus?",
+    "options": [
+      "Tax collector",
+      "Fisherman",
+      "Carpenter",
+      "Tentmaker"
+    ],
+    "answer": "Fisherman",
+    "id": "bible-265",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 266,
+    "question": "Who was the Roman governor who sentenced Jesus to death?",
+    "options": [
+      "Herod",
+      "Caesar Augustus",
+      "Pontius Pilate",
+      "Felix"
+    ],
+    "answer": "Pontius Pilate",
+    "id": "bible-266",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 267,
+    "question": "What happened to the curtain in the temple when Jesus died?",
+    "options": [
+      "It caught fire",
+      "It was torn in two",
+      "It fell down",
+      "It turned red"
+    ],
+    "answer": "It was torn in two",
+    "id": "bible-267",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 268,
+    "question": "Who requested the body of Jesus for burial?",
+    "options": [
+      "Nicodemus",
+      "Joseph of Arimathea",
+      "Peter",
+      "John"
+    ],
+    "answer": "Joseph of Arimathea",
+    "id": "bible-268",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 269,
+    "question": "On what day did the Holy Spirit descend upon the apostles?",
+    "options": [
+      "Passover",
+      "Pentecost",
+      "Yom Kippur",
+      "Feast of Tabernacles"
+    ],
+    "answer": "Pentecost",
+    "id": "bible-269",
+    "category": "New Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 270,
+    "question": "Who was the first Christian martyr?",
+    "options": [
+      "James",
+      "Peter",
+      "Stephen",
+      "Paul"
+    ],
+    "answer": "Stephen",
+    "id": "bible-270",
+    "category": "Bible Basics",
+    "answer_index": 2
+  },
+  {
+    "question_number": 271,
+    "question": "What was Paul's original name?",
+    "options": [
+      "Silas",
+      "Saul",
+      "Barnabas",
+      "Timothy"
+    ],
+    "answer": "Saul",
+    "id": "bible-271",
+    "category": "New Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 272,
+    "question": "On the road to which city was Paul converted?",
+    "options": [
+      "Jerusalem",
+      "Antioch",
+      "Damascus",
+      "Rome"
+    ],
+    "answer": "Damascus",
+    "id": "bible-272",
+    "category": "New Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 273,
+    "question": "Who traveled with Paul on his first missionary journey?",
+    "options": [
+      "Silas",
+      "Timothy",
+      "Barnabas",
+      "Luke"
+    ],
+    "answer": "Barnabas",
+    "id": "bible-273",
+    "category": "New Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 274,
+    "question": "Which of these letters was NOT written by Paul?",
+    "options": [
+      "Romans",
+      "Galatians",
+      "Ephesians",
+      "James"
+    ],
+    "answer": "James",
+    "id": "bible-274",
+    "category": "New Testament",
+    "answer_index": 3
+  },
+  {
+    "question_number": 275,
+    "question": "What island was John on when he received the Revelation?",
+    "options": [
+      "Cyprus",
+      "Crete",
+      "Patmos",
+      "Malta"
+    ],
+    "answer": "Patmos",
+    "id": "bible-275",
+    "category": "Revelation",
+    "answer_index": 2
+  },
+  {
+    "question_number": 276,
+    "question": "In Genesis, what was the name of Adam and Eve's first son?",
+    "options": [
+      "Abel",
+      "Cain",
+      "Seth",
+      "Enoch"
+    ],
+    "answer": "Cain",
+    "id": "bible-276",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 277,
+    "question": "What did God use to symbolize His promise never to flood the earth again?",
+    "options": [
+      "A dove",
+      "An olive branch",
+      "A rainbow",
+      "A burning bush"
+    ],
+    "answer": "A rainbow",
+    "id": "bible-277",
+    "category": "Bible Basics",
+    "answer_index": 2
+  },
+  {
+    "question_number": 278,
+    "question": "Who was Abraham's wife?",
+    "options": [
+      "Rebekah",
+      "Rachel",
+      "Sarah",
+      "Leah"
+    ],
+    "answer": "Sarah",
+    "id": "bible-278",
+    "category": "Old Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 279,
+    "question": "Who was the son of Abraham and Sarah?",
+    "options": [
+      "Ishmael",
+      "Isaac",
+      "Jacob",
+      "Esau"
+    ],
+    "answer": "Isaac",
+    "id": "bible-279",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 280,
+    "question": "Who traded his birthright for a bowl of stew?",
+    "options": [
+      "Jacob",
+      "Esau",
+      "Joseph",
+      "Reuben"
+    ],
+    "answer": "Esau",
+    "id": "bible-280",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 281,
+    "question": "How many sons did Jacob have?",
+    "options": [
+      "10",
+      "11",
+      "12",
+      "13"
+    ],
+    "answer": "12",
+    "id": "bible-281",
+    "category": "Old Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 282,
+    "question": "Which of Joseph's brothers suggested throwing him in the pit instead of killing him?",
+    "options": [
+      "Simeon",
+      "Judah",
+      "Reuben",
+      "Levi"
+    ],
+    "answer": "Reuben",
+    "id": "bible-282",
+    "category": "Old Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 283,
+    "question": "In Egypt, Joseph interpreted the dreams of which official?",
+    "options": [
+      "The baker and cupbearer",
+      "The general",
+      "The high priest",
+      "The scribe"
+    ],
+    "answer": "The baker and cupbearer",
+    "id": "bible-283",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 284,
+    "question": "What baby was placed in a basket in the Nile River?",
+    "options": [
+      "Joseph",
+      "Moses",
+      "Aaron",
+      "Joshua"
+    ],
+    "answer": "Moses",
+    "id": "bible-284",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 285,
+    "question": "How did God speak to Moses in the desert?",
+    "options": [
+      "Through an angel",
+      "Through a burning bush",
+      "In a dream",
+      "Through a thundercloud"
+    ],
+    "answer": "Through a burning bush",
+    "id": "bible-285",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 286,
+    "question": "How many plagues did God send on Egypt?",
+    "options": [
+      "7",
+      "10",
+      "12",
+      "40"
+    ],
+    "answer": "10",
+    "id": "bible-286",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 287,
+    "question": "What sea did the Israelites cross on dry land?",
+    "options": [
+      "The Dead Sea",
+      "The Mediterranean Sea",
+      "The Red Sea",
+      "The Sea of Galilee"
+    ],
+    "answer": "The Red Sea",
+    "id": "bible-287",
+    "category": "Old Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 288,
+    "question": "On what mountain did Moses receive the Ten Commandments?",
+    "options": [
+      "Mount Ararat",
+      "Mount Sinai",
+      "Mount Carmel",
+      "Mount Zion"
+    ],
+    "answer": "Mount Sinai",
+    "id": "bible-288",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 289,
+    "question": "What idol did the Israelites worship while Moses was on the mountain?",
+    "options": [
+      "A golden calf",
+      "A bronze snake",
+      "A wooden idol",
+      "A silver coin"
+    ],
+    "answer": "A golden calf",
+    "id": "bible-289",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 290,
+    "question": "Who was the mother of Samuel?",
+    "options": [
+      "Hannah",
+      "Peninnah",
+      "Elizabeth",
+      "Mary"
+    ],
+    "answer": "Hannah",
+    "id": "bible-290",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 291,
+    "question": "What was the name of the high priest who raised Samuel?",
+    "options": [
+      "Aaron",
+      "Eli",
+      "Zadok",
+      "Abiathar"
+    ],
+    "answer": "Eli",
+    "id": "bible-291",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 292,
+    "question": "Who was the second king of Israel?",
+    "options": [
+      "Saul",
+      "David",
+      "Solomon",
+      "Hezekiah"
+    ],
+    "answer": "David",
+    "id": "bible-292",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 293,
+    "question": "With whom did David commit adultery?",
+    "options": [
+      "Abigail",
+      "Michal",
+      "Bathsheba",
+      "Tamar"
+    ],
+    "answer": "Bathsheba",
+    "id": "bible-293",
+    "category": "Old Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 294,
+    "question": "Who was the prophet that confronted David about his sin?",
+    "options": [
+      "Samuel",
+      "Nathan",
+      "Elijah",
+      "Gad"
+    ],
+    "answer": "Nathan",
+    "id": "bible-294",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 295,
+    "question": "Which of David's sons rebelled against him and tried to take the throne?",
+    "options": [
+      "Solomon",
+      "Amnon",
+      "Absalom",
+      "Adonijah"
+    ],
+    "answer": "Absalom",
+    "id": "bible-295",
+    "category": "Old Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 296,
+    "question": "What did Solomon ask God for when he became king?",
+    "options": [
+      "Wealth",
+      "Long life",
+      "Wisdom",
+      "Victory over enemies"
+    ],
+    "answer": "Wisdom",
+    "id": "bible-296",
+    "category": "Old Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 297,
+    "question": "Who visited Solomon to test his wisdom?",
+    "options": [
+      "The Queen of Sheba",
+      "The Pharaoh of Egypt",
+      "The King of Tyre",
+      "The Emperor of Rome"
+    ],
+    "answer": "The Queen of Sheba",
+    "id": "bible-297",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 298,
+    "question": "After Solomon's death, the kingdom divided. What was the northern kingdom called?",
+    "options": [
+      "Judah",
+      "Israel",
+      "Edom",
+      "Moab"
+    ],
+    "answer": "Israel",
+    "id": "bible-298",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 299,
+    "question": "What was the southern kingdom called?",
+    "options": [
+      "Judah",
+      "Israel",
+      "Ephraim",
+      "Manasseh"
+    ],
+    "answer": "Judah",
+    "id": "bible-299",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 300,
+    "question": "Who was the wicked queen who tried to kill all the prophets of the Lord?",
+    "options": [
+      "Athaliah",
+      "Jezebel",
+      "Vashti",
+      "Herodias"
+    ],
+    "answer": "Jezebel",
+    "id": "bible-300",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 301,
+    "question": "How did Elijah depart from the earth?",
+    "options": [
+      "He died of old age",
+      "He was taken up in a whirlwind",
+      "He was buried in a secret valley",
+      "He ascended on a cloud"
+    ],
+    "answer": "He was taken up in a whirlwind",
+    "id": "bible-301",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 302,
+    "question": "What disease was Naaman healed of by washing in the Jordan River?",
+    "options": [
+      "Blindness",
+      "Leprosy",
+      "Paralysis",
+      "Deafness"
+    ],
+    "answer": "Leprosy",
+    "id": "bible-302",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 303,
+    "question": "Which empire conquered the northern kingdom of Israel?",
+    "options": [
+      "Babylon",
+      "Assyria",
+      "Persia",
+      "Rome"
+    ],
+    "answer": "Assyria",
+    "id": "bible-303",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 304,
+    "question": "Which empire conquered the southern kingdom of Judah?",
+    "options": [
+      "Assyria",
+      "Babylon",
+      "Persia",
+      "Greece"
+    ],
+    "answer": "Babylon",
+    "id": "bible-304",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 305,
+    "question": "Who was the king of Babylon who destroyed Jerusalem?",
+    "options": [
+      "Cyrus",
+      "Darius",
+      "Nebuchadnezzar",
+      "Belshazzar"
+    ],
+    "answer": "Nebuchadnezzar",
+    "id": "bible-305",
+    "category": "Bible Basics",
+    "answer_index": 2
+  },
+  {
+    "question_number": 306,
+    "question": "What were the names of Daniel's three friends?",
+    "options": [
+      "Shadrach, Meshach, Abednego",
+      "Peter, James, John",
+      "Abraham, Isaac, Jacob",
+      "Gideon, Samson, Jephthah"
+    ],
+    "answer": "Shadrach, Meshach, Abednego",
+    "id": "bible-306",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 307,
+    "question": "What did King Belshazzar see during his feast?",
+    "options": [
+      "An angel",
+      "A handwriting on the wall",
+      "A burning bush",
+      "A vision of a statue"
+    ],
+    "answer": "A handwriting on the wall",
+    "id": "bible-307",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 308,
+    "question": "Who led the first group of Jews back to Jerusalem from exile?",
+    "options": [
+      "Ezra",
+      "Nehemiah",
+      "Zerubbabel",
+      "Daniel"
+    ],
+    "answer": "Zerubbabel",
+    "id": "bible-308",
+    "category": "Bible Basics",
+    "answer_index": 2
+  },
+  {
+    "question_number": 309,
+    "question": "Who led the rebuilding of the walls of Jerusalem?",
+    "options": [
+      "Ezra",
+      "Nehemiah",
+      "Haggai",
+      "Zechariah"
+    ],
+    "answer": "Nehemiah",
+    "id": "bible-309",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 310,
+    "question": "What is the longest book in the Bible?",
+    "options": [
+      "Genesis",
+      "Isaiah",
+      "Psalms",
+      "Jeremiah"
+    ],
+    "answer": "Psalms",
+    "id": "bible-310",
+    "category": "Bible Basics",
+    "answer_index": 2
+  },
+  {
+    "question_number": 311,
+    "question": "What is the shortest chapter in the Bible?",
+    "options": [
+      "Psalm 117",
+      "Psalm 119",
+      "John 11",
+      "3 John 1"
+    ],
+    "answer": "Psalm 117",
+    "id": "bible-311",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 312,
+    "question": "What is the longest chapter in the Bible?",
+    "options": [
+      "Psalm 1",
+      "Psalm 119",
+      "Isaiah 53",
+      "Matthew 5"
+    ],
+    "answer": "Psalm 119",
+    "id": "bible-312",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 313,
+    "question": "Who wrote most of the Psalms?",
+    "options": [
+      "Moses",
+      "David",
+      "Solomon",
+      "Asaph"
+    ],
+    "answer": "David",
+    "id": "bible-313",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 314,
+    "question": "Who wrote most of the Proverbs?",
+    "options": [
+      "David",
+      "Solomon",
+      "Agur",
+      "Lemuel"
+    ],
+    "answer": "Solomon",
+    "id": "bible-314",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 315,
+    "question": "Which book of the Bible is a collection of love poetry?",
+    "options": [
+      "Ruth",
+      "Esther",
+      "Song of Solomon",
+      "Lamentations"
+    ],
+    "answer": "Song of Solomon",
+    "id": "bible-315",
+    "category": "Bible Basics",
+    "answer_index": 2
+  },
+  {
+    "question_number": 316,
+    "question": "Which prophet was told to marry a prostitute to symbolize God's relationship with Israel?",
+    "options": [
+      "Amos",
+      "Hosea",
+      "Micah",
+      "Joel"
+    ],
+    "answer": "Hosea",
+    "id": "bible-316",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 317,
+    "question": "In the New Testament, who is known as the forerunner of Jesus?",
+    "options": [
+      "Peter",
+      "John the Baptist",
+      "James",
+      "Andrew"
+    ],
+    "answer": "John the Baptist",
+    "id": "bible-317",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 318,
+    "question": "Who were the parents of John the Baptist?",
+    "options": [
+      "Joseph and Mary",
+      "Zechariah and Elizabeth",
+      "Aquila and Priscilla",
+      "Ananias and Sapphira"
+    ],
+    "answer": "Zechariah and Elizabeth",
+    "id": "bible-318",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 319,
+    "question": "Where was Jesus baptized?",
+    "options": [
+      "The Red Sea",
+      "The Sea of Galilee",
+      "The Jordan River",
+      "The Pool of Siloam"
+    ],
+    "answer": "The Jordan River",
+    "id": "bible-319",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 320,
+    "question": "How many days was Jesus tempted in the wilderness?",
+    "options": [
+      "7",
+      "12",
+      "40",
+      "100"
+    ],
+    "answer": "40",
+    "id": "bible-320",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 321,
+    "question": "What was Jesus' first miracle?",
+    "options": [
+      "Healing a blind man",
+      "Turning water into wine",
+      "Walking on water",
+      "Raising Lazarus"
+    ],
+    "answer": "Turning water into wine",
+    "id": "bible-321",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 322,
+    "question": "At whose wedding did Jesus perform his first miracle?",
+    "options": [
+      "The wedding at Cana",
+      "The wedding at Bethany",
+      "The wedding in Jerusalem",
+      "The wedding in Capernaum"
+    ],
+    "answer": "The wedding at Cana",
+    "id": "bible-322",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 323,
+    "question": "Who came to Jesus by night to ask him questions?",
+    "options": [
+      "Nicodemus",
+      "Zacchaeus",
+      "Joseph of Arimathea",
+      "Caiaphas"
+    ],
+    "answer": "Nicodemus",
+    "id": "bible-323",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 324,
+    "question": "What woman did Jesus talk to at a well?",
+    "options": [
+      "A Canaanite woman",
+      "A Samaritan woman",
+      "Mary Magdalene",
+      "Martha"
+    ],
+    "answer": "A Samaritan woman",
+    "id": "bible-324",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 325,
+    "question": "Which of these is NOT one of the 12 disciples?",
+    "options": [
+      "Andrew",
+      "Bartholomew",
+      "Thaddaeus",
+      "Luke"
+    ],
+    "answer": "Luke",
+    "id": "bible-325",
+    "category": "Gospels",
+    "answer_index": 3
+  },
+  {
+    "question_number": 326,
+    "question": "Which disciple was a tax collector?",
+    "options": [
+      "Matthew",
+      "Mark",
+      "Luke",
+      "John"
+    ],
+    "answer": "Matthew",
+    "id": "bible-326",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 327,
+    "question": "In the Sermon on the Mount, what are the blessings listed by Jesus called?",
+    "options": [
+      "The Commandments",
+      "The Beatitudes",
+      "The Proverbs",
+      "The Parables"
+    ],
+    "answer": "The Beatitudes",
+    "id": "bible-327",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 328,
+    "question": "Which parable features a son who wastes his inheritance?",
+    "options": [
+      "The Good Samaritan",
+      "The Sower",
+      "The Prodigal Son",
+      "The Ten Virgins"
+    ],
+    "answer": "The Prodigal Son",
+    "id": "bible-328",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 329,
+    "question": "In the parable of the Good Samaritan, who helped the injured man?",
+    "options": [
+      "A priest",
+      "A Levite",
+      "A Samaritan",
+      "A Roman soldier"
+    ],
+    "answer": "A Samaritan",
+    "id": "bible-329",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 330,
+    "question": "Who did Jesus raise from the dead after he had been in the tomb for four days?",
+    "options": [
+      "Jairus's daughter",
+      "The widow's son",
+      "Lazarus",
+      "John the Baptist"
+    ],
+    "answer": "Lazarus",
+    "id": "bible-330",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 331,
+    "question": "What did Jesus ride into Jerusalem on Palm Sunday?",
+    "options": [
+      "A horse",
+      "A camel",
+      "A donkey",
+      "A chariot"
+    ],
+    "answer": "A donkey",
+    "id": "bible-331",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 332,
+    "question": "What feast were Jesus and his disciples celebrating at the Last Supper?",
+    "options": [
+      "Pentecost",
+      "Passover",
+      "Hanukkah",
+      "Purim"
+    ],
+    "answer": "Passover",
+    "id": "bible-332",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 333,
+    "question": "What did Jesus do for his disciples before the Last Supper to show humility?",
+    "options": [
+      "Washed their feet",
+      "Cooked their meal",
+      "Gave them money",
+      "Anointed their heads with oil"
+    ],
+    "answer": "Washed their feet",
+    "id": "bible-333",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 334,
+    "question": "In which garden did Jesus pray before his arrest?",
+    "options": [
+      "Eden",
+      "Gethsemane",
+      "Olives",
+      "Carmel"
+    ],
+    "answer": "Gethsemane",
+    "id": "bible-334",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 335,
+    "question": "Who was the high priest who presided over Jesus' trial?",
+    "options": [
+      "Annas",
+      "Caiaphas",
+      "Gamaliel",
+      "Nicodemus"
+    ],
+    "answer": "Caiaphas",
+    "id": "bible-335",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 336,
+    "question": "What criminal was released instead of Jesus?",
+    "options": [
+      "Barabbas",
+      "Judas",
+      "Gestas",
+      "Dismas"
+    ],
+    "answer": "Barabbas",
+    "id": "bible-336",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 337,
+    "question": "Who was forced to carry Jesus' cross?",
+    "options": [
+      "Simon of Cyrene",
+      "Joseph of Arimathea",
+      "Nicodemus",
+      "John"
+    ],
+    "answer": "Simon of Cyrene",
+    "id": "bible-337",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 338,
+    "question": "What was written on the sign above Jesus' cross?",
+    "options": [
+      "The King of the Jews",
+      "The Son of God",
+      "The Prophet of Nazareth",
+      "The Savior of the World"
+    ],
+    "answer": "The King of the Jews",
+    "id": "bible-338",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 339,
+    "question": "What were Jesus' last words on the cross according to the Gospel of John?",
+    "options": [
+      "My God, my God, why have you forsaken me?",
+      "Father, forgive them.",
+      "It is finished.",
+      "Into your hands I commit my spirit."
+    ],
+    "answer": "It is finished.",
+    "id": "bible-339",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 340,
+    "question": "Who brought spices to anoint Jesus' body on Sunday morning?",
+    "options": [
+      "Peter and John",
+      "Mary Magdalene and other women",
+      "Nicodemus and Joseph",
+      "The twelve disciples"
+    ],
+    "answer": "Mary Magdalene and other women",
+    "id": "bible-340",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 341,
+    "question": "Who rolled away the stone from Jesus' tomb?",
+    "options": [
+      "Peter",
+      "An angel",
+      "Roman soldiers",
+      "An earthquake"
+    ],
+    "answer": "An angel",
+    "id": "bible-341",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 342,
+    "question": "To which two disciples did Jesus appear on the road to Emmaus?",
+    "options": [
+      "Peter and John",
+      "Cleopas and another unnamed disciple",
+      "James and Andrew",
+      "Thomas and Philip"
+    ],
+    "answer": "Cleopas and another unnamed disciple",
+    "id": "bible-342",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 343,
+    "question": "For how many days did Jesus appear to his disciples after his resurrection?",
+    "options": [
+      "3",
+      "7",
+      "40",
+      "50"
+    ],
+    "answer": "40",
+    "id": "bible-343",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 344,
+    "question": "From what mount did Jesus ascend into heaven?",
+    "options": [
+      "Mount Sinai",
+      "Mount of Olives",
+      "Mount Carmel",
+      "Mount Zion"
+    ],
+    "answer": "Mount of Olives",
+    "id": "bible-344",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 345,
+    "question": "Who was chosen to replace Judas Iscariot?",
+    "options": [
+      "Paul",
+      "Matthias",
+      "Barnabas",
+      "Silas"
+    ],
+    "answer": "Matthias",
+    "id": "bible-345",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 346,
+    "question": "What appeared as resting on the believers on the day of Pentecost?",
+    "options": [
+      "Doves",
+      "Tongues of fire",
+      "Halos",
+      "Clouds"
+    ],
+    "answer": "Tongues of fire",
+    "id": "bible-346",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 347,
+    "question": "Who preached the first sermon on the day of Pentecost?",
+    "options": [
+      "Paul",
+      "John",
+      "Peter",
+      "James"
+    ],
+    "answer": "Peter",
+    "id": "bible-347",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 348,
+    "question": "Who was the married couple that lied about the price of the land they sold?",
+    "options": [
+      "Aquila and Priscilla",
+      "Ananias and Sapphira",
+      "Zechariah and Elizabeth",
+      "Ahab and Jezebel"
+    ],
+    "answer": "Ananias and Sapphira",
+    "id": "bible-348",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 349,
+    "question": "Who stood by and approved of the stoning of Stephen?",
+    "options": [
+      "Peter",
+      "Saul (Paul)",
+      "Caiaphas",
+      "Pilate"
+    ],
+    "answer": "Saul (Paul)",
+    "id": "bible-349",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 350,
+    "question": "Who explained the Scripture to the Ethiopian eunuch and baptized him?",
+    "options": [
+      "Peter",
+      "Philip",
+      "Paul",
+      "Stephen"
+    ],
+    "answer": "Philip",
+    "id": "bible-350",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 351,
+    "question": "Who was the Roman centurion in Caesarea who sent for Peter?",
+    "options": [
+      "Cornelius",
+      "Julius",
+      "Augustus",
+      "Felix"
+    ],
+    "answer": "Cornelius",
+    "id": "bible-351",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 352,
+    "question": "What vision did Peter have before meeting the centurion?",
+    "options": [
+      "A burning bush",
+      "A sheet descending with all kinds of animals",
+      "A stairway to heaven",
+      "A man from Macedonia calling for help"
+    ],
+    "answer": "A sheet descending with all kinds of animals",
+    "id": "bible-352",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 353,
+    "question": "Who was rescued from prison by an angel in the book of Acts?",
+    "options": [
+      "Paul",
+      "Silas",
+      "Peter",
+      "John"
+    ],
+    "answer": "Peter",
+    "id": "bible-353",
+    "category": "New Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 354,
+    "question": "Who was Paul's companion on his second missionary journey?",
+    "options": [
+      "Barnabas",
+      "Silas",
+      "Mark",
+      "Luke"
+    ],
+    "answer": "Silas",
+    "id": "bible-354",
+    "category": "New Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 355,
+    "question": "In what city did Paul preach at the Areopagus (Mars Hill)?",
+    "options": [
+      "Rome",
+      "Corinth",
+      "Athens",
+      "Ephesus"
+    ],
+    "answer": "Athens",
+    "id": "bible-355",
+    "category": "New Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 356,
+    "question": "What was Paul's trade?",
+    "options": [
+      "Fisherman",
+      "Carpenter",
+      "Tentmaker",
+      "Tax collector"
+    ],
+    "answer": "Tentmaker",
+    "id": "bible-356",
+    "category": "New Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 357,
+    "question": "Who was the silversmith in Ephesus who started a riot against Paul?",
+    "options": [
+      "Demetrius",
+      "Alexander",
+      "Hymenaeus",
+      "Philetus"
+    ],
+    "answer": "Demetrius",
+    "id": "bible-357",
+    "category": "New Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 358,
+    "question": "What young man fell out of a window while Paul was preaching late into the night?",
+    "options": [
+      "Timothy",
+      "Titus",
+      "Eutychus",
+      "Onesimus"
+    ],
+    "answer": "Eutychus",
+    "id": "bible-358",
+    "category": "New Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 359,
+    "question": "On what island was Paul shipwrecked while being taken to Rome?",
+    "options": [
+      "Cyprus",
+      "Crete",
+      "Malta",
+      "Patmos"
+    ],
+    "answer": "Malta",
+    "id": "bible-359",
+    "category": "New Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 360,
+    "question": "Which epistle is known as the 'Letter of Joy'?",
+    "options": [
+      "Romans",
+      "Galatians",
+      "Philippians",
+      "Colossians"
+    ],
+    "answer": "Philippians",
+    "id": "bible-360",
+    "category": "Bible Basics",
+    "answer_index": 2
+  },
+  {
+    "question_number": 361,
+    "question": "Who is the runaway slave that Paul writes about in a short letter?",
+    "options": [
+      "Philemon",
+      "Onesimus",
+      "Epaphras",
+      "Tychicus"
+    ],
+    "answer": "Onesimus",
+    "id": "bible-361",
+    "category": "New Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 362,
+    "question": "In Hebrews 11, known as the 'Hall of Faith', who is the first person mentioned by name?",
+    "options": [
+      "Adam",
+      "Abel",
+      "Enoch",
+      "Noah"
+    ],
+    "answer": "Abel",
+    "id": "bible-362",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 363,
+    "question": "According to James 2:17, faith by itself, if it does not have works, is what?",
+    "options": [
+      "Weak",
+      "Dead",
+      "Blind",
+      "Incomplete"
+    ],
+    "answer": "Dead",
+    "id": "bible-363",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 364,
+    "question": "According to 1 John 4:8, anyone who does not love does not know God, because God is what?",
+    "options": [
+      "Holy",
+      "Just",
+      "Love",
+      "Light"
+    ],
+    "answer": "Love",
+    "id": "bible-364",
+    "category": "Bible Basics",
+    "answer_index": 2
+  },
+  {
+    "question_number": 365,
+    "question": "In Revelation, how many churches in Asia Minor does Jesus address letters to?",
+    "options": [
+      "3",
+      "7",
+      "10",
+      "12"
+    ],
+    "answer": "7",
+    "id": "bible-365",
+    "category": "Revelation",
+    "answer_index": 1
+  },
+  {
+    "question_number": 366,
+    "question": "What are the names of the two churches in Revelation that receive no rebuke?",
+    "options": [
+      "Ephesus and Smyrna",
+      "Smyrna and Philadelphia",
+      "Pergamum and Thyatira",
+      "Sardis and Laodicea"
+    ],
+    "answer": "Smyrna and Philadelphia",
+    "id": "bible-366",
+    "category": "Revelation",
+    "answer_index": 1
+  },
+  {
+    "question_number": 367,
+    "question": "In Revelation, who is worthy to open the scroll and its seven seals?",
+    "options": [
+      "An angel",
+      "The Lion of the tribe of Judah (The Lamb)",
+      "John",
+      "The twenty-four elders"
+    ],
+    "answer": "The Lion of the tribe of Judah (The Lamb)",
+    "id": "bible-367",
+    "category": "Revelation",
+    "answer_index": 1
+  },
+  {
+    "question_number": 368,
+    "question": "What is the name of the star that falls from heaven in the sounding of the third trumpet?",
+    "options": [
+      "Wormwood",
+      "Lucifer",
+      "Morning Star",
+      "Sirius"
+    ],
+    "answer": "Wormwood",
+    "id": "bible-368",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 369,
+    "question": "In Revelation 13, what is the number of the beast?",
+    "options": [
+      "777",
+      "666",
+      "144000",
+      "12"
+    ],
+    "answer": "666",
+    "id": "bible-369",
+    "category": "Revelation",
+    "answer_index": 1
+  },
+  {
+    "question_number": 370,
+    "question": "What comes down out of heaven from God at the end of Revelation?",
+    "options": [
+      "A golden chariot",
+      "The New Jerusalem",
+      "A flaming sword",
+      "A great flood"
+    ],
+    "answer": "The New Jerusalem",
+    "id": "bible-370",
+    "category": "Revelation",
+    "answer_index": 1
+  },
+  {
+    "question_number": 371,
+    "question": "In Genesis 1, what did God create on the second day?",
+    "options": [
+      "Light",
+      "The sky/expanse",
+      "Dry land",
+      "The sun, moon, and stars"
+    ],
+    "answer": "The sky/expanse",
+    "id": "bible-371",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 372,
+    "question": "What bird did Noah send out first from the ark?",
+    "options": [
+      "A dove",
+      "A raven",
+      "An eagle",
+      "A sparrow"
+    ],
+    "answer": "A raven",
+    "id": "bible-372",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 373,
+    "question": "What was the name of the tower where God confused the languages of the people?",
+    "options": [
+      "Tower of Babel",
+      "Tower of Siloam",
+      "Tower of David",
+      "Tower of Jericho"
+    ],
+    "answer": "Tower of Babel",
+    "id": "bible-373",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 374,
+    "question": "Who was Abraham's father?",
+    "options": [
+      "Nahor",
+      "Terah",
+      "Haran",
+      "Lot"
+    ],
+    "answer": "Terah",
+    "id": "bible-374",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 375,
+    "question": "What was the name of the city that God destroyed where Lot lived?",
+    "options": [
+      "Gomorrah",
+      "Sodom",
+      "Zoar",
+      "Admah"
+    ],
+    "answer": "Sodom",
+    "id": "bible-375",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 376,
+    "question": "What happened to Lot's wife when she looked back?",
+    "options": [
+      "She turned into a pillar of salt",
+      "She was struck by lightning",
+      "She turned to stone",
+      "She was swallowed by the earth"
+    ],
+    "answer": "She turned into a pillar of salt",
+    "id": "bible-376",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 377,
+    "question": "What was the name of Isaac's wife?",
+    "options": [
+      "Sarah",
+      "Rebekah",
+      "Rachel",
+      "Leah"
+    ],
+    "answer": "Rebekah",
+    "id": "bible-377",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 378,
+    "question": "How did Esau and Jacob differ in appearance?",
+    "options": [
+      "Esau was tall, Jacob was short",
+      "Esau was hairy, Jacob was smooth-skinned",
+      "Esau was dark, Jacob was fair",
+      "Esau was strong, Jacob was weak"
+    ],
+    "answer": "Esau was hairy, Jacob was smooth-skinned",
+    "id": "bible-378",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 379,
+    "question": "What did Jacob see in his dream at Bethel?",
+    "options": [
+      "A burning bush",
+      "A ladder/stairway reaching to heaven",
+      "A chariot of fire",
+      "A golden calf"
+    ],
+    "answer": "A ladder/stairway reaching to heaven",
+    "id": "bible-379",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 380,
+    "question": "To what name did God change Jacob's name?",
+    "options": [
+      "Abraham",
+      "Israel",
+      "Joseph",
+      "Ephraim"
+    ],
+    "answer": "Israel",
+    "id": "bible-380",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 381,
+    "question": "Who was Jacob's favorite wife?",
+    "options": [
+      "Leah",
+      "Rachel",
+      "Bilhah",
+      "Zilpah"
+    ],
+    "answer": "Rachel",
+    "id": "bible-381",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 382,
+    "question": "What did Jacob give to his son Joseph that made his brothers jealous?",
+    "options": [
+      "A gold ring",
+      "A coat of many colors",
+      "A flock of sheep",
+      "A sword"
+    ],
+    "answer": "A coat of many colors",
+    "id": "bible-382",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 383,
+    "question": "Into which country was Joseph sold as a slave?",
+    "options": [
+      "Babylon",
+      "Assyria",
+      "Egypt",
+      "Midian"
+    ],
+    "answer": "Egypt",
+    "id": "bible-383",
+    "category": "Old Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 384,
+    "question": "Who was the Egyptian captain of the guard that bought Joseph?",
+    "options": [
+      "Pharaoh",
+      "Potiphar",
+      "Ramses",
+      "Imhotep"
+    ],
+    "answer": "Potiphar",
+    "id": "bible-384",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 385,
+    "question": "What did Pharaoh's dream of the seven fat cows and seven skinny cows mean?",
+    "options": [
+      "Seven years of war, seven of peace",
+      "Seven years of plenty, seven of famine",
+      "Seven plagues",
+      "Seven new pharaohs"
+    ],
+    "answer": "Seven years of plenty, seven of famine",
+    "id": "bible-385",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 386,
+    "question": "Which of Joseph's brothers was left behind in Egypt as a hostage on their first trip?",
+    "options": [
+      "Reuben",
+      "Simeon",
+      "Judah",
+      "Benjamin"
+    ],
+    "answer": "Simeon",
+    "id": "bible-386",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 387,
+    "question": "What was the name of Moses' father-in-law?",
+    "options": [
+      "Jethro (Reuel)",
+      "Laban",
+      "Terah",
+      "Potiphar"
+    ],
+    "answer": "Jethro (Reuel)",
+    "id": "bible-387",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 388,
+    "question": "What was the first plague God sent upon Egypt?",
+    "options": [
+      "Frogs",
+      "Lice",
+      "Water turned to blood",
+      "Flies"
+    ],
+    "answer": "Water turned to blood",
+    "id": "bible-388",
+    "category": "Bible Basics",
+    "answer_index": 2
+  },
+  {
+    "question_number": 389,
+    "question": "During the Passover, what were the Israelites instructed to put on their doorposts?",
+    "options": [
+      "Olive oil",
+      "The blood of a lamb",
+      "Red paint",
+      "Salt"
+    ],
+    "answer": "The blood of a lamb",
+    "id": "bible-389",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 390,
+    "question": "What did God use to lead the Israelites by day in the wilderness?",
+    "options": [
+      "A pillar of fire",
+      "A pillar of cloud",
+      "A flying eagle",
+      "A bright star"
+    ],
+    "answer": "A pillar of cloud",
+    "id": "bible-390",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 391,
+    "question": "Where did the water come from when the Israelites were thirsty at Rephidim?",
+    "options": [
+      "A deep well",
+      "A rock that Moses struck",
+      "Rain from heaven",
+      "A river that appeared"
+    ],
+    "answer": "A rock that Moses struck",
+    "id": "bible-391",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 392,
+    "question": "Who were the two spies that brought back a good report of the Promised Land?",
+    "options": [
+      "Joshua and Caleb",
+      "Moses and Aaron",
+      "Eldad and Medad",
+      "Nadab and Abihu"
+    ],
+    "answer": "Joshua and Caleb",
+    "id": "bible-392",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 393,
+    "question": "What happened to the Israelites who rebelled with Korah?",
+    "options": [
+      "They were turned to salt",
+      "The earth opened and swallowed them",
+      "They were struck with leprosy",
+      "They were bitten by snakes"
+    ],
+    "answer": "The earth opened and swallowed them",
+    "id": "bible-393",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 394,
+    "question": "What did Moses make to save the Israelites from the venomous snakes?",
+    "options": [
+      "A bronze snake on a pole",
+      "A golden calf",
+      "A wooden cross",
+      "A silver shield"
+    ],
+    "answer": "A bronze snake on a pole",
+    "id": "bible-394",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 395,
+    "question": "Who was the prophet that Balak hired to curse Israel, but God made him bless them?",
+    "options": [
+      "Balaam",
+      "Elisha",
+      "Jonah",
+      "Micah"
+    ],
+    "answer": "Balaam",
+    "id": "bible-395",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 396,
+    "question": "What river did the Israelites cross to enter the Promised Land?",
+    "options": [
+      "The Nile",
+      "The Euphrates",
+      "The Jordan",
+      "The Tigris"
+    ],
+    "answer": "The Jordan",
+    "id": "bible-396",
+    "category": "Old Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 397,
+    "question": "Who was the man that kept some of the devoted things from Jericho, causing Israel to lose at Ai?",
+    "options": [
+      "Achan",
+      "Korah",
+      "Dathan",
+      "Abiram"
+    ],
+    "answer": "Achan",
+    "id": "bible-397",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 398,
+    "question": "What did Joshua ask God to make stand still during a battle?",
+    "options": [
+      "The wind",
+      "The sun and the moon",
+      "The rain",
+      "The river"
+    ],
+    "answer": "The sun and the moon",
+    "id": "bible-398",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 399,
+    "question": "Who was the left-handed judge who killed the fat king Eglon?",
+    "options": [
+      "Ehud",
+      "Othniel",
+      "Shamgar",
+      "Gideon"
+    ],
+    "answer": "Ehud",
+    "id": "bible-399",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 400,
+    "question": "How did Sisera die?",
+    "options": [
+      "In battle against Barak",
+      "Jael drove a tent peg through his temple",
+      "He drowned in the river Kishon",
+      "He fell off his chariot"
+    ],
+    "answer": "Jael drove a tent peg through his temple",
+    "id": "bible-400",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 401,
+    "question": "What was the sign Gideon asked from God using a fleece?",
+    "options": [
+      "Dew on the fleece but dry ground, then dry fleece but dew on ground",
+      "The fleece turning to gold",
+      "Fire burning the fleece",
+      "The fleece flying in the air"
+    ],
+    "answer": "Dew on the fleece but dry ground, then dry fleece but dew on ground",
+    "id": "bible-401",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 402,
+    "question": "What weapons did Gideon's 300 men use to defeat the Midianites?",
+    "options": [
+      "Swords and shields",
+      "Bows and arrows",
+      "Trumpets, empty jars, and torches",
+      "Slings and stones"
+    ],
+    "answer": "Trumpets, empty jars, and torches",
+    "id": "bible-402",
+    "category": "Bible Basics",
+    "answer_index": 2
+  },
+  {
+    "question_number": 403,
+    "question": "What animal did Samson kill with his bare hands?",
+    "options": [
+      "A bear",
+      "A lion",
+      "A wolf",
+      "A leopard"
+    ],
+    "answer": "A lion",
+    "id": "bible-403",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 404,
+    "question": "What did Samson use to kill a thousand Philistines?",
+    "options": [
+      "A sword of fire",
+      "The jawbone of a donkey",
+      "A heavy stone",
+      "His bare hands"
+    ],
+    "answer": "The jawbone of a donkey",
+    "id": "bible-404",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 405,
+    "question": "How did Samson die?",
+    "options": [
+      "In his sleep",
+      "He was executed by the sword",
+      "He pushed apart the pillars of a temple, bringing it down on himself and his enemies",
+      "He died of old age"
+    ],
+    "answer": "He pushed apart the pillars of a temple, bringing it down on himself and his enemies",
+    "id": "bible-405",
+    "category": "Bible Basics",
+    "answer_index": 2
+  },
+  {
+    "question_number": 406,
+    "question": "In what city did Ruth and Naomi settle after returning from Moab?",
+    "options": [
+      "Jerusalem",
+      "Bethlehem",
+      "Nazareth",
+      "Hebron"
+    ],
+    "answer": "Bethlehem",
+    "id": "bible-406",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 407,
+    "question": "What was the name of the priest whose sons Hophni and Phinehas were wicked?",
+    "options": [
+      "Eli",
+      "Samuel",
+      "Aaron",
+      "Zadok"
+    ],
+    "answer": "Eli",
+    "id": "bible-407",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 408,
+    "question": "What did the Philistines capture from Israel that brought plagues upon them?",
+    "options": [
+      "The Golden Calf",
+      "The Ark of the Covenant",
+      "The Tabernacle",
+      "The Urim and Thummim"
+    ],
+    "answer": "The Ark of the Covenant",
+    "id": "bible-408",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 409,
+    "question": "Who was the father of King Saul?",
+    "options": [
+      "Kish",
+      "Jesse",
+      "Abner",
+      "Samuel"
+    ],
+    "answer": "Kish",
+    "id": "bible-409",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 410,
+    "question": "Why was Saul rejected by God as king?",
+    "options": [
+      "He offered a sacrifice himself instead of waiting for Samuel, and spared the Amalekite king",
+      "He lost a major battle",
+      "He refused to build a temple",
+      "He worshipped idols"
+    ],
+    "answer": "He offered a sacrifice himself instead of waiting for Samuel, and spared the Amalekite king",
+    "id": "bible-410",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 411,
+    "question": "What instrument did David play to soothe King Saul?",
+    "options": [
+      "A flute",
+      "A harp/lyre",
+      "A tambourine",
+      "A trumpet"
+    ],
+    "answer": "A harp/lyre",
+    "id": "bible-411",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 412,
+    "question": "Who was Saul's daughter that became David's first wife?",
+    "options": [
+      "Michal",
+      "Merab",
+      "Abigail",
+      "Ahinoam"
+    ],
+    "answer": "Michal",
+    "id": "bible-412",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 413,
+    "question": "How did King Saul die?",
+    "options": [
+      "He was killed by David",
+      "He fell on his own sword in battle",
+      "He died of old age",
+      "He was assassinated by his servant"
+    ],
+    "answer": "He fell on his own sword in battle",
+    "id": "bible-413",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 414,
+    "question": "What city did David conquer and make his capital?",
+    "options": [
+      "Hebron",
+      "Jerusalem (Jebus)",
+      "Samaria",
+      "Shechem"
+    ],
+    "answer": "Jerusalem (Jebus)",
+    "id": "bible-414",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 415,
+    "question": "Who was the husband of Bathsheba that David had killed in battle?",
+    "options": [
+      "Uriah the Hittite",
+      "Joab",
+      "Abner",
+      "Amasa"
+    ],
+    "answer": "Uriah the Hittite",
+    "id": "bible-415",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 416,
+    "question": "Which of David's sons was known for his long, heavy hair, which ultimately led to his death?",
+    "options": [
+      "Amnon",
+      "Adonijah",
+      "Absalom",
+      "Solomon"
+    ],
+    "answer": "Absalom",
+    "id": "bible-416",
+    "category": "Old Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 417,
+    "question": "Who was the prophet that God sent to anoint David as king?",
+    "options": [
+      "Nathan",
+      "Samuel",
+      "Elijah",
+      "Gad"
+    ],
+    "answer": "Samuel",
+    "id": "bible-417",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 418,
+    "question": "What was the main thing Solomon built during his reign?",
+    "options": [
+      "The walls of Jericho",
+      "The Temple in Jerusalem",
+      "The Tower of Babel",
+      "The Ark of the Covenant"
+    ],
+    "answer": "The Temple in Jerusalem",
+    "id": "bible-418",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 419,
+    "question": "What caused King Solomon's heart to turn away from the Lord?",
+    "options": [
+      "His love for money",
+      "His many foreign wives",
+      "His desire for power",
+      "His fear of enemies"
+    ],
+    "answer": "His many foreign wives",
+    "id": "bible-419",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 420,
+    "question": "Who was the first king of the divided northern kingdom of Israel?",
+    "options": [
+      "Jeroboam",
+      "Rehoboam",
+      "Ahab",
+      "Omri"
+    ],
+    "answer": "Jeroboam",
+    "id": "bible-420",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 421,
+    "question": "What did Jeroboam build in Dan and Bethel to stop people from going to Jerusalem?",
+    "options": [
+      "Golden calves",
+      "Altars to Baal",
+      "High towers",
+      "Iron gates"
+    ],
+    "answer": "Golden calves",
+    "id": "bible-421",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 422,
+    "question": "During the famine, what did the ravens bring Elijah to eat?",
+    "options": [
+      "Fruit",
+      "Bread and meat",
+      "Fish",
+      "Locusts"
+    ],
+    "answer": "Bread and meat",
+    "id": "bible-422",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 423,
+    "question": "Whose son did Elijah raise from the dead?",
+    "options": [
+      "The Shunammite woman's son",
+      "The widow of Zarephath's son",
+      "Jairus's daughter",
+      "King Ahab's son"
+    ],
+    "answer": "The widow of Zarephath's son",
+    "id": "bible-423",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 424,
+    "question": "Who owned a vineyard that King Ahab wanted, leading Jezebel to have him killed?",
+    "options": [
+      "Naboth",
+      "Obadiah",
+      "Micaiah",
+      "Jehu"
+    ],
+    "answer": "Naboth",
+    "id": "bible-424",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 425,
+    "question": "What did Elisha ask of Elijah before Elijah was taken to heaven?",
+    "options": [
+      "Great wealth",
+      "A double portion of his spirit",
+      "To become king",
+      "Long life"
+    ],
+    "answer": "A double portion of his spirit",
+    "id": "bible-425",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 426,
+    "question": "What happened to the youths who mocked Elisha, calling him 'baldhead'?",
+    "options": [
+      "They were struck blind",
+      "Two she-bears came out of the woods and mauled them",
+      "They were swallowed by the earth",
+      "They repented"
+    ],
+    "answer": "Two she-bears came out of the woods and mauled them",
+    "id": "bible-426",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 427,
+    "question": "Which king of Judah was only 8 years old when he began to reign and discovered the Book of the Law?",
+    "options": [
+      "Joash",
+      "Josiah",
+      "Hezekiah",
+      "Manasseh"
+    ],
+    "answer": "Josiah",
+    "id": "bible-427",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 428,
+    "question": "Which king of Judah prayed to God when surrounded by the Assyrians, resulting in an angel killing 185,000 Assyrian soldiers?",
+    "options": [
+      "Hezekiah",
+      "Josiah",
+      "Uzziah",
+      "Ahaz"
+    ],
+    "answer": "Hezekiah",
+    "id": "bible-428",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 429,
+    "question": "Who was the Babylonian king that went mad and lived like a wild animal for seven periods of time?",
+    "options": [
+      "Belshazzar",
+      "Nebuchadnezzar",
+      "Darius",
+      "Cyrus"
+    ],
+    "answer": "Nebuchadnezzar",
+    "id": "bible-429",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 430,
+    "question": "In the book of Daniel, what was the meaning of the writing on the wall: 'Mene, Mene, Tekel, Parsin'?",
+    "options": [
+      "God has numbered the days of your kingdom, weighed you, and divided it",
+      "A great flood is coming",
+      "The temple will be rebuilt",
+      "Victory over all enemies"
+    ],
+    "answer": "God has numbered the days of your kingdom, weighed you, and divided it",
+    "id": "bible-430",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 431,
+    "question": "What did Daniel do that caused him to be thrown into the lions' den?",
+    "options": [
+      "He stole from the king",
+      "He prayed to God against the king's decree",
+      "He murdered a satrap",
+      "He refused to eat meat"
+    ],
+    "answer": "He prayed to God against the king's decree",
+    "id": "bible-431",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 432,
+    "question": "Who was the Persian queen before Esther was chosen?",
+    "options": [
+      "Vashti",
+      "Zeresh",
+      "Athaliah",
+      "Jezebel"
+    ],
+    "answer": "Vashti",
+    "id": "bible-432",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 433,
+    "question": "Who was Esther's cousin who raised her and uncovered an assassination plot?",
+    "options": [
+      "Haman",
+      "Mordecai",
+      "Ezra",
+      "Nehemiah"
+    ],
+    "answer": "Mordecai",
+    "id": "bible-433",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 434,
+    "question": "Who plotted to destroy all the Jews in the Persian Empire?",
+    "options": [
+      "Haman",
+      "Mordecai",
+      "King Xerxes",
+      "Bigthana"
+    ],
+    "answer": "Haman",
+    "id": "bible-434",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 435,
+    "question": "What did Job lose in his trial of faith?",
+    "options": [
+      "His wealth, children, and health",
+      "Only his wealth",
+      "His wife",
+      "His life"
+    ],
+    "answer": "His wealth, children, and health",
+    "id": "bible-435",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 436,
+    "question": "At the end of the book of Job, what does God do for him?",
+    "options": [
+      "Restores his fortunes twofold",
+      "Takes him to heaven",
+      "Makes him king",
+      "Nothing"
+    ],
+    "answer": "Restores his fortunes twofold",
+    "id": "bible-436",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 437,
+    "question": "According to Psalm 1, the blessed man delights in what?",
+    "options": [
+      "Gold and silver",
+      "The law of the Lord",
+      "Feasting",
+      "Power"
+    ],
+    "answer": "The law of the Lord",
+    "id": "bible-437",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 438,
+    "question": "According to Proverbs 16:18, what comes before destruction?",
+    "options": [
+      "A fall",
+      "Pride",
+      "Greed",
+      "Anger"
+    ],
+    "answer": "Pride",
+    "id": "bible-438",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 439,
+    "question": "In Ecclesiastes, the author says, 'Vanity of vanities, all is...'",
+    "options": [
+      "Beautiful",
+      "Vanity",
+      "Lost",
+      "Good"
+    ],
+    "answer": "Vanity",
+    "id": "bible-439",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 440,
+    "question": "What prophet had a vision of a valley of dry bones coming back to life?",
+    "options": [
+      "Isaiah",
+      "Jeremiah",
+      "Ezekiel",
+      "Daniel"
+    ],
+    "answer": "Ezekiel",
+    "id": "bible-440",
+    "category": "Old Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 441,
+    "question": "Which prophet was called by God as a boy and said, 'Ah, Lord God! Behold, I do not know how to speak, for I am only a youth'?",
+    "options": [
+      "Isaiah",
+      "Jeremiah",
+      "Samuel",
+      "David"
+    ],
+    "answer": "Jeremiah",
+    "id": "bible-441",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 442,
+    "question": "Which prophet saw the Lord sitting upon a throne, high and lifted up, with seraphim above him?",
+    "options": [
+      "Isaiah",
+      "Ezekiel",
+      "Daniel",
+      "Hosea"
+    ],
+    "answer": "Isaiah",
+    "id": "bible-442",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 443,
+    "question": "In Isaiah 7:14, what is the sign given by the Lord regarding the Messiah?",
+    "options": [
+      "A star will appear in the east",
+      "A virgin shall conceive and bear a son named Immanuel",
+      "A ruler will come from Bethlehem",
+      "The sun will turn dark"
+    ],
+    "answer": "A virgin shall conceive and bear a son named Immanuel",
+    "id": "bible-443",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 444,
+    "question": "Where was Jesus when he was tempted by Satan?",
+    "options": [
+      "In the temple",
+      "In the wilderness",
+      "On a boat",
+      "In Nazareth"
+    ],
+    "answer": "In the wilderness",
+    "id": "bible-444",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 445,
+    "question": "What did Jesus say to the storm on the Sea of Galilee?",
+    "options": [
+      "Be still",
+      "Peace, be still",
+      "Stop raining",
+      "Calm down"
+    ],
+    "answer": "Peace, be still",
+    "id": "bible-445",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 446,
+    "question": "In the parable of the Sower, what does the seed represent?",
+    "options": [
+      "Money",
+      "The word of God",
+      "Good deeds",
+      "Faith"
+    ],
+    "answer": "The word of God",
+    "id": "bible-446",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 447,
+    "question": "Who recognized Jesus as the Messiah when he was presented at the temple as a baby?",
+    "options": [
+      "Simeon and Anna",
+      "The Pharisees",
+      "King Herod",
+      "The shepherds"
+    ],
+    "answer": "Simeon and Anna",
+    "id": "bible-447",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 448,
+    "question": "How did John the Baptist die?",
+    "options": [
+      "Crucifixion",
+      "Stoning",
+      "Beheading",
+      "Old age"
+    ],
+    "answer": "Beheading",
+    "id": "bible-448",
+    "category": "Bible Basics",
+    "answer_index": 2
+  },
+  {
+    "question_number": 449,
+    "question": "Who danced for King Herod and asked for John the Baptist's head on a platter?",
+    "options": [
+      "Herodias",
+      "Salome (Herodias's daughter)",
+      "Mary Magdalene",
+      "Cleopatra"
+    ],
+    "answer": "Salome (Herodias's daughter)",
+    "id": "bible-449",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 450,
+    "question": "When Jesus fed the 5,000, how many baskets of broken pieces were left over?",
+    "options": [
+      "7",
+      "10",
+      "12",
+      "0"
+    ],
+    "answer": "12",
+    "id": "bible-450",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 451,
+    "question": "Which disciple walked on water towards Jesus?",
+    "options": [
+      "John",
+      "James",
+      "Peter",
+      "Andrew"
+    ],
+    "answer": "Peter",
+    "id": "bible-451",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 452,
+    "question": "On the Mount of Transfiguration, who appeared and talked with Jesus?",
+    "options": [
+      "Abraham and Isaac",
+      "Moses and Elijah",
+      "David and Solomon",
+      "Enoch and Noah"
+    ],
+    "answer": "Moses and Elijah",
+    "id": "bible-452",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 453,
+    "question": "What did the woman with the issue of blood do to be healed by Jesus?",
+    "options": [
+      "Asked him to lay hands on her",
+      "Washed his feet",
+      "Touched the fringe of his garment",
+      "Called his name loudly"
+    ],
+    "answer": "Touched the fringe of his garment",
+    "id": "bible-453",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 454,
+    "question": "How many lepers did Jesus heal in Luke 17, and how many returned to thank him?",
+    "options": [
+      "10 healed, 1 returned",
+      "10 healed, 10 returned",
+      "5 healed, 1 returned",
+      "12 healed, 2 returned"
+    ],
+    "answer": "10 healed, 1 returned",
+    "id": "bible-454",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 455,
+    "question": "Who was the rich man that Jesus told to sell all he had and give to the poor?",
+    "options": [
+      "Zacchaeus",
+      "The rich young ruler",
+      "Nicodemus",
+      "Joseph of Arimathea"
+    ],
+    "answer": "The rich young ruler",
+    "id": "bible-455",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 456,
+    "question": "In the parable of the Talents, what did the servant who received one talent do with it?",
+    "options": [
+      "Invested it",
+      "Spent it",
+      "Hid it in the ground",
+      "Gave it to the poor"
+    ],
+    "answer": "Hid it in the ground",
+    "id": "bible-456",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 457,
+    "question": "How much was the widow's offering that Jesus praised?",
+    "options": [
+      "Ten silver coins",
+      "One denarius",
+      "Two small copper coins",
+      "A gold piece"
+    ],
+    "answer": "Two small copper coins",
+    "id": "bible-457",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 458,
+    "question": "What did Jesus say is the greatest commandment?",
+    "options": [
+      "Love your neighbor as yourself",
+      "Love the Lord your God with all your heart, soul, and mind",
+      "Do not murder",
+      "Keep the Sabbath holy"
+    ],
+    "answer": "Love the Lord your God with all your heart, soul, and mind",
+    "id": "bible-458",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 459,
+    "question": "At the Last Supper, what did the bread and wine represent?",
+    "options": [
+      "Jesus' body and blood",
+      "The manna in the desert",
+      "The harvest",
+      "Peace and joy"
+    ],
+    "answer": "Jesus' body and blood",
+    "id": "bible-459",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 460,
+    "question": "In John 14:6, Jesus says, 'I am the way, and the truth, and the...'",
+    "options": [
+      "Life",
+      "Light",
+      "Door",
+      "Bread"
+    ],
+    "answer": "Life",
+    "id": "bible-460",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 461,
+    "question": "Which disciple was absent when Jesus first appeared to the apostles after his resurrection?",
+    "options": [
+      "Peter",
+      "John",
+      "Thomas",
+      "James"
+    ],
+    "answer": "Thomas",
+    "id": "bible-461",
+    "category": "New Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 462,
+    "question": "In Acts 2, when the disciples spoke in tongues, what did the crowd hear?",
+    "options": [
+      "Gibberish",
+      "The sound of wind",
+      "Their own native languages",
+      "Angelic singing"
+    ],
+    "answer": "Their own native languages",
+    "id": "bible-462",
+    "category": "New Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 463,
+    "question": "Who healed the lame beggar at the Beautiful Gate?",
+    "options": [
+      "Paul and Silas",
+      "Peter and John",
+      "Philip",
+      "Stephen"
+    ],
+    "answer": "Peter and John",
+    "id": "bible-463",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 464,
+    "question": "Who was the first person Paul (Saul) stayed with in Damascus after being blinded?",
+    "options": [
+      "Ananias",
+      "Judas",
+      "Barnabas",
+      "Silas"
+    ],
+    "answer": "Judas",
+    "id": "bible-464",
+    "category": "New Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 465,
+    "question": "Who restored Saul's sight?",
+    "options": [
+      "Peter",
+      "Ananias",
+      "Barnabas",
+      "Luke"
+    ],
+    "answer": "Ananias",
+    "id": "bible-465",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 466,
+    "question": "In what city was Paul stoned and left for dead, only to get up and go back into the city?",
+    "options": [
+      "Lystra",
+      "Iconium",
+      "Derbe",
+      "Antioch"
+    ],
+    "answer": "Lystra",
+    "id": "bible-466",
+    "category": "New Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 467,
+    "question": "What issue was debated at the Council of Jerusalem in Acts 15?",
+    "options": [
+      "Whether to pay taxes to Rome",
+      "Whether Gentile believers needed to be circumcised and follow the Law of Moses",
+      "Who should replace Judas",
+      "Where Paul should travel next"
+    ],
+    "answer": "Whether Gentile believers needed to be circumcised and follow the Law of Moses",
+    "id": "bible-467",
+    "category": "New Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 468,
+    "question": "What was the name of the couple who were tentmakers and helped Paul?",
+    "options": [
+      "Ananias and Sapphira",
+      "Aquila and Priscilla",
+      "Zechariah and Elizabeth",
+      "Mary and Joseph"
+    ],
+    "answer": "Aquila and Priscilla",
+    "id": "bible-468",
+    "category": "New Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 469,
+    "question": "In Philippi, who was baptized after an earthquake opened the prison doors?",
+    "options": [
+      "Lydia",
+      "The Philippian jailer",
+      "Crispus",
+      "Apollos"
+    ],
+    "answer": "The Philippian jailer",
+    "id": "bible-469",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 470,
+    "question": "In Romans 1:16, Paul says he is not ashamed of what?",
+    "options": [
+      "His past",
+      "The gospel",
+      "Being in prison",
+      "The cross"
+    ],
+    "answer": "The gospel",
+    "id": "bible-470",
+    "category": "New Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 471,
+    "question": "According to 1 Corinthians 6:19, what is your body?",
+    "options": [
+      "A temple of the Holy Spirit",
+      "A vessel of clay",
+      "A temporary tent",
+      "A sacrifice"
+    ],
+    "answer": "A temple of the Holy Spirit",
+    "id": "bible-471",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 472,
+    "question": "In 2 Corinthians 5:17, 'Therefore, if anyone is in Christ, he is a...'",
+    "options": [
+      "Good person",
+      "New creation",
+      "Holy saint",
+      "Prophet"
+    ],
+    "answer": "New creation",
+    "id": "bible-472",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 473,
+    "question": "According to Galatians 2:20, 'I have been crucified with Christ. It is no longer I who live, but...'",
+    "options": [
+      "Christ who lives in me",
+      "The Spirit who leads me",
+      "I who live for God",
+      "My faith that lives"
+    ],
+    "answer": "Christ who lives in me",
+    "id": "bible-473",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 474,
+    "question": "In Ephesians 6, what are believers told to put on to stand against the schemes of the devil?",
+    "options": [
+      "The whole armor of God",
+      "The robe of righteousness",
+      "The helmet of salvation only",
+      "The cloak of zeal"
+    ],
+    "answer": "The whole armor of God",
+    "id": "bible-474",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 475,
+    "question": "According to Philippians 2, Jesus humbled himself by becoming obedient to the point of what?",
+    "options": [
+      "Death, even death on a cross",
+      "Washing feet",
+      "Being baptized",
+      "Fasting"
+    ],
+    "answer": "Death, even death on a cross",
+    "id": "bible-475",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 476,
+    "question": "In Colossians 1:15, Jesus is described as the image of what?",
+    "options": [
+      "The invisible God",
+      "The Father",
+      "The Holy Spirit",
+      "Man"
+    ],
+    "answer": "The invisible God",
+    "id": "bible-476",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 477,
+    "question": "According to 1 Thessalonians 4, who will rise first when the Lord descends from heaven?",
+    "options": [
+      "The living believers",
+      "The dead in Christ",
+      "The prophets",
+      "The angels"
+    ],
+    "answer": "The dead in Christ",
+    "id": "bible-477",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 478,
+    "question": "In 1 Timothy 6:10, what is the root of all kinds of evils?",
+    "options": [
+      "Money",
+      "The love of money",
+      "Pride",
+      "Power"
+    ],
+    "answer": "The love of money",
+    "id": "bible-478",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 479,
+    "question": "According to Hebrews 4:12, the word of God is living and active, sharper than what?",
+    "options": [
+      "Any two-edged sword",
+      "A piercing arrow",
+      "A diamond",
+      "A spear"
+    ],
+    "answer": "Any two-edged sword",
+    "id": "bible-479",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 480,
+    "question": "In James 4:7, what are we told to do so the devil will flee from us?",
+    "options": [
+      "Pray daily",
+      "Submit yourselves to God and resist the devil",
+      "Fast for three days",
+      "Read the Scriptures"
+    ],
+    "answer": "Submit yourselves to God and resist the devil",
+    "id": "bible-480",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 481,
+    "question": "According to 1 Peter 2:9, believers are a chosen race and a what?",
+    "options": [
+      "Royal priesthood",
+      "Mighty army",
+      "Silent majority",
+      "Wandering flock"
+    ],
+    "answer": "Royal priesthood",
+    "id": "bible-481",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 482,
+    "question": "In 1 John 4:18, what casts out fear?",
+    "options": [
+      "Courage",
+      "Perfect love",
+      "Strong faith",
+      "Hope"
+    ],
+    "answer": "Perfect love",
+    "id": "bible-482",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 483,
+    "question": "In Revelation 3:20, Jesus says, 'Behold, I stand at the door and...'",
+    "options": [
+      "Knock",
+      "Wait",
+      "Call",
+      "Listen"
+    ],
+    "answer": "Knock",
+    "id": "bible-483",
+    "category": "Revelation",
+    "answer_index": 0
+  },
+  {
+    "question_number": 484,
+    "question": "What is the final word of the Bible?",
+    "options": [
+      "Hallelujah",
+      "Amen",
+      "Peace",
+      "Love"
+    ],
+    "answer": "Amen",
+    "id": "bible-484",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 485,
+    "question": "Who was the first person to build an altar to the Lord in the Bible?",
+    "options": [
+      "Adam",
+      "Cain",
+      "Abel",
+      "Noah"
+    ],
+    "answer": "Noah",
+    "id": "bible-485",
+    "category": "Bible Basics",
+    "answer_index": 3
+  },
+  {
+    "question_number": 486,
+    "question": "What type of wood was Noah instructed to use to build the ark?",
+    "options": [
+      "Cedar",
+      "Gopher wood",
+      "Oak",
+      "Olive wood"
+    ],
+    "answer": "Gopher wood",
+    "id": "bible-486",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 487,
+    "question": "Who was the father of Abraham?",
+    "options": [
+      "Terah",
+      "Nahor",
+      "Haran",
+      "Lot"
+    ],
+    "answer": "Terah",
+    "id": "bible-487",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 488,
+    "question": "How old was Abraham when Isaac was born?",
+    "options": [
+      "80",
+      "90",
+      "100",
+      "120"
+    ],
+    "answer": "100",
+    "id": "bible-488",
+    "category": "Old Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 489,
+    "question": "What was the name of Ishmael's mother?",
+    "options": [
+      "Sarah",
+      "Hagar",
+      "Keturah",
+      "Zilpah"
+    ],
+    "answer": "Hagar",
+    "id": "bible-489",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 490,
+    "question": "Who was Jacob's firstborn son?",
+    "options": [
+      "Judah",
+      "Simeon",
+      "Levi",
+      "Reuben"
+    ],
+    "answer": "Reuben",
+    "id": "bible-490",
+    "category": "Old Testament",
+    "answer_index": 3
+  },
+  {
+    "question_number": 491,
+    "question": "Which of Jacob's sons did not receive a land inheritance in Canaan?",
+    "options": [
+      "Levi",
+      "Judah",
+      "Joseph",
+      "Benjamin"
+    ],
+    "answer": "Levi",
+    "id": "bible-491",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 492,
+    "question": "Who was the sister of Aaron and Moses?",
+    "options": [
+      "Miriam",
+      "Zipporah",
+      "Jochebed",
+      "Shiphrah"
+    ],
+    "answer": "Miriam",
+    "id": "bible-492",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 493,
+    "question": "What did God turn Moses' staff into when he first appeared to Pharaoh?",
+    "options": [
+      "A snake (serpent)",
+      "A river",
+      "A pillar of fire",
+      "A sword"
+    ],
+    "answer": "A snake (serpent)",
+    "id": "bible-493",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 494,
+    "question": "Which Egyptian god was the plague of darkness likely directed against?",
+    "options": [
+      "Osiris",
+      "Ra (the sun god)",
+      "Anubis",
+      "Isis"
+    ],
+    "answer": "Ra (the sun god)",
+    "id": "bible-494",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 495,
+    "question": "What was the name of the bread God provided the Israelites in the morning?",
+    "options": [
+      "Manna",
+      "Quail",
+      "Unleavened bread",
+      "Shewbread"
+    ],
+    "answer": "Manna",
+    "id": "bible-495",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 496,
+    "question": "On Mount Sinai, God gave Moses the Ten Commandments on how many stone tablets?",
+    "options": [
+      "One",
+      "Two",
+      "Three",
+      "Four"
+    ],
+    "answer": "Two",
+    "id": "bible-496",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 497,
+    "question": "What tribe of Israel was chosen to serve as priests and care for the Tabernacle?",
+    "options": [
+      "Judah",
+      "Levi",
+      "Ephraim",
+      "Dan"
+    ],
+    "answer": "Levi",
+    "id": "bible-497",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 498,
+    "question": "Which two spies believed God would give them the Promised Land despite the giants?",
+    "options": [
+      "Joshua and Caleb",
+      "Moses and Aaron",
+      "Nadab and Abihu",
+      "Eldad and Medad"
+    ],
+    "answer": "Joshua and Caleb",
+    "id": "bible-498",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 499,
+    "question": "How many times did the Israelites march around Jericho on the seventh day?",
+    "options": [
+      "1",
+      "3",
+      "7",
+      "12"
+    ],
+    "answer": "7",
+    "id": "bible-499",
+    "category": "Old Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 500,
+    "question": "Who was the woman that hid the Israelite spies in Jericho?",
+    "options": [
+      "Rahab",
+      "Deborah",
+      "Ruth",
+      "Esther"
+    ],
+    "answer": "Rahab",
+    "id": "bible-500",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 501,
+    "question": "Who was the only female judge of Israel?",
+    "options": [
+      "Deborah",
+      "Jael",
+      "Hannah",
+      "Abigail"
+    ],
+    "answer": "Deborah",
+    "id": "bible-501",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 502,
+    "question": "What did Gideon put out to test God's will regarding saving Israel?",
+    "options": [
+      "A fleece of wool",
+      "A bowl of water",
+      "A loaf of bread",
+      "A sword"
+    ],
+    "answer": "A fleece of wool",
+    "id": "bible-502",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 503,
+    "question": "From which tribe was King Saul?",
+    "options": [
+      "Judah",
+      "Benjamin",
+      "Ephraim",
+      "Manasseh"
+    ],
+    "answer": "Benjamin",
+    "id": "bible-503",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 504,
+    "question": "Who was the giant Philistine from Gath?",
+    "options": [
+      "Goliath",
+      "Og",
+      "Sihon",
+      "Agag"
+    ],
+    "answer": "Goliath",
+    "id": "bible-504",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 505,
+    "question": "How many stones did David put in his shepherd's bag before fighting Goliath?",
+    "options": [
+      "1",
+      "3",
+      "5",
+      "7"
+    ],
+    "answer": "5",
+    "id": "bible-505",
+    "category": "Old Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 506,
+    "question": "Who was the wise woman who prevented David from taking vengeance on Nabal?",
+    "options": [
+      "Michal",
+      "Abigail",
+      "Bathsheba",
+      "Tamar"
+    ],
+    "answer": "Abigail",
+    "id": "bible-506",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 507,
+    "question": "What physical feature was Absalom, David's son, famous for?",
+    "options": [
+      "His height",
+      "His muscular strength",
+      "His beautiful, heavy hair",
+      "His blue eyes"
+    ],
+    "answer": "His beautiful, heavy hair",
+    "id": "bible-507",
+    "category": "Old Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 508,
+    "question": "Who built the first Temple in Jerusalem?",
+    "options": [
+      "David",
+      "Solomon",
+      "Ezra",
+      "Nehemiah"
+    ],
+    "answer": "Solomon",
+    "id": "bible-508",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 509,
+    "question": "What idol did the northern kingdom of Israel worship at Dan and Bethel under Jeroboam?",
+    "options": [
+      "Asherah poles",
+      "Golden calves",
+      "Bronze snakes",
+      "Statues of Baal"
+    ],
+    "answer": "Golden calves",
+    "id": "bible-509",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 510,
+    "question": "Who was the prophet that challenged the 450 prophets of Baal on Mount Carmel?",
+    "options": [
+      "Elisha",
+      "Elijah",
+      "Isaiah",
+      "Jeremiah"
+    ],
+    "answer": "Elijah",
+    "id": "bible-510",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 511,
+    "question": "What did Elisha use to heal the unwholesome water of Jericho?",
+    "options": [
+      "A branch",
+      "Salt",
+      "Oil",
+      "A prayer cloth"
+    ],
+    "answer": "Salt",
+    "id": "bible-511",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 512,
+    "question": "Who was the commander of the Syrian army healed of leprosy by Elisha?",
+    "options": [
+      "Naaman",
+      "Hazael",
+      "Ben-Hadad",
+      "Sennacherib"
+    ],
+    "answer": "Naaman",
+    "id": "bible-512",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 513,
+    "question": "Which king of Judah built a tunnel to bring water into Jerusalem?",
+    "options": [
+      "Hezekiah",
+      "Josiah",
+      "Uzziah",
+      "Ahaz"
+    ],
+    "answer": "Hezekiah",
+    "id": "bible-513",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 514,
+    "question": "In what language was most of the Old Testament written?",
+    "options": [
+      "Greek",
+      "Aramaic",
+      "Hebrew",
+      "Latin"
+    ],
+    "answer": "Hebrew",
+    "id": "bible-514",
+    "category": "Bible Basics",
+    "answer_index": 2
+  },
+  {
+    "question_number": 515,
+    "question": "In what language was most of the New Testament written?",
+    "options": [
+      "Greek",
+      "Aramaic",
+      "Hebrew",
+      "Latin"
+    ],
+    "answer": "Greek",
+    "id": "bible-515",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 516,
+    "question": "Who interpreted the dream of King Nebuchadnezzar's statue?",
+    "options": [
+      "Joseph",
+      "Daniel",
+      "Ezekiel",
+      "Jeremiah"
+    ],
+    "answer": "Daniel",
+    "id": "bible-516",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 517,
+    "question": "What were the Babylonian names of Daniel's three friends?",
+    "options": [
+      "Belteshazzar, Shadrach, Meshach",
+      "Shadrach, Meshach, Abednego",
+      "Hananiah, Mishael, Azariah",
+      "Joshua, Caleb, Othniel"
+    ],
+    "answer": "Shadrach, Meshach, Abednego",
+    "id": "bible-517",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 518,
+    "question": "Who was the cupbearer to King Artaxerxes that rebuilt the walls of Jerusalem?",
+    "options": [
+      "Ezra",
+      "Nehemiah",
+      "Zerubbabel",
+      "Haggai"
+    ],
+    "answer": "Nehemiah",
+    "id": "bible-518",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 519,
+    "question": "Who is the main character of the book of Esther, besides Esther?",
+    "options": [
+      "Mordecai",
+      "Haman",
+      "Ahasuerus (Xerxes)",
+      "All of the above"
+    ],
+    "answer": "All of the above",
+    "id": "bible-519",
+    "category": "Old Testament",
+    "answer_index": 3
+  },
+  {
+    "question_number": 520,
+    "question": "What is the primary theme of the book of Proverbs?",
+    "options": [
+      "Prophecy",
+      "Wisdom",
+      "History",
+      "Law"
+    ],
+    "answer": "Wisdom",
+    "id": "bible-520",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 521,
+    "question": "According to Isaiah 53, he was pierced for our what?",
+    "options": [
+      "Sins",
+      "Transgressions",
+      "Iniquities",
+      "Sorrows"
+    ],
+    "answer": "Transgressions",
+    "id": "bible-521",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 522,
+    "question": "Who is known as the 'weeping prophet'?",
+    "options": [
+      "Isaiah",
+      "Jeremiah",
+      "Ezekiel",
+      "Hosea"
+    ],
+    "answer": "Jeremiah",
+    "id": "bible-522",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 523,
+    "question": "What prophet was commanded by God to marry an unfaithful wife?",
+    "options": [
+      "Amos",
+      "Hosea",
+      "Joel",
+      "Micah"
+    ],
+    "answer": "Hosea",
+    "id": "bible-523",
+    "category": "Old Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 524,
+    "question": "Which prophet ran away from God's command to preach to Nineveh?",
+    "options": [
+      "Jonah",
+      "Nahum",
+      "Obadiah",
+      "Habakkuk"
+    ],
+    "answer": "Jonah",
+    "id": "bible-524",
+    "category": "Old Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 525,
+    "question": "Where was Jesus born?",
+    "options": [
+      "Nazareth",
+      "Jerusalem",
+      "Bethlehem",
+      "Capernaum"
+    ],
+    "answer": "Bethlehem",
+    "id": "bible-525",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 526,
+    "question": "What were the gifts brought by the Magi (Wise Men)?",
+    "options": [
+      "Gold, silver, bronze",
+      "Gold, frankincense, myrrh",
+      "Bread, wine, oil",
+      "Sheep, oxen, doves"
+    ],
+    "answer": "Gold, frankincense, myrrh",
+    "id": "bible-526",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 527,
+    "question": "Who warned Joseph in a dream to take Mary and Jesus and flee to Egypt?",
+    "options": [
+      "An angel of the Lord",
+      "A prophet",
+      "The Magi",
+      "Elizabeth"
+    ],
+    "answer": "An angel of the Lord",
+    "id": "bible-527",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 528,
+    "question": "At what age did Jesus stay behind in the temple, talking with the teachers?",
+    "options": [
+      "7",
+      "10",
+      "12",
+      "15"
+    ],
+    "answer": "12",
+    "id": "bible-528",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 529,
+    "question": "Who baptized Jesus?",
+    "options": [
+      "Peter",
+      "John the Baptist",
+      "James",
+      "Andrew"
+    ],
+    "answer": "John the Baptist",
+    "id": "bible-529",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 530,
+    "question": "What descended on Jesus like a dove at his baptism?",
+    "options": [
+      "An angel",
+      "A cloud",
+      "The Spirit of God",
+      "Fire"
+    ],
+    "answer": "The Spirit of God",
+    "id": "bible-530",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 531,
+    "question": "Jesus said, 'Man shall not live by bread alone, but by every word that comes from the mouth of...'",
+    "options": [
+      "God",
+      "Prophets",
+      "Angels",
+      "The law"
+    ],
+    "answer": "God",
+    "id": "bible-531",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 532,
+    "question": "Which disciple found a coin in the mouth of a fish to pay the temple tax?",
+    "options": [
+      "John",
+      "Peter",
+      "Matthew",
+      "Judas"
+    ],
+    "answer": "Peter",
+    "id": "bible-532",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 533,
+    "question": "In the parable of the Good Shepherd, what does the good shepherd do for the sheep?",
+    "options": [
+      "Feeds them",
+      "Lays down his life for them",
+      "Sells them",
+      "Leaves them"
+    ],
+    "answer": "Lays down his life for them",
+    "id": "bible-533",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 534,
+    "question": "How many times did Jesus say we should forgive someone who sins against us?",
+    "options": [
+      "7 times",
+      "77 times (or 70 times 7)",
+      "3 times",
+      "Once"
+    ],
+    "answer": "77 times (or 70 times 7)",
+    "id": "bible-534",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 535,
+    "question": "Who climbed a sycamore tree to see Jesus?",
+    "options": [
+      "Zacchaeus",
+      "Bartimaeus",
+      "Nicodemus",
+      "Matthew"
+    ],
+    "answer": "Zacchaeus",
+    "id": "bible-535",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 536,
+    "question": "What did Jesus say to Zacchaeus when he saw him in the tree?",
+    "options": [
+      "Come down, I must stay at your house today",
+      "Repent of your sins",
+      "Give your money to the poor",
+      "Follow me"
+    ],
+    "answer": "Come down, I must stay at your house today",
+    "id": "bible-536",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 537,
+    "question": "Who anointed Jesus' feet with expensive perfume and wiped them with her hair?",
+    "options": [
+      "Mary the mother of Jesus",
+      "Mary of Bethany (sister of Martha)",
+      "Martha",
+      "Salome"
+    ],
+    "answer": "Mary of Bethany (sister of Martha)",
+    "id": "bible-537",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 538,
+    "question": "How much was Judas Iscariot paid to betray Jesus?",
+    "options": [
+      "10 pieces of silver",
+      "20 pieces of silver",
+      "30 pieces of silver",
+      "40 pieces of silver"
+    ],
+    "answer": "30 pieces of silver",
+    "id": "bible-538",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 539,
+    "question": "What was the name of the Roman governor who washed his hands of Jesus' blood?",
+    "options": [
+      "Herod Antipas",
+      "Pontius Pilate",
+      "Felix",
+      "Festus"
+    ],
+    "answer": "Pontius Pilate",
+    "id": "bible-539",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 540,
+    "question": "Who was the criminal released by the crowd instead of Jesus?",
+    "options": [
+      "Barabbas",
+      "Gestas",
+      "Dismas",
+      "Judas"
+    ],
+    "answer": "Barabbas",
+    "id": "bible-540",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 541,
+    "question": "Where was Jesus crucified? (The Place of a Skull)",
+    "options": [
+      "Gethsemane",
+      "Golgotha",
+      "Bethany",
+      "Mount of Olives"
+    ],
+    "answer": "Golgotha",
+    "id": "bible-541",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 542,
+    "question": "Who asked Pilate for the body of Jesus?",
+    "options": [
+      "Peter",
+      "John",
+      "Joseph of Arimathea",
+      "Nicodemus"
+    ],
+    "answer": "Joseph of Arimathea",
+    "id": "bible-542",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 543,
+    "question": "On what day of the week did Jesus rise from the dead?",
+    "options": [
+      "Friday",
+      "Saturday",
+      "Sunday",
+      "Monday"
+    ],
+    "answer": "Sunday",
+    "id": "bible-543",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 544,
+    "question": "Who did Jesus ask three times, 'Do you love me?' after his resurrection?",
+    "options": [
+      "John",
+      "James",
+      "Peter",
+      "Thomas"
+    ],
+    "answer": "Peter",
+    "id": "bible-544",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 545,
+    "question": "Before ascending to heaven, Jesus gave the 'Great Commission'. Where is this recorded?",
+    "options": [
+      "Matthew 28",
+      "Mark 1",
+      "Luke 2",
+      "John 1"
+    ],
+    "answer": "Matthew 28",
+    "id": "bible-545",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 546,
+    "question": "What event marked the coming of the Holy Spirit in Acts 2?",
+    "options": [
+      "Passover",
+      "Pentecost",
+      "Feast of Tabernacles",
+      "Day of Atonement"
+    ],
+    "answer": "Pentecost",
+    "id": "bible-546",
+    "category": "New Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 547,
+    "question": "Who was the first Christian to be martyred for his faith?",
+    "options": [
+      "James",
+      "Peter",
+      "Stephen",
+      "Paul"
+    ],
+    "answer": "Stephen",
+    "id": "bible-547",
+    "category": "Bible Basics",
+    "answer_index": 2
+  },
+  {
+    "question_number": 548,
+    "question": "Who held the coats of the men who stoned Stephen?",
+    "options": [
+      "Saul (Paul)",
+      "Caiaphas",
+      "Pilate",
+      "Gamaliel"
+    ],
+    "answer": "Saul (Paul)",
+    "id": "bible-548",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 549,
+    "question": "Who prayed and Silas sang hymns in prison at midnight?",
+    "options": [
+      "Peter",
+      "Paul",
+      "John",
+      "Barnabas"
+    ],
+    "answer": "Paul",
+    "id": "bible-549",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 550,
+    "question": "What city was Paul in when he saw an altar 'To an Unknown God'?",
+    "options": [
+      "Rome",
+      "Corinth",
+      "Athens",
+      "Ephesus"
+    ],
+    "answer": "Athens",
+    "id": "bible-550",
+    "category": "New Testament",
+    "answer_index": 2
+  },
+  {
+    "question_number": 551,
+    "question": "Who was the physician that traveled with Paul and wrote a Gospel?",
+    "options": [
+      "Mark",
+      "Luke",
+      "Timothy",
+      "Titus"
+    ],
+    "answer": "Luke",
+    "id": "bible-551",
+    "category": "New Testament",
+    "answer_index": 1
+  },
+  {
+    "question_number": 552,
+    "question": "In Romans 8:1, Paul says there is therefore now no what for those who are in Christ Jesus?",
+    "options": [
+      "Condemnation",
+      "Suffering",
+      "Temptation",
+      "Fear"
+    ],
+    "answer": "Condemnation",
+    "id": "bible-552",
+    "category": "New Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 553,
+    "question": "According to 1 Corinthians 10:13, what will God provide when you are tempted?",
+    "options": [
+      "A shield",
+      "A way of escape",
+      "An angel",
+      "A sword"
+    ],
+    "answer": "A way of escape",
+    "id": "bible-553",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 554,
+    "question": "What does 2 Corinthians 9:7 say God loves?",
+    "options": [
+      "A cheerful giver",
+      "A quiet prayer",
+      "A humble heart",
+      "A loud voice"
+    ],
+    "answer": "A cheerful giver",
+    "id": "bible-554",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 555,
+    "question": "According to Galatians 6:7, 'Do not be deceived: God is not mocked, for whatever one sows, that will he also...'",
+    "options": [
+      "Reap",
+      "Lose",
+      "Find",
+      "Destroy"
+    ],
+    "answer": "Reap",
+    "id": "bible-555",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 556,
+    "question": "In Ephesians 2:10, believers are called God's what, created in Christ Jesus for good works?",
+    "options": [
+      "Servants",
+      "Workmanship",
+      "Children",
+      "Soldiers"
+    ],
+    "answer": "Workmanship",
+    "id": "bible-556",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 557,
+    "question": "According to Philippians 4:4, what should believers do in the Lord always?",
+    "options": [
+      "Pray",
+      "Rejoice",
+      "Fast",
+      "Sing"
+    ],
+    "answer": "Rejoice",
+    "id": "bible-557",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 558,
+    "question": "In Colossians 3:14, what binds everything together in perfect harmony?",
+    "options": [
+      "Faith",
+      "Hope",
+      "Love",
+      "Peace"
+    ],
+    "answer": "Love",
+    "id": "bible-558",
+    "category": "Bible Basics",
+    "answer_index": 2
+  },
+  {
+    "question_number": 559,
+    "question": "According to 1 Thessalonians 5:17, how often should we pray?",
+    "options": [
+      "Three times a day",
+      "Without ceasing",
+      "Only in the morning",
+      "When in trouble"
+    ],
+    "answer": "Without ceasing",
+    "id": "bible-559",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 560,
+    "question": "In 2 Timothy 1:7, God gave us a spirit not of fear but of power and love and what?",
+    "options": [
+      "Self-control",
+      "Joy",
+      "Peace",
+      "Patience"
+    ],
+    "answer": "Self-control",
+    "id": "bible-560",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 561,
+    "question": "According to Hebrews 11:6, without what is it impossible to please God?",
+    "options": [
+      "Good works",
+      "Faith",
+      "Money",
+      "Sacrifice"
+    ],
+    "answer": "Faith",
+    "id": "bible-561",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 562,
+    "question": "In James 1:19, everyone should be quick to hear, slow to speak, and slow to what?",
+    "options": [
+      "Act",
+      "Anger",
+      "Judge",
+      "Move"
+    ],
+    "answer": "Anger",
+    "id": "bible-562",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 563,
+    "question": "According to 1 Peter 5:8, who prowls around like a roaring lion, seeking someone to devour?",
+    "options": [
+      "The Roman Emperor",
+      "The devil",
+      "A false prophet",
+      "A greedy man"
+    ],
+    "answer": "The devil",
+    "id": "bible-563",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 564,
+    "question": "In 1 John 1:5, God is what, and in him is no darkness at all?",
+    "options": [
+      "Light",
+      "Love",
+      "Spirit",
+      "Truth"
+    ],
+    "answer": "Light",
+    "id": "bible-564",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 565,
+    "question": "According to Revelation 1:8, who says 'I am the Alpha and the Omega'?",
+    "options": [
+      "John",
+      "The Lord God",
+      "An angel",
+      "Peter"
+    ],
+    "answer": "The Lord God",
+    "id": "bible-565",
+    "category": "Revelation",
+    "answer_index": 1
+  },
+  {
+    "question_number": 566,
+    "question": "In Revelation, what are the streets of the New Jerusalem made of?",
+    "options": [
+      "Silver",
+      "Pure gold, like clear glass",
+      "Pearls",
+      "Sapphires"
+    ],
+    "answer": "Pure gold, like clear glass",
+    "id": "bible-566",
+    "category": "Revelation",
+    "answer_index": 1
+  },
+  {
+    "question_number": 567,
+    "question": "What are the gates of the New Jerusalem made of?",
+    "options": [
+      "Iron",
+      "Wood",
+      "A single pearl each",
+      "Gold"
+    ],
+    "answer": "A single pearl each",
+    "id": "bible-567",
+    "category": "Bible Basics",
+    "answer_index": 2
+  },
+  {
+    "question_number": 568,
+    "question": "In Revelation 22, what flows from the throne of God and of the Lamb?",
+    "options": [
+      "The river of the water of life",
+      "A stream of fire",
+      "A cloud of glory",
+      "A sea of glass"
+    ],
+    "answer": "The river of the water of life",
+    "id": "bible-568",
+    "category": "Revelation",
+    "answer_index": 0
+  },
+  {
+    "question_number": 569,
+    "question": "What tree is on either side of the river in the New Jerusalem?",
+    "options": [
+      "The Tree of Knowledge",
+      "The Tree of Life",
+      "The Fig Tree",
+      "The Olive Tree"
+    ],
+    "answer": "The Tree of Life",
+    "id": "bible-569",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 570,
+    "question": "How many books are in the New Testament?",
+    "options": [
+      "27",
+      "39",
+      "66",
+      "73"
+    ],
+    "answer": "27",
+    "id": "bible-570",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 571,
+    "question": "How many books are in the Old Testament (Protestant)?",
+    "options": [
+      "27",
+      "39",
+      "66",
+      "46"
+    ],
+    "answer": "39",
+    "id": "bible-571",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 572,
+    "question": "Who was the father of John the Baptist?",
+    "options": [
+      "Zechariah",
+      "Joseph",
+      "Simeon",
+      "Eli"
+    ],
+    "answer": "Zechariah",
+    "id": "bible-572",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 573,
+    "question": "What was the name of the angel who appeared to Zechariah in the temple?",
+    "options": [
+      "Michael",
+      "Gabriel",
+      "Raphael",
+      "Uriel"
+    ],
+    "answer": "Gabriel",
+    "id": "bible-573",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 574,
+    "question": "Why was Zechariah struck mute until his son was born?",
+    "options": [
+      "Because he yelled in the temple",
+      "Because he did not believe the angel's words",
+      "Because he lied",
+      "As a sign of fasting"
+    ],
+    "answer": "Because he did not believe the angel's words",
+    "id": "bible-574",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 575,
+    "question": "Who was the elderly woman (a prophetess) who saw baby Jesus in the temple?",
+    "options": [
+      "Anna",
+      "Elizabeth",
+      "Martha",
+      "Lydia"
+    ],
+    "answer": "Anna",
+    "id": "bible-575",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 576,
+    "question": "Where did Jesus turn water into wine?",
+    "options": [
+      "Jerusalem",
+      "Cana in Galilee",
+      "Bethlehem",
+      "Nazareth"
+    ],
+    "answer": "Cana in Galilee",
+    "id": "bible-576",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 577,
+    "question": "Who was the Roman centurion whose servant was healed by Jesus from afar?",
+    "options": [
+      "Not named",
+      "Cornelius",
+      "Julius",
+      "Longinus"
+    ],
+    "answer": "Not named",
+    "id": "bible-577",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 578,
+    "question": "What did Jesus say to the paralyzed man let down through the roof before healing him?",
+    "options": [
+      "Get up and walk",
+      "Your sins are forgiven",
+      "Do you believe?",
+      "Take up your bed"
+    ],
+    "answer": "Your sins are forgiven",
+    "id": "bible-578",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 579,
+    "question": "Who criticized Mary for wasting expensive perfume on Jesus' feet?",
+    "options": [
+      "Peter",
+      "John",
+      "Judas Iscariot",
+      "Martha"
+    ],
+    "answer": "Judas Iscariot",
+    "id": "bible-579",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 580,
+    "question": "What did Jesus say when asked about paying taxes to Caesar?",
+    "options": [
+      "Do not pay them",
+      "Pay what you owe",
+      "Render to Caesar the things that are Caesar's, and to God the things that are God's",
+      "Only pay the temple tax"
+    ],
+    "answer": "Render to Caesar the things that are Caesar's, and to God the things that are God's",
+    "id": "bible-580",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 581,
+    "question": "According to Jesus, it is easier for a camel to go through the eye of a needle than for what?",
+    "options": [
+      "A rich person to enter the kingdom of God",
+      "A sinner to repent",
+      "A hypocrite to pray",
+      "A blind man to see"
+    ],
+    "answer": "A rich person to enter the kingdom of God",
+    "id": "bible-581",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 582,
+    "question": "What sign did Judas use to identify Jesus to the guards?",
+    "options": [
+      "A pointed finger",
+      "A kiss",
+      "A handshake",
+      "A wave"
+    ],
+    "answer": "A kiss",
+    "id": "bible-582",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 583,
+    "question": "When Jesus was arrested, who drew a sword and cut off the ear of the high priest's servant?",
+    "options": [
+      "John",
+      "James",
+      "Peter",
+      "Andrew"
+    ],
+    "answer": "Peter",
+    "id": "bible-583",
+    "category": "Gospels",
+    "answer_index": 2
+  },
+  {
+    "question_number": 584,
+    "question": "What was the name of the servant whose ear was cut off?",
+    "options": [
+      "Malchus",
+      "Jairus",
+      "Barabbas",
+      "Simon"
+    ],
+    "answer": "Malchus",
+    "id": "bible-584",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 585,
+    "question": "How did Judas Iscariot die?",
+    "options": [
+      "He was crucified",
+      "He hanged himself",
+      "He was stoned",
+      "He fell off a cliff"
+    ],
+    "answer": "He hanged himself",
+    "id": "bible-585",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 586,
+    "question": "With what was Jesus' side pierced while on the cross?",
+    "options": [
+      "A sword",
+      "A spear",
+      "A nail",
+      "An arrow"
+    ],
+    "answer": "A spear",
+    "id": "bible-586",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 587,
+    "question": "What came out of Jesus' side when it was pierced?",
+    "options": [
+      "Blood and water",
+      "Only blood",
+      "Nothing",
+      "Light"
+    ],
+    "answer": "Blood and water",
+    "id": "bible-587",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 588,
+    "question": "Who was the Pharisee that came to Jesus by night and later helped bury him?",
+    "options": [
+      "Nicodemus",
+      "Caiaphas",
+      "Annas",
+      "Gamaliel"
+    ],
+    "answer": "Nicodemus",
+    "id": "bible-588",
+    "category": "Gospels",
+    "answer_index": 0
+  },
+  {
+    "question_number": 589,
+    "question": "What did Jesus tell the disciples to wait for in Jerusalem after his ascension?",
+    "options": [
+      "The second coming",
+      "The promise of the Father (The Holy Spirit)",
+      "The Roman army",
+      "The new temple"
+    ],
+    "answer": "The promise of the Father (The Holy Spirit)",
+    "id": "bible-589",
+    "category": "Gospels",
+    "answer_index": 1
+  },
+  {
+    "question_number": 590,
+    "question": "In Acts 3, what did Peter say to the lame beggar instead of giving him money?",
+    "options": [
+      "I have no silver and gold, but what I do have I give to you. In the name of Jesus Christ of Nazareth, rise up and walk!",
+      "Go in peace.",
+      "Your faith has healed you.",
+      "Wait for the Lord."
+    ],
+    "answer": "I have no silver and gold, but what I do have I give to you. In the name of Jesus Christ of Nazareth, rise up and walk!",
+    "id": "bible-590",
+    "category": "New Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 591,
+    "question": "Who was the prophet in Acts who tied his own hands and feet with Paul's belt, predicting Paul's arrest?",
+    "options": [
+      "Agabus",
+      "Silas",
+      "Barnabas",
+      "Apollos"
+    ],
+    "answer": "Agabus",
+    "id": "bible-591",
+    "category": "New Testament",
+    "answer_index": 0
+  },
+  {
+    "question_number": 592,
+    "question": "What was the name of the eloquent man from Alexandria who was mighty in the Scriptures but only knew the baptism of John?",
+    "options": [
+      "Apollos",
+      "Aquila",
+      "Crispus",
+      "Sosthenes"
+    ],
+    "answer": "Apollos",
+    "id": "bible-592",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 593,
+    "question": "In Galatians 5:1, what did Christ set us free for?",
+    "options": [
+      "To sin",
+      "For freedom",
+      "To follow the law",
+      "To be rich"
+    ],
+    "answer": "For freedom",
+    "id": "bible-593",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 594,
+    "question": "According to Ephesians 4:5, there is one Lord, one faith, one what?",
+    "options": [
+      "Church",
+      "Baptism",
+      "Spirit",
+      "Hope"
+    ],
+    "answer": "Baptism",
+    "id": "bible-594",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 595,
+    "question": "In 1 Timothy 2:5, there is one God, and there is one mediator between God and men. Who is it?",
+    "options": [
+      "The man Christ Jesus",
+      "The Holy Spirit",
+      "The Pope",
+      "The Virgin Mary"
+    ],
+    "answer": "The man Christ Jesus",
+    "id": "bible-595",
+    "category": "Bible Basics",
+    "answer_index": 0
+  },
+  {
+    "question_number": 596,
+    "question": "According to Hebrews 11:8, who went out, not knowing where he was going, when called to a place he would receive as an inheritance?",
+    "options": [
+      "Moses",
+      "Abraham",
+      "Noah",
+      "David"
+    ],
+    "answer": "Abraham",
+    "id": "bible-596",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 597,
+    "question": "In James 3, what small part of the body is described as a fire and a restless evil?",
+    "options": [
+      "The eye",
+      "The ear",
+      "The tongue",
+      "The hand"
+    ],
+    "answer": "The tongue",
+    "id": "bible-597",
+    "category": "Bible Basics",
+    "answer_index": 2
+  },
+  {
+    "question_number": 598,
+    "question": "According to 2 Peter 3:8, with the Lord one day is as what?",
+    "options": [
+      "A short breath",
+      "A thousand years",
+      "A passing shadow",
+      "An eternity"
+    ],
+    "answer": "A thousand years",
+    "id": "bible-598",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 599,
+    "question": "In 1 John 4:19, why do we love?",
+    "options": [
+      "Because we are commanded to",
+      "Because he first loved us",
+      "Because it feels good",
+      "Because we fear punishment"
+    ],
+    "answer": "Because he first loved us",
+    "id": "bible-599",
+    "category": "Bible Basics",
+    "answer_index": 1
+  },
+  {
+    "question_number": 600,
+    "question": "What are the names of the two witnesses described in Revelation 11?",
+    "options": [
+      "Moses and Elijah (widely interpreted, though unnamed in the text)",
+      "Peter and Paul",
+      "Enoch and Noah",
+      "They are not named in the text"
+    ],
+    "answer": "They are not named in the text",
+    "id": "bible-600",
+    "category": "Revelation",
+    "answer_index": 3
+  }
+]

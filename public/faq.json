@@ -1,0 +1,70 @@
+{
+  "church_faq": [
+    {
+      "id": 1,
+      "question": "Church starts at?",
+      "keywords": [
+        "church time",
+        "service time",
+        "church starts",
+        "worship time"
+      ],
+      "answer": "The church service is held from 11:00 AM to 1:00 PM."
+    },
+    {
+      "id": 2,
+      "question": "Youth fellowship starts at?",
+      "keywords": [
+        "youth fellowship",
+        "youth time",
+        "youth meeting",
+        "youth service"
+      ],
+      "answer": "Youth Fellowship is held on the 2nd Saturday from 2:00 PM to 3:00 PM. On other Saturdays, it is from 12:30 PM to 1:00 PM."
+    },
+    {
+      "id": 3,
+      "question": "What denomination is the church?",
+      "keywords": [
+        "denomination",
+        "church denomination",
+        "what church",
+        "trinity",
+        "protestant"
+      ],
+      "answer": "The church belongs to the Protestant (Trinity) denomination."
+    },
+    {
+      "id": 4,
+      "question": "How do I become a choir member?",
+      "keywords": [
+        "choir",
+        "join choir",
+        "choir member",
+        "singing team"
+      ],
+      "answer": "Go to the Laws section and click on 'Choir Rules' to learn how to become a choir member."
+    },
+    {
+      "id": 5,
+      "question": "What is the youth routine?",
+      "keywords": [
+        "youth routine",
+        "youth schedule",
+        "youth activities"
+      ],
+      "answer": "Go to the Youth section to view the complete youth routine."
+    },
+    {
+      "id": 6,
+      "question": "Which youth group am I in?",
+      "keywords": [
+        "youth group",
+        "my group",
+        "which group",
+        "group assignment"
+      ],
+      "answer": "Go to the Youth section to find your assigned youth group."
+    }
+  ]
+}

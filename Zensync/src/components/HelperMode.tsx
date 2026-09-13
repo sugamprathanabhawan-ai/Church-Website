@@ -162,14 +162,30 @@ export const HelperMode: React.FC<HelperModeProps> = ({ sessionCode, onExit }) =
         </div>
       </header>
 
+      {/* Mobile Backdrop */}
+      <div
+        className={`sidebar-backdrop ${sidebarOpen ? 'open' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+      />
+
       {/* Main Layout Area: Read-Only Section Sidebar + Image Viewer with Controls */}
       <div className="presentation-layout">
         {/* Left Sidebar (Read-only sections & slides list) */}
         <aside className={`presentation-sidebar ${sidebarOpen ? 'open' : ''}`}>
           <div className="sidebar-header">
-            <span className="sidebar-title">Presentation Sections</span>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-light)', fontWeight: 600 }}>
-              Read-Only
+            <span className="sidebar-title">Sections ({sections.length})</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', fontWeight: 600 }}>
+                Read-Only
+              </span>
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="btn-icon"
+                style={{ width: '28px', height: '28px', border: 'none' }}
+                title="Close sidebar"
+              >
+                <X size={18} />
+              </button>
             </div>
           </div>
 
@@ -225,14 +241,40 @@ export const HelperMode: React.FC<HelperModeProps> = ({ sessionCode, onExit }) =
         </aside>
 
         {/* Center Presentation Stage with Full Control (Previous/Next/Fullscreen) */}
-        <ImageViewer
-          activeSlide={activeFlatSlide}
-          currentIndex={currentGlobalIndex}
-          totalSlides={totalSlides}
-          onPrevious={handlePrevious}
-          onNext={handleNext}
-          canNavigate={true}
-        />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100%' }}>
+          {/* Horizontal Section Track for Fast Mobile Access */}
+          {sections.length > 0 && (
+            <div className="mobile-section-bar">
+              {sections.map((sec) => {
+                const isActive = currentSlide.sectionId === sec.id;
+                const flat = flattenSections(sections);
+                const firstInSec = flat.find((f) => f.sectionId === sec.id);
+
+                return (
+                  <button
+                    key={sec.id}
+                    onClick={() => {
+                      if (firstInSec) handleGoToSlide(firstInSec.globalIndex);
+                    }}
+                    className={`mobile-section-chip ${isActive ? 'active' : ''}`}
+                  >
+                    <span>{sec.title}</span>
+                    <span className="mobile-section-chip-count">({sec.slides.length})</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          <ImageViewer
+            activeSlide={activeFlatSlide}
+            currentIndex={currentGlobalIndex}
+            totalSlides={totalSlides}
+            onPrevious={handlePrevious}
+            onNext={handleNext}
+            canNavigate={true}
+          />
+        </div>
       </div>
     </div>
   );

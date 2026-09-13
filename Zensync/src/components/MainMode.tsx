@@ -379,21 +379,37 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, onExit }) => {
         </div>
       </header>
 
+      {/* Mobile Backdrop */}
+      <div
+        className={`sidebar-backdrop ${sidebarOpen ? 'open' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+      />
+
       {/* Main Layout Area: Sidebar + Image Viewer */}
       <div className="presentation-layout">
         {/* Left Sidebar */}
         <aside className={`presentation-sidebar ${sidebarOpen ? 'open' : ''}`}>
           <div className="sidebar-header">
-            <span className="sidebar-title">Sections</span>
-            <button
-              onClick={handleAddSection}
-              className="btn-secondary"
-              style={{ padding: '0.4rem 0.75rem', fontSize: '0.85rem' }}
-              id="btn-add-section"
-            >
-              <Plus size={16} />
-              Add Section
-            </button>
+            <span className="sidebar-title">Sections ({sections.length})</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <button
+                onClick={handleAddSection}
+                className="btn-secondary"
+                style={{ padding: '0.4rem 0.75rem', fontSize: '0.85rem' }}
+                id="btn-add-section"
+              >
+                <Plus size={16} />
+                Add
+              </button>
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="btn-icon"
+                style={{ width: '28px', height: '28px', border: 'none' }}
+                title="Close sidebar"
+              >
+                <X size={18} />
+              </button>
+            </div>
           </div>
 
           <div className="sidebar-content">
@@ -579,21 +595,56 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, onExit }) => {
         </aside>
 
         {/* Center Presentation Stage */}
-        <ImageViewer
-          activeSlide={activeFlatSlide}
-          currentIndex={currentGlobalIndex}
-          totalSlides={totalSlides}
-          onPrevious={handlePrevious}
-          onNext={handleNext}
-          canNavigate={true}
-          onAddSlidePrompt={() => {
-            if (sections.length > 0) {
-              handleTriggerUpload(sections[0].id);
-            } else {
-              handleAddSection();
-            }
-          }}
-        />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100%' }}>
+          {/* Horizontal Section Track for Fast Mobile Access */}
+          {sections.length > 0 && (
+            <div className="mobile-section-bar">
+              <button
+                onClick={handleAddSection}
+                className="mobile-section-chip"
+                style={{ backgroundColor: 'var(--primary-soft)', color: 'var(--primary)', borderColor: 'var(--primary-border)' }}
+                title="Add New Section"
+              >
+                <Plus size={14} />
+                <span>Section</span>
+              </button>
+              {sections.map((sec) => {
+                const isActive = currentSlide.sectionId === sec.id;
+                const flat = flattenSections(sections);
+                const firstInSec = flat.find((f) => f.sectionId === sec.id);
+
+                return (
+                  <button
+                    key={sec.id}
+                    onClick={() => {
+                      if (firstInSec) handleGoToSlide(firstInSec.globalIndex);
+                    }}
+                    className={`mobile-section-chip ${isActive ? 'active' : ''}`}
+                  >
+                    <span>{sec.title}</span>
+                    <span className="mobile-section-chip-count">({sec.slides.length})</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          <ImageViewer
+            activeSlide={activeFlatSlide}
+            currentIndex={currentGlobalIndex}
+            totalSlides={totalSlides}
+            onPrevious={handlePrevious}
+            onNext={handleNext}
+            canNavigate={true}
+            onAddSlidePrompt={() => {
+              if (sections.length > 0) {
+                handleTriggerUpload(sections[0].id);
+              } else {
+                handleAddSection();
+              }
+            }}
+          />
+        </div>
       </div>
     </div>
   );

@@ -94,60 +94,74 @@ export const SubMode: React.FC<SubModeProps> = ({ sessionCode, onExit }) => {
     );
   }
 
+  const [headerVisible, setHeaderVisible] = useState(true);
+
   return (
-    <div className="sub-presentation-stage">
+    <div
+      className="sub-presentation-stage"
+      onClick={() => setHeaderVisible((prev) => !prev)}
+      title="Tap anywhere to toggle header"
+    >
       {/* Floating Sub Header with Status and Exit */}
-      <div className="sub-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      <div
+        className="sub-header"
+        style={{
+          opacity: headerVisible ? 1 : 0,
+          pointerEvents: headerVisible ? 'auto' : 'none',
+          transition: 'opacity 0.2s ease',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <button
             onClick={onExit}
             className="btn-outline"
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0.92)', backdropFilter: 'blur(4px)' }}
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.94)', backdropFilter: 'blur(6px)', padding: '0.4rem 0.75rem' }}
             title="Leave Session"
           >
-            <Home size={16} />
-            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Exit</span>
+            <Home size={15} />
+            <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Exit</span>
           </button>
 
           <div
             className="code-badge"
             style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.92)',
-              backdropFilter: 'blur(4px)',
-              padding: '0.25rem 0.65rem',
-              fontSize: '0.9rem',
+              backgroundColor: 'rgba(255, 255, 255, 0.94)',
+              backdropFilter: 'blur(6px)',
+              padding: '0.25rem 0.6rem',
+              fontSize: '0.85rem',
             }}
           >
             CODE: <span>{sessionCode}</span>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           {/* Status Indicator */}
           {status === 'connected' ? (
-            <div className="status-pill connected" style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(4px)' }}>
+            <div className="status-pill connected" style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(6px)' }}>
               <span className="status-dot green" />
-              <span>● LIVE — Synced</span>
+              <span>● LIVE</span>
             </div>
           ) : status === 'reconnecting' ? (
-            <div className="status-pill reconnecting" style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(4px)' }}>
+            <div className="status-pill reconnecting" style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(6px)' }}>
               <span className="status-dot amber" />
               <span>○ Reconnecting...</span>
             </div>
           ) : (
-            <div className="status-pill demo" style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(4px)' }}>
+            <div className="status-pill demo" style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(6px)' }}>
               <span className="status-dot blue" />
-              <span>● Local Synced</span>
+              <span>● Synced</span>
             </div>
           )}
 
           <button
             onClick={toggleFullscreen}
             className="btn-icon"
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0.92)', backdropFilter: 'blur(4px)' }}
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.94)', backdropFilter: 'blur(6px)', width: '2.2rem', height: '2.2rem' }}
             title="Toggle Fullscreen"
           >
-            {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+            {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
           </button>
         </div>
       </div>

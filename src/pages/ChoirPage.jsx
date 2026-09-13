@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { extractYouTubeId } from '../utils/dataSyncEngine';
 import PDFViewer from '../components/PDFViewer';
@@ -12,7 +13,8 @@ import {
   Sparkles, 
   RotateCw,
   ExternalLink,
-  Play
+  Play,
+  Presentation
 } from 'lucide-react';
 
 function YoutubeIcon({ className = "w-4 h-4" }) {
@@ -87,9 +89,7 @@ export default function ChoirPage() {
             Glorifying God through worship, choral praise, vocal training, and unity.
           </p>
 
-          <div className="flex flex-wrap justify-center gap-4">
-            <a 
-              href="#choir-routine" 
+          <div className="flex flex-wrap justify-center gap-4">`n            <Link to="/zensync" className="px-7 py-3 bg-sky-400 hover:bg-sky-300 text-slate-950 font-bold rounded-full shadow-lg shadow-sky-400/40 hover:-translate-y-0.5 transition-all text-sm hover:scale-105 flex items-center gap-2">`n              <Presentation className="w-4 h-4" />`n              Zen Sync Live`n            </Link>`n            <a href="#choir-routine" 
               className="px-7 py-3 bg-sky-500 hover:bg-sky-400 text-white font-semibold rounded-full shadow-lg shadow-sky-500/30 hover:-translate-y-0.5 transition-all text-sm hover:scale-105"
             >
               View Routine
@@ -147,7 +147,7 @@ export default function ChoirPage() {
                 <ul className="space-y-1.5 text-xs sm:text-sm text-slate-700">
                   {choirData.notices.map((notice, idx) => (
                     <li key={idx} className="flex items-start gap-2">
-                      <span className="text-sky-500 font-bold">•</span>
+                      <span className="text-sky-500 font-bold">â€¢</span>
                       <span className="leading-relaxed">{notice}</span>
                     </li>
                   ))}
@@ -230,7 +230,7 @@ export default function ChoirPage() {
                           <ul className="space-y-1.5 text-xs sm:text-sm text-slate-700 pl-3">
                             {(day.activities || []).map((activity, actIdx) => (
                               <li key={actIdx} className="flex gap-2">
-                                <span className="text-sky-400">•</span>
+                                <span className="text-sky-400">â€¢</span>
                                 <span>{activity}</span>
                               </li>
                             ))}
@@ -412,3 +412,4 @@ export default function ChoirPage() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Menu, 
@@ -13,13 +13,15 @@ import {
   Users, 
   Sparkles,
   ChevronRight,
-  ShieldAlert
+  ShieldAlert,
+  Presentation
 } from 'lucide-react';
 
 const NAV_LINKS = [
   { name: "Home", href: "/", icon: Church },
   { name: "Youth", href: "/youth", icon: Users },
   { name: "Choir", href: "/choir", icon: Music },
+  { name: "Zen Sync", href: "/zensync", icon: Presentation },
   { name: "Calendar", href: "/calendar", icon: Calendar },
   { name: "Games", href: "/quiz", icon: Gamepad2 },
   { name: "Laws", href: "/laws", icon: Scale },
@@ -137,7 +139,7 @@ export default function Navbar() {
                   Sugam Prathana Bhawan
                 </span>
                 <span className="text-[10px] text-sky-400 font-medium tracking-widest uppercase hidden sm:block">
-                  Sugam Church • Nepal
+                  Sugam Church â€¢ Nepal
                 </span>
               </div>
             </Link>
@@ -263,3 +265,4 @@ export default function Navbar() {
     </header>
   );
 }
+

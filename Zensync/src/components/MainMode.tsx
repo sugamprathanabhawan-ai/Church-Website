@@ -13,8 +13,10 @@ import {
   Home,
   CheckSquare,
   Square,
+  Smartphone,
+  ShieldCheck,
 } from 'lucide-react';
-import type { SectionItem, SlideItem, ConnectionStatus } from '../types';
+import type { SectionItem, SlideItem, ConnectionStatus, DeviceAuditInfo } from '../types';
 import { ImageViewer } from './ImageViewer';
 import {
   flattenSections,
@@ -30,19 +32,23 @@ import {
   deleteSlideImage,
   deleteSession,
 } from '../lib/supabaseClient';
+import { collectDeviceAuditInfo } from '../lib/deviceUtils';
 
 interface MainModeProps {
   sessionCode: string;
+  initialDeviceInfo?: DeviceAuditInfo;
   onExit: () => void;
 }
 
-export const MainMode: React.FC<MainModeProps> = ({ sessionCode, onExit }) => {
+export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceInfo, onExit }) => {
   const [sections, setSections] = useState<SectionItem[]>(() => createDefaultSections());
   const [currentGlobalIndex, setCurrentGlobalIndex] = useState(0);
   const [copied, setCopied] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [status, setStatus] = useState<ConnectionStatus>('connected');
   const [isUploading, setIsUploading] = useState(false);
+  const [deviceInfo, setDeviceInfo] = useState<DeviceAuditInfo | undefined>(initialDeviceInfo);
+  const [showAuditModal, setShowAuditModal] = useState(false);
 
   // Section editing state
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
@@ -60,10 +66,18 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, onExit }) => {
     let isMounted = true;
 
     async function init() {
-      const initial = await createSession(sessionCode, sections);
+      let activeDev = initialDeviceInfo;
+      if (!activeDev) {
+        activeDev = await collectDeviceAuditInfo();
+        if (isMounted) setDeviceInfo(activeDev);
+      }
+      const initial = await createSession(sessionCode, sections, activeDev);
       if (isMounted && initial) {
         if (initial.content?.sections && initial.content.sections.length > 0) {
           setSections(initial.content.sections);
+        }
+        if (initial.device_info && !activeDev) {
+          setDeviceInfo(initial.device_info);
         }
         if (initial.current_slide) {
           setCurrentGlobalIndex(initial.current_slide.globalIndex || 0);
@@ -196,6 +210,7 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, onExit }) => {
           name: file.name.replace(/\.[^/.]+$/, ''),
           url,
           createdAt: Date.now() + i,
+          uploadedBy: deviceInfo,
         });
       }
 
@@ -327,12 +342,12 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, onExit }) => {
       />
 
       {/* Top Navbar */}
-      <header className="app-navbar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+      <header className="app-navbar main-navbar">
+        <div className="navbar-left">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="btn-icon"
-            style={{ display: 'flex' }}
+            style={{ display: 'flex', flexShrink: 0 }}
             title="Toggle Sections Sidebar"
             aria-label="Toggle Sidebar"
           >
@@ -344,37 +359,51 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, onExit }) => {
           </div>
 
           <div className="code-badge" title="Share this 4-digit code with Sub & Helper devices">
-            CODE: <span>{sessionCode}</span>
+            <span className="code-label">CODE:</span>
+            <span>{sessionCode}</span>
             <button
               onClick={handleCopyCode}
               className="btn-icon"
-              style={{ width: '26px', height: '26px', border: 'none', background: 'transparent' }}
+              style={{ width: '22px', height: '22px', border: 'none', background: 'transparent', padding: 0 }}
               title="Copy Code"
             >
-              {copied ? <Check size={16} color="var(--primary)" /> : <Copy size={16} color="var(--primary)" />}
+              {copied ? <Check size={14} color="var(--primary)" /> : <Copy size={14} color="var(--primary)" />}
             </button>
           </div>
         </div>
 
         <div className="navbar-actions">
+          {/* Host Device Audit Badge */}
+          {deviceInfo && (
+            <button
+              onClick={() => setShowAuditModal(true)}
+              className="device-host-badge"
+              title={`Host Device: ${deviceInfo.deviceName} (${deviceInfo.deviceModel}) - Click to view security audit`}
+              id="btn-device-audit"
+            >
+              <Smartphone size={14} />
+              <span className="device-host-name">{deviceInfo.deviceName}</span>
+            </button>
+          )}
+
           <div className={`status-pill ${status === 'connected' ? 'connected' : 'demo'}`}>
             <span className={`status-dot ${status === 'connected' ? 'green' : 'blue'}`} />
-            <span>{status === 'connected' ? '● LIVE (Host)' : 'Local Sync Active'}</span>
+            <span className="status-text-full">{status === 'connected' ? 'LIVE (Host)' : 'Local Host'}</span>
           </div>
 
           <button
             onClick={handleEndAndDeleteSession}
-            className="btn-danger-outline"
+            className="btn-danger-outline btn-delete-session-desktop"
             title="Permanently delete presentation & storage files from Supabase"
             id="btn-delete-session"
           >
             <Trash2 size={15} />
-            <span>Delete Session</span>
+            <span>Delete</span>
           </button>
 
-          <button onClick={onExit} className="btn-outline" title="Exit Presentation">
-            <Home size={16} />
-            <span style={{ display: 'inline-block' }}>Exit</span>
+          <button onClick={onExit} className="btn-outline btn-exit" title="Exit Presentation" id="btn-main-exit">
+            <Home size={15} />
+            <span>Exit</span>
           </button>
         </div>
       </header>
@@ -532,7 +561,17 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, onExit }) => {
                             ) : (
                               <div className="slide-num-pill">{slideIdx + 1}</div>
                             )}
-                            <span style={{ fontSize: '0.85rem' }}>{slide.name}</span>
+                            <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                              <span style={{ fontSize: '0.85rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{slide.name}</span>
+                              {slide.uploadedBy?.deviceName && (
+                                <span
+                                  style={{ fontSize: '0.7rem', color: 'var(--text-light)', display: 'flex', alignItems: 'center', gap: '2px' }}
+                                  title={`Uploaded by: ${slide.uploadedBy.deviceName} (${slide.uploadedBy.deviceModel})`}
+                                >
+                                  <Smartphone size={10} /> {slide.uploadedBy.deviceName}
+                                </span>
+                              )}
+                            </div>
                           </div>
 
                           {!isBulk && (
@@ -592,6 +631,29 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, onExit }) => {
               );
             })}
           </div>
+
+          {/* Sidebar Bottom Action - Always accessible Exit and Delete on Mobile */}
+          <div className="sidebar-footer">
+            <button
+              onClick={handleEndAndDeleteSession}
+              className="btn-danger-outline btn-sidebar-delete"
+              style={{ width: '100%', justifyContent: 'center', gap: '0.4rem', padding: '0.6rem', fontSize: '0.85rem' }}
+              title="Delete session"
+            >
+              <Trash2 size={14} />
+              <span>Delete Presentation</span>
+            </button>
+            <button
+              onClick={onExit}
+              className="btn-outline btn-sidebar-exit"
+              style={{ width: '100%', justifyContent: 'center', gap: '0.4rem', padding: '0.6rem', fontSize: '0.85rem' }}
+              title="Exit Presentation"
+              id="btn-main-sidebar-exit"
+            >
+              <Home size={15} />
+              <span>Exit to Home</span>
+            </button>
+          </div>
         </aside>
 
         {/* Center Presentation Stage */}
@@ -646,6 +708,66 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, onExit }) => {
           />
         </div>
       </div>
+
+      {/* Host Device Audit Modal */}
+      {showAuditModal && deviceInfo && (
+        <div className="join-modal-overlay" onClick={() => setShowAuditModal(false)}>
+          <div className="join-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '440px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <ShieldCheck size={22} color="var(--primary)" />
+                <h3 className="join-title" style={{ fontSize: '1.2rem', margin: 0 }}>
+                  Presenter Device Audit
+                </h3>
+              </div>
+              <button onClick={() => setShowAuditModal(false)} className="btn-icon" style={{ width: '28px', height: '28px' }}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', textAlign: 'left' }}>
+              <div className="audit-detail-item">
+                <span className="audit-label">Phone / Device Name:</span>
+                <span className="audit-value highlight">{deviceInfo.deviceName}</span>
+              </div>
+              <div className="audit-detail-item">
+                <span className="audit-label">Hardware Model:</span>
+                <span className="audit-value">{deviceInfo.deviceModel}</span>
+              </div>
+              <div className="audit-detail-item">
+                <span className="audit-label">OS Platform:</span>
+                <span className="audit-value">{deviceInfo.platform}</span>
+              </div>
+              {deviceInfo.ip && (
+                <div className="audit-detail-item">
+                  <span className="audit-label">IP Address:</span>
+                  <span className="audit-value monospace">{deviceInfo.ip}</span>
+                </div>
+              )}
+              <div className="audit-detail-item">
+                <span className="audit-label">Device Fingerprint:</span>
+                <span className="audit-value monospace">{deviceInfo.deviceId}</span>
+              </div>
+              <div className="audit-detail-item">
+                <span className="audit-label">Session Started:</span>
+                <span className="audit-value">{new Date(deviceInfo.timestamp).toLocaleTimeString()}</span>
+              </div>
+
+              <div style={{ marginTop: '0.4rem', padding: '0.65rem', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 'var(--radius-sm)', fontSize: '0.78rem', color: '#166534', lineHeight: 1.4 }}>
+                ✓ All slides and photos uploaded during this session are recorded with this device signature for accountability.
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowAuditModal(false)}
+              className="btn-primary"
+              style={{ width: '100%', marginTop: '1.25rem' }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -102,12 +102,12 @@ export const HelperMode: React.FC<HelperModeProps> = ({ sessionCode, onExit }) =
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
       {/* Top Navbar */}
-      <header className="app-navbar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+      <header className="app-navbar helper-navbar">
+        <div className="navbar-left">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="btn-icon"
-            style={{ display: 'flex' }}
+            style={{ display: 'flex', flexShrink: 0 }}
             title="Toggle Sections Sidebar"
             aria-label="Toggle Sidebar"
           >
@@ -118,46 +118,42 @@ export const HelperMode: React.FC<HelperModeProps> = ({ sessionCode, onExit }) =
             <span className="app-brand-title">ZEN SYNC</span>
           </div>
 
-          <div className="code-badge" title="Session Code">
-            CODE: <span>{sessionCode}</span>
+          <div className="code-badge" title={`Session Code: ${sessionCode}`}>
+            <span className="code-label">CODE:</span>
+            <span>{sessionCode}</span>
           </div>
 
-          <div
-            style={{
-              backgroundColor: 'var(--primary-light)',
-              color: 'var(--primary)',
-              padding: '0.25rem 0.6rem',
-              borderRadius: 'var(--radius-sm)',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              letterSpacing: '0.04em',
-            }}
-          >
+          <div className="role-pill-badge helper">
             HELPER
           </div>
         </div>
 
         <div className="navbar-actions">
           {status === 'connected' ? (
-            <div className="status-pill connected">
+            <div className="status-pill connected" title="Live Synced with Presenter">
               <span className="status-dot green" />
-              <span>● LIVE — Synced</span>
+              <span className="status-text-full">LIVE</span>
             </div>
           ) : status === 'reconnecting' ? (
-            <div className="status-pill reconnecting">
+            <div className="status-pill reconnecting" title="Reconnecting...">
               <span className="status-dot amber" />
-              <span>○ Reconnecting...</span>
+              <span className="status-text-full">Reconnecting</span>
             </div>
           ) : (
-            <div className="status-pill demo">
+            <div className="status-pill demo" title="Local Synced">
               <span className="status-dot blue" />
-              <span>● Local Synced</span>
+              <span className="status-text-full">Synced</span>
             </div>
           )}
 
-          <button onClick={onExit} className="btn-outline" title="Exit Presentation">
-            <Home size={16} />
-            <span style={{ display: 'inline-block' }}>Exit</span>
+          <button
+            onClick={onExit}
+            className="btn-outline btn-exit"
+            title="Exit Presentation"
+            id="btn-helper-exit"
+          >
+            <Home size={15} />
+            <span>Exit</span>
           </button>
         </div>
       </header>
@@ -237,6 +233,20 @@ export const HelperMode: React.FC<HelperModeProps> = ({ sessionCode, onExit }) =
                 </div>
               );
             })}
+          </div>
+
+          {/* Sidebar Bottom Action - Always accessible Exit button */}
+          <div className="sidebar-footer">
+            <button
+              onClick={onExit}
+              className="btn-outline btn-sidebar-exit"
+              style={{ width: '100%', justifyContent: 'center', gap: '0.5rem', padding: '0.65rem' }}
+              title="Exit Presentation"
+              id="btn-helper-sidebar-exit"
+            >
+              <Home size={16} />
+              <span>Exit Presentation</span>
+            </button>
           </div>
         </aside>
 

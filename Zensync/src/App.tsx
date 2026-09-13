@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { UserRole } from './types';
+import type { UserRole, DeviceAuditInfo } from './types';
 import { HomeScreen } from './components/HomeScreen';
 import { MainMode } from './components/MainMode';
 import { SubMode } from './components/SubMode';
@@ -9,6 +9,7 @@ import { generateSessionCode } from './lib/presentationUtils';
 export function App() {
   const [role, setRole] = useState<UserRole>('home');
   const [sessionCode, setSessionCode] = useState<string>('');
+  const [deviceInfo, setDeviceInfo] = useState<DeviceAuditInfo | undefined>(undefined);
 
   // Sync initial state from URL query params (e.g. ?role=sub&code=4827)
   useEffect(() => {
@@ -22,10 +23,11 @@ export function App() {
     }
   }, []);
 
-  const handleSelectRole = (newRole: UserRole, code?: string) => {
+  const handleSelectRole = (newRole: UserRole, code?: string, devInfo?: DeviceAuditInfo) => {
     if (newRole === 'main') {
       const newCode = generateSessionCode();
       setSessionCode(newCode);
+      setDeviceInfo(devInfo);
       setRole('main');
       window.history.pushState({}, '', `?role=main&code=${newCode}`);
     } else if ((newRole === 'sub' || newRole === 'helper') && code) {
@@ -48,7 +50,7 @@ export function App() {
       )}
 
       {role === 'main' && sessionCode && (
-        <MainMode sessionCode={sessionCode} onExit={handleExit} />
+        <MainMode sessionCode={sessionCode} initialDeviceInfo={deviceInfo} onExit={handleExit} />
       )}
 
       {role === 'sub' && sessionCode && (
@@ -63,3 +65,4 @@ export function App() {
 }
 
 export default App;
+

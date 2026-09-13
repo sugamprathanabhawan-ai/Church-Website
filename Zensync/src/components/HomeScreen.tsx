@@ -1,15 +1,35 @@
-import React, { useState, useRef } from 'react';
-import { Presentation, Eye, SlidersHorizontal, ArrowRight, X, Sparkles } from 'lucide-react';
-import type { UserRole } from '../types';
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  Presentation,
+  Eye,
+  SlidersHorizontal,
+  ArrowRight,
+  X,
+  Sparkles,
+  Smartphone,
+  ShieldAlert,
+  Loader2,
+} from 'lucide-react';
+import type { UserRole, DeviceAuditInfo } from '../types';
+import {
+  getInitialDeviceNameSuggestion,
+  detectDeviceModel,
+  collectDeviceAuditInfo,
+} from '../lib/deviceUtils';
 
 interface HomeScreenProps {
-  onSelectRole: (role: UserRole, code?: string) => void;
+  onSelectRole: (role: UserRole, code?: string, deviceInfo?: DeviceAuditInfo) => void;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
   onSelectRole,
 }) => {
   const [modalRole, setModalRole] = useState<'sub' | 'helper' | null>(null);
+  const [showMainDeviceModal, setShowMainDeviceModal] = useState(false);
+  const [deviceName, setDeviceName] = useState('');
+  const [detectedModel, setDetectedModel] = useState({ model: '', platform: '' });
+  const [isStartingMain, setIsStartingMain] = useState(false);
+
   const [pin, setPin] = useState(['', '', '', '']);
   const [errorMessage, setErrorMessage] = useState('');
   const inputRefs = [
@@ -18,6 +38,40 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
   ];
+  const deviceInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const detected = detectDeviceModel();
+    setDetectedModel(detected);
+    const suggested = getInitialDeviceNameSuggestion();
+    setDeviceName(suggested);
+  }, []);
+
+  const handleOpenMainModal = () => {
+    setShowMainDeviceModal(true);
+    setTimeout(() => {
+      deviceInputRef.current?.focus();
+      deviceInputRef.current?.select();
+    }, 100);
+  };
+
+  const handleConfirmMainDevice = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!deviceName.trim()) return;
+
+    setIsStartingMain(true);
+    try {
+      const auditInfo = await collectDeviceAuditInfo(deviceName);
+      setShowMainDeviceModal(false);
+      onSelectRole('main', undefined, auditInfo);
+    } catch (err) {
+      console.error('Failed to collect device audit info:', err);
+      // Fallback
+      onSelectRole('main');
+    } finally {
+      setIsStartingMain(false);
+    }
+  };
 
   const handleOpenPinModal = (role: 'sub' | 'helper') => {
     setModalRole(role);
@@ -114,11 +168,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           {/* MAIN Role Card */}
           <div
             className="role-card"
-            onClick={() => onSelectRole('main')}
+            onClick={handleOpenMainModal}
             id="role-card-main"
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => e.key === 'Enter' && onSelectRole('main')}
+            onKeyDown={(e) => e.key === 'Enter' && handleOpenMainModal()}
           >
             <div className="role-card-icon">
               <Presentation size={28} />
@@ -243,6 +297,134 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
         </div>
       )}
+
+      {/* Presenter Device Verification Modal for MAIN Mode */}
+      {showMainDeviceModal && (
+        <div className="join-modal-overlay">
+          <div className="join-card device-modal-card">
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-0.5rem' }}>
+              <button
+                onClick={() => setShowMainDeviceModal(false)}
+                className="btn-icon"
+                style={{ width: '2rem', height: '2rem' }}
+                aria-label="Close"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="join-header" style={{ marginBottom: '1.25rem' }}>
+              <div
+                className="role-card-icon"
+                style={{ margin: '0 auto 1rem', width: '48px', height: '48px', backgroundColor: 'var(--primary-soft)', color: 'var(--primary)' }}
+              >
+                <Smartphone size={26} />
+              </div>
+              <h3 className="join-title" style={{ fontSize: '1.25rem' }}>
+                Presenter Device Setup
+              </h3>
+              <p className="join-subtitle">
+                Enter your device / phone name. This records ownership of the session so uploaded presentation slides are traceable.
+              </p>
+            </div>
+
+            <form onSubmit={handleConfirmMainDevice} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', textAlign: 'left' }}>
+                <label
+                  htmlFor="device-name-input"
+                  style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)' }}
+                >
+                  Your Phone / Device Name:
+                </label>
+                <input
+                  id="device-name-input"
+                  ref={deviceInputRef}
+                  type="text"
+                  value={deviceName}
+                  onChange={(e) => setDeviceName(e.target.value)}
+                  placeholder="e.g. John's iPhone, Samsung S24"
+                  maxLength={50}
+                  className="input-field"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1.5px solid var(--border-color)',
+                    fontSize: '1rem',
+                    fontWeight: 500,
+                  }}
+                  required
+                />
+              </div>
+
+              {/* Hardware hint pill */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.6rem 0.85rem',
+                  backgroundColor: 'var(--bg-secondary)',
+                  borderRadius: 'var(--radius-sm)',
+                  fontSize: '0.8rem',
+                  color: 'var(--text-muted)',
+                }}
+              >
+                <Smartphone size={15} style={{ flexShrink: 0 }} />
+                <span>
+                  Detected: <strong>{detectedModel.model || 'Mobile Device'}</strong> ({detectedModel.platform})
+                </span>
+              </div>
+
+              {/* Security Audit notice */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '0.55rem',
+                  padding: '0.65rem 0.85rem',
+                  backgroundColor: '#fef3c7',
+                  border: '1px solid #fde68a',
+                  borderRadius: 'var(--radius-sm)',
+                  fontSize: '0.78rem',
+                  color: '#92400e',
+                  lineHeight: 1.4,
+                  textAlign: 'left',
+                }}
+              >
+                <ShieldAlert size={16} style={{ flexShrink: 0, marginTop: '2px', color: '#b45309' }} />
+                <span>
+                  <strong>Security Tracking Active:</strong> Device name, ID, and IP are linked to this session to track and hold accountable anyone uploading unwanted pictures.
+                </span>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isStartingMain || !deviceName.trim()}
+                className="btn-primary"
+                style={{
+                  width: '100%',
+                  padding: '0.85rem',
+                  fontSize: '1rem',
+                  letterSpacing: '0.02em',
+                  marginTop: '0.25rem',
+                }}
+                id="btn-confirm-main-device"
+              >
+                {isStartingMain ? (
+                  <>
+                    <Loader2 size={18} className="spin" />
+                    <span>Connecting Device...</span>
+                  </>
+                ) : (
+                  <span>Start Presentation</span>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+

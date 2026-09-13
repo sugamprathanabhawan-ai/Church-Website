@@ -3,14 +3,21 @@
 -- Run this script in the Supabase SQL Editor (Dashboard -> SQL Editor -> New Query)
 -- ==============================================================================
 
--- 1. Create the sessions table
+-- 1. Create the sessions table (with presenter device audit info)
 CREATE TABLE IF NOT EXISTS public.sessions (
     code VARCHAR(10) PRIMARY KEY,
     created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+    device_name TEXT DEFAULT '',
+    device_info JSONB DEFAULT '{}'::jsonb,
     content JSONB NOT NULL DEFAULT '{"sections": []}'::jsonb,
     current_slide JSONB NOT NULL DEFAULT '{"section_id": "", "slide_index": 0, "global_index": 0}'::jsonb
 );
+
+-- Upgrade existing tables if already created
+ALTER TABLE public.sessions ADD COLUMN IF NOT EXISTS device_name TEXT DEFAULT '';
+ALTER TABLE public.sessions ADD COLUMN IF NOT EXISTS device_info JSONB DEFAULT '{}'::jsonb;
+
 
 -- 2. Enable Row Level Security (RLS)
 ALTER TABLE public.sessions ENABLE ROW LEVEL SECURITY;

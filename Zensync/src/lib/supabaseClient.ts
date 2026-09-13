@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient, type RealtimeChannel } from '@supabase/supabase-js';
-import type { CurrentSlideState, SectionItem, SessionData, ConnectionStatus } from '../types';
+import type { CurrentSlideState, SectionItem, SessionData, ConnectionStatus, DeviceAuditInfo } from '../types';
 
 const envUrl = (import.meta.env.VITE_SUPABASE_URL as string || '').trim();
 const envKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string || '').trim();
@@ -32,14 +32,22 @@ export function isSupabaseConfigured(): boolean {
 // --- Session Persistence & Realtime Functions ---
 
 /**
- * Creates a new presentation session
+ * Creates a new presentation session with audit device information
  */
-export async function createSession(code: string, sections: SectionItem[]): Promise<SessionData> {
+export async function createSession(
+  code: string,
+  sections: SectionItem[],
+  deviceInfo?: DeviceAuditInfo
+): Promise<SessionData> {
   const initialData: SessionData = {
     code,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    content: { sections },
+    device_info: deviceInfo,
+    content: {
+      sections,
+      device_info: deviceInfo,
+    },
     current_slide: { sectionId: sections[0]?.id || '', slideIndex: 0, globalIndex: 0 },
   };
 
@@ -49,12 +57,22 @@ export async function createSession(code: string, sections: SectionItem[]): Prom
   const client = getSupabase();
   if (client) {
     try {
-      const { error } = await client.from('sessions').upsert({
+      const upsertPayload: Record<string, unknown> = {
         code,
-        content: { sections },
+        content: {
+          sections,
+          device_info: deviceInfo,
+        },
         current_slide: initialData.current_slide,
         updated_at: new Date().toISOString(),
-      });
+      };
+
+      if (deviceInfo) {
+        upsertPayload.device_info = deviceInfo;
+        upsertPayload.device_name = deviceInfo.deviceName;
+      }
+
+      const { error } = await client.from('sessions').upsert(upsertPayload);
       if (error) {
         console.warn('Supabase createSession note:', error.message);
       }
@@ -84,7 +102,11 @@ export async function getSession(code: string): Promise<SessionData | null> {
           code: data.code,
           created_at: data.created_at,
           updated_at: data.updated_at,
-          content: data.content || { sections: [] },
+          device_info: data.device_info || data.content?.device_info,
+          content: {
+            sections: data.content?.sections || [],
+            device_info: data.content?.device_info || data.device_info,
+          },
           current_slide: data.current_slide || { sectionId: '', slideIndex: 0, globalIndex: 0 },
         };
         // Update local cache

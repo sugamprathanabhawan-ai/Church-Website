@@ -11,7 +11,8 @@ import {
   MapPin, 
   Mail, 
   ChevronDown, 
-  Sparkles
+  Sparkles,
+  ArrowRight
 } from 'lucide-react';
 import ImageSlider from '../components/ImageSlider';
 import Lightbox from '../components/Lightbox';

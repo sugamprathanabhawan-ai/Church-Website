@@ -6,11 +6,7 @@ import {
   VolumeX, 
   Flame, 
   Trophy, 
-  Zap, 
-  Clock, 
-  BookOpen, 
   RotateCcw, 
-  Award,
   Sparkles,
   CheckCircle2,
   XCircle,
@@ -21,6 +17,16 @@ import { fetchQuizQuestions, fetchQuizLeaderboard, submitQuizScore } from '../se
 
 const TIMER_SECONDS = 10;
 const QUESTIONS_PER_ROUND = 10;
+
+// Fisher-Yates uniform shuffle
+function shuffleArray(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 
 export default function BibleQuizPage() {
   const [questionsPool, setQuestionsPool] = useState([]);
@@ -112,8 +118,8 @@ export default function BibleQuizPage() {
   const startGame = () => {
     if (questionsPool.length === 0) return;
 
-    // Shuffle questions
-    const shuffled = [...questionsPool].sort(() => 0.5 - Math.random());
+    // Shuffle questions with Fisher-Yates algorithm
+    const shuffled = shuffleArray(questionsPool);
     const selected = shuffled.slice(0, QUESTIONS_PER_ROUND);
 
     setCurrentQuestions(selected);
@@ -224,7 +230,7 @@ export default function BibleQuizPage() {
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none animate-pulse-slow" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl pointer-events-none animate-pulse-slow" />
 
-      <main className="w-full max-w-lg church-glass-dark rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl relative z-10 animate-fade-in">
+      <section className="w-full max-w-lg church-glass-dark rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl relative z-10 animate-fade-in">
         
         {/* Top Sound & Mode Control */}
         <div className="flex justify-between items-center mb-6">
@@ -426,15 +432,17 @@ export default function BibleQuizPage() {
             {/* Leaderboard Submission Form */}
             {!scoreSubmitted ? (
               <form onSubmit={handleScoreSubmit} className="w-full mb-5 bg-indigo-950/40 border border-indigo-500/30 p-4 rounded-2xl">
-                <label className="block text-xs font-bold text-indigo-200 mb-2 text-left">
+                <label htmlFor="player-name-input" className="block text-xs font-bold text-indigo-200 mb-2 text-left">
                   Submit Score to Church Leaderboard:
                 </label>
                 <div className="flex gap-2">
                   <input
+                    id="player-name-input"
                     type="text"
                     value={playerName}
                     onChange={(e) => setPlayerName(e.target.value)}
                     placeholder="Enter your name"
+                    aria-label="Enter your name"
                     required
                     maxLength={30}
                     className="flex-1 px-3.5 py-2.5 bg-white/10 border border-white/15 rounded-xl text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none focus:border-indigo-400"
@@ -474,7 +482,7 @@ export default function BibleQuizPage() {
           </div>
         )}
 
-      </main>
+      </section>
     </div>
   );
 }

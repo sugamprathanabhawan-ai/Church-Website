@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Menu, 
@@ -14,7 +14,8 @@ import {
   Sparkles,
   ChevronRight,
   ShieldAlert,
-  Presentation
+  Presentation,
+  MapPin
 } from 'lucide-react';
 
 const NAV_LINKS = [
@@ -36,7 +37,8 @@ const QUICK_LINKS = [
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [logoClicks, setLogoClicks] = useState(0);
+  const logoClicksRef = useRef(0);
+  const logoTimerRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -67,21 +69,22 @@ export default function Navbar() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [navigate]);
 
-  // Close mobile drawer on route change
+  // Close mobile drawer on route or anchor change
   useEffect(() => {
     setMobileMenuOpen(false);
-  }, [location.pathname]);
+  }, [location.pathname, location.hash]);
 
   const handleLogoClick = () => {
-    setLogoClicks(prev => {
-      const next = prev + 1;
-      if (next >= 4) {
-        navigate('/admin');
-        return 0;
-      }
-      return next;
-    });
-    setTimeout(() => setLogoClicks(0), 2000);
+    logoClicksRef.current += 1;
+    if (logoClicksRef.current >= 4) {
+      navigate('/admin');
+      logoClicksRef.current = 0;
+      return;
+    }
+    clearTimeout(logoTimerRef.current);
+    logoTimerRef.current = setTimeout(() => {
+      logoClicksRef.current = 0;
+    }, 2000);
   };
 
   // Determine navbar theme classes
@@ -139,7 +142,7 @@ export default function Navbar() {
                   Sugam Prathana Bhawan
                 </span>
                 <span className="text-[10px] text-sky-400 font-medium tracking-widest uppercase hidden sm:block">
-                  Sugam Church â€¢ Nepal
+                  Sugam Church • Nepal
                 </span>
               </div>
             </Link>
@@ -252,6 +255,14 @@ export default function Navbar() {
               );
             })}
           </div>
+
+          <Link
+            to="/#contact"
+            className="flex items-center justify-center gap-2 w-full py-2.5 bg-sky-600 hover:bg-sky-500 rounded-2xl text-xs text-white font-semibold shadow-sm transition-all"
+          >
+            <MapPin className="w-3.5 h-3.5 text-white" />
+            <span>Visit Us (Location &amp; Contact)</span>
+          </Link>
 
           <Link
             to="/admin"

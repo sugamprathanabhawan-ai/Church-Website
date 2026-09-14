@@ -120,6 +120,19 @@ CREATE TABLE IF NOT EXISTS public.church_settings (
     updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- 13. CHURCH DOCUMENTS & PDF REPOSITORY (CALENDAR, LAWS, CHOIR)
+CREATE TABLE IF NOT EXISTS public.church_documents (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    section TEXT NOT NULL, -- 'calendar', 'laws', 'choir'
+    title TEXT NOT NULL,
+    file_url TEXT NOT NULL,
+    file_name TEXT DEFAULT '',
+    file_size INT DEFAULT 0,
+    sort_order INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 -- ==============================================================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
 -- ==============================================================================
@@ -127,7 +140,7 @@ CREATE TABLE IF NOT EXISTS public.church_settings (
 DO $$ 
 DECLARE
     tbl text;
-    tables text[] := ARRAY[
+    content_tables text[] := ARRAY[
         'youth_notices', 
         'youth_schedules', 
         'youth_groups', 
@@ -136,26 +149,46 @@ DECLARE
         'choir_layouts', 
         'youtube_songs', 
         'quiz_questions', 
-        'quiz_leaderboard', 
         'faq_items',
-        'church_settings'
+        'church_settings',
+        'church_documents'
     ];
 BEGIN
-    FOREACH tbl IN ARRAY tables LOOP
+    -- 1. Secure Content Tables (Public Read, Authenticated Write/Delete)
+    FOREACH tbl IN ARRAY content_tables LOOP
         EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY;', tbl);
         
-        -- Drop existing policies if any to ensure idempotency
+        -- Clean up existing policies
         EXECUTE format('DROP POLICY IF EXISTS "Public Read Access" ON public.%I;', tbl);
         EXECUTE format('DROP POLICY IF EXISTS "Public Insert Access" ON public.%I;', tbl);
         EXECUTE format('DROP POLICY IF EXISTS "Public Update Access" ON public.%I;', tbl);
         EXECUTE format('DROP POLICY IF EXISTS "Public Delete Access" ON public.%I;', tbl);
+        EXECUTE format('DROP POLICY IF EXISTS "Authenticated Insert Access" ON public.%I;', tbl);
+        EXECUTE format('DROP POLICY IF EXISTS "Authenticated Update Access" ON public.%I;', tbl);
+        EXECUTE format('DROP POLICY IF EXISTS "Authenticated Delete Access" ON public.%I;', tbl);
 
-        -- Create universal access policies (anon + authenticated)
+        -- Public Read
         EXECUTE format('CREATE POLICY "Public Read Access" ON public.%I FOR SELECT USING (true);', tbl);
-        EXECUTE format('CREATE POLICY "Public Insert Access" ON public.%I FOR INSERT WITH CHECK (true);', tbl);
-        EXECUTE format('CREATE POLICY "Public Update Access" ON public.%I FOR UPDATE USING (true);', tbl);
-        EXECUTE format('CREATE POLICY "Public Delete Access" ON public.%I FOR DELETE USING (true);', tbl);
+
+        -- Authenticated-only modifications (Admins)
+        EXECUTE format('CREATE POLICY "Authenticated Insert Access" ON public.%I FOR INSERT TO authenticated WITH CHECK (true);', tbl);
+        EXECUTE format('CREATE POLICY "Authenticated Update Access" ON public.%I FOR UPDATE TO authenticated USING (true);', tbl);
+        EXECUTE format('CREATE POLICY "Authenticated Delete Access" ON public.%I FOR DELETE TO authenticated USING (true);', tbl);
     END LOOP;
+
+    -- 2. Quiz Leaderboard Policies (Public Read, Validated Public Insert, Authenticated Delete/Reset)
+    ALTER TABLE public.quiz_leaderboard ENABLE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS "Public Read Access" ON public.quiz_leaderboard;
+    DROP POLICY IF EXISTS "Public Insert Access" ON public.quiz_leaderboard;
+    DROP POLICY IF EXISTS "Public Update Access" ON public.quiz_leaderboard;
+    DROP POLICY IF EXISTS "Public Delete Access" ON public.quiz_leaderboard;
+    DROP POLICY IF EXISTS "Authenticated Delete Access" ON public.quiz_leaderboard;
+
+    CREATE POLICY "Public Read Access" ON public.quiz_leaderboard FOR SELECT USING (true);
+    CREATE POLICY "Public Insert Access" ON public.quiz_leaderboard FOR INSERT WITH CHECK (
+        length(player_name) > 0 AND length(player_name) <= 50 AND score >= 0
+    );
+    CREATE POLICY "Authenticated Delete Access" ON public.quiz_leaderboard FOR DELETE TO authenticated USING (true);
 END $$;
 
 -- ==============================================================================
@@ -176,7 +209,8 @@ DECLARE
         'quiz_questions', 
         'quiz_leaderboard', 
         'faq_items',
-        'church_settings'
+        'church_settings',
+        'church_documents'
     ];
 BEGIN
     FOR tbl IN SELECT unnest(tables) LOOP
@@ -187,3 +221,37 @@ BEGIN
         END;
     END LOOP;
 END $$;
+
+-- ==============================================================================
+-- STORAGE BUCKET SETUP (CHURCH DOCUMENTS & PDFS)
+-- ==============================================================================
+
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+    'church_documents',
+    'church_documents',
+    true,
+    26214400, -- 25 MB max limit
+    ARRAY['application/pdf', 'application/x-pdf', 'image/png', 'image/jpeg', 'image/webp']
+)
+ON CONFLICT (id) DO UPDATE SET 
+    public = true,
+    file_size_limit = 26214400,
+    allowed_mime_types = ARRAY['application/pdf', 'application/x-pdf', 'image/png', 'image/jpeg', 'image/webp'];
+
+-- Storage Policies for church_documents
+DROP POLICY IF EXISTS "Public Read Documents" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated Upload Documents" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated Delete Documents" ON storage.objects;
+
+CREATE POLICY "Public Read Documents" ON storage.objects 
+    FOR SELECT USING (bucket_id = 'church_documents');
+
+CREATE POLICY "Authenticated Upload Documents" ON storage.objects 
+    FOR INSERT TO authenticated 
+    WITH CHECK (bucket_id = 'church_documents');
+
+CREATE POLICY "Authenticated Delete Documents" ON storage.objects 
+    FOR DELETE TO authenticated 
+    USING (bucket_id = 'church_documents');
+

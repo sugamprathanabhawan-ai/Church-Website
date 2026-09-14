@@ -210,6 +210,7 @@ export default function Chatbot() {
           <div className="p-3 bg-white border-t border-sky-100 flex items-center gap-2">
             <input
               type="text"
+              aria-label="Ask a question"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={handleKeyDown}

@@ -7,7 +7,6 @@ import {
   Bell, 
   Users, 
   UserCheck, 
-  X, 
   Sparkles,
   LayoutGrid,
   Table as TableIcon,
@@ -18,12 +17,18 @@ import {
 const USER_IMAGES = {
   "aryan rai": "/images/you3.png",
   "aryanrai": "/images/you3.png",
-  "suraj pokhrel": "/images/you2.jpg",
-  "surajpokhrel": "/images/you2.jpg",
-  "urmila chaudhary": "/images/you4.jpg",
-  "urmilachaudhary": "/images/you4.jpg",
-  "sara poudel": "/images/you1.jpg",
-  "sarapoudel": "/images/you1.jpg"
+  "mams": "/images/you1.png",
+  "mamatarai": "/images/you1.png",
+  "mamta rai": "/images/you1.png",
+  "naren rai": "/images/you2.png",
+  "narenrai": "/images/you2.png",
+  "kiran thapa": "/images/ag1.webp",
+  "deepak thapa": "/images/ag2.webp",
+  "naresh rai": "/images/ag3.webp",
+  "khadka chaudhary": "/images/ag4.webp",
+  "bilas pokhrel": "/images/ag5.webp",
+  "man bahadur shrestha": "/images/ag7.webp",
+  "stephen tamang": "/images/ag8.webp"
 };
 
 function getMemberAvatar(name) {
@@ -34,7 +39,7 @@ function getMemberAvatar(name) {
 }
 
 export default function YouthRoutinePage() {
-  const { youthData, loading, error, refreshData } = useData();
+  const { youthData, loading, refreshData } = useData();
   const [viewMode, setViewMode] = useState('auto'); // 'auto', 'table', 'cards'
   const [copied, setCopied] = useState(false);
 
@@ -302,77 +307,51 @@ export default function YouthRoutinePage() {
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
           
-          {/* Leader: Aryan Rai */}
-          <div className="hover-lift bg-gradient-to-b from-white to-sky-50/50 p-5 rounded-3xl border border-sky-100 shadow-sm flex flex-col items-center">
-            <div className="relative w-[95px] h-[95px] flex justify-center items-center mb-3">
-              <div className="loader-red absolute inset-0"></div>
-              <img 
-                src="/images/you3.png" 
-                alt="Aryan Rai" 
-                className="w-[78px] h-[78px] rounded-full object-cover relative z-10 border-2 border-white shadow-md"
-                onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/80'; }}
-              />
+          {/* Overall Youth Leader */}
+          {youthData.group?.leader && (
+            <div className="hover-lift bg-gradient-to-b from-white to-sky-50/50 p-5 rounded-3xl border border-sky-100 shadow-sm flex flex-col items-center">
+              <div className="relative w-[95px] h-[95px] flex justify-center items-center mb-3">
+                <div className="loader-red absolute inset-0"></div>
+                <img 
+                  src={getMemberAvatar(youthData.group.leader) || '/images/logos.webp'} 
+                  alt={youthData.group.leader} 
+                  className="w-[78px] h-[78px] rounded-full object-cover relative z-10 border-2 border-white shadow-md"
+                  onError={(e) => { e.currentTarget.src = '/images/logos.webp'; }}
+                />
+              </div>
+              <span className="bg-rose-500 text-white text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider mb-1 shadow-xs">
+                Leader
+              </span>
+              <h3 className="text-slate-900 font-bold text-sm text-center">{youthData.group.leader}</h3>
+              <p className="text-slate-500 text-xs font-medium mt-0.5">Youth Leader</p>
             </div>
-            <span className="bg-rose-500 text-white text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider mb-1 shadow-xs">
-              Leader
-            </span>
-            <h3 className="text-slate-900 font-bold text-sm text-center">Aryan Rai</h3>
-            <p className="text-slate-500 text-xs font-medium mt-0.5">Youth Leader</p>
-          </div>
+          )}
 
-          {/* Captain: Sara Poudel (Patrus) */}
-          <div className="hover-lift bg-gradient-to-b from-white to-sky-50/50 p-5 rounded-3xl border border-sky-100 shadow-sm flex flex-col items-center">
-            <div className="relative w-[95px] h-[95px] flex justify-center items-center mb-3">
-              <div className="loader-skyblue absolute inset-0"></div>
-              <img 
-                src="/images/you1.jpg" 
-                alt="Sara Poudel" 
-                className="w-[78px] h-[78px] rounded-full object-cover relative z-10 border-2 border-white shadow-md"
-                onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/80'; }}
-              />
-            </div>
-            <span className="bg-sky-500 text-white text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider mb-1 shadow-xs">
-              Captain
-            </span>
-            <h3 className="text-slate-900 font-bold text-sm text-center">Sara Poudel</h3>
-            <p className="text-sky-600 text-xs font-medium mt-0.5">(Patrus)</p>
-          </div>
+          {/* Dynamic Team Captains */}
+          {(youthData.group?.teams || []).map((team, idx) => {
+            const avatar = getMemberAvatar(team.captain) || '/images/logos.webp';
+            const cleanName = team.captain.replace(/\(.*?\)/, '').trim();
+            const groupTag = team.captain.match(/\((.*?)\)/)?.[0] || '';
 
-          {/* Captain: Suraj Pokhrel (Yakub) */}
-          <div className="hover-lift bg-gradient-to-b from-white to-sky-50/50 p-5 rounded-3xl border border-sky-100 shadow-sm flex flex-col items-center">
-            <div className="relative w-[95px] h-[95px] flex justify-center items-center mb-3">
-              <div className="loader-skyblue absolute inset-0"></div>
-              <img 
-                src="/images/you2.jpg" 
-                alt="Suraj Pokhrel" 
-                className="w-[78px] h-[78px] rounded-full object-cover relative z-10 border-2 border-white shadow-md"
-                onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/80'; }}
-              />
-            </div>
-            <span className="bg-sky-500 text-white text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider mb-1 shadow-xs">
-              Captain
-            </span>
-            <h3 className="text-slate-900 font-bold text-sm text-center">Suraj Pokhrel</h3>
-            <p className="text-sky-600 text-xs font-medium mt-0.5">(Yakub)</p>
-          </div>
-
-          {/* Captain: Urmila Chaudhary (Yahunna) */}
-          <div className="hover-lift bg-gradient-to-b from-white to-sky-50/50 p-5 rounded-3xl border border-sky-100 shadow-sm flex flex-col items-center">
-            <div className="relative w-[95px] h-[95px] flex justify-center items-center mb-3">
-              <div className="loader-skyblue absolute inset-0"></div>
-              <img 
-                src="/images/you4.jpg" 
-                alt="Urmila Chaudhary" 
-                className="w-[78px] h-[78px] rounded-full object-cover relative z-10 border-2 border-white shadow-md"
-                onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/80'; }}
-              />
-            </div>
-            <span className="bg-sky-500 text-white text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider mb-1 shadow-xs">
-              Captain
-            </span>
-            <h3 className="text-slate-900 font-bold text-sm text-center">Urmila Chaudhary</h3>
-            <p className="text-sky-600 text-xs font-medium mt-0.5">(Yahunna)</p>
-          </div>
+            return (
+              <div key={idx} className="hover-lift bg-gradient-to-b from-white to-sky-50/50 p-5 rounded-3xl border border-sky-100 shadow-sm flex flex-col items-center">
+                <div className="relative w-[95px] h-[95px] flex justify-center items-center mb-3">
+                  <div className="loader-skyblue absolute inset-0"></div>
+                  <img 
+                    src={avatar} 
+                    alt={cleanName || team.captain} 
+                    className="w-[78px] h-[78px] rounded-full object-cover relative z-10 border-2 border-white shadow-md"
+                    onError={(e) => { e.currentTarget.src = '/images/logos.webp'; }}
+                  />
+                </div>
+                <span className="bg-sky-500 text-white text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider mb-1 shadow-xs">
+                  Captain
+                </span>
+                <h3 className="text-slate-900 font-bold text-sm text-center">{cleanName || team.captain}</h3>
+                {groupTag && <p className="text-sky-600 text-xs font-medium mt-0.5">{groupTag}</p>}
+              </div>
+            );
+          })}
 
         </div>
       </section>

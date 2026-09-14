@@ -11,9 +11,7 @@ import {
   MapPin, 
   Mail, 
   ChevronDown, 
-  Calendar,
-  Sparkles,
-  ArrowRight
+  Sparkles
 } from 'lucide-react';
 import ImageSlider from '../components/ImageSlider';
 import Lightbox from '../components/Lightbox';
@@ -303,10 +301,12 @@ export default function HomePage() {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {GALLERY_IMAGES.map((img, idx) => (
-              <div 
+              <button 
                 key={idx} 
+                type="button"
                 onClick={() => openLightbox(idx)}
-                className="group relative overflow-hidden rounded-2xl cursor-pointer bg-slate-900 border border-sky-900/60 aspect-[4/3]"
+                aria-label={`View photo: ${img.caption}`}
+                className="group relative overflow-hidden rounded-2xl cursor-pointer bg-slate-900 border border-sky-900/60 aspect-[4/3] text-left block w-full focus:outline-none focus:ring-2 focus:ring-sky-400"
               >
                 <img 
                   src={img.src} 
@@ -319,7 +319,7 @@ export default function HomePage() {
                     {img.caption}
                   </span>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </div>

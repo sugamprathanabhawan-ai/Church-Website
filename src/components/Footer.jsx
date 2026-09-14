@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Church, Heart, Mail, MapPin } from 'lucide-react';
+import { Heart, Mail } from 'lucide-react';
 
 function FacebookIcon({ className = "w-4 h-4" }) {
   return (
@@ -31,7 +31,7 @@ export default function Footer() {
             <div className="flex items-center gap-3">
               <img 
                 src="/images/logos.webp" 
-                alt="Logo" 
+                alt="Sugam Prathana Bhawan Church Logo" 
                 className="w-10 h-10 rounded-full object-cover border border-sky-400/40 shadow-sm"
                 onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/40'; }}
               />
@@ -79,6 +79,7 @@ export default function Footer() {
             <ul className="space-y-2 text-xs text-slate-300">
               <li><Link to="/youth" className="hover:text-sky-300 transition">Youth Fellowship</Link></li>
               <li><Link to="/choir" className="hover:text-sky-300 transition">Choir Ministry</Link></li>
+              <li><Link to="/zensync" className="hover:text-sky-300 transition">Zen Sync (Live Presentation)</Link></li>
               <li><Link to="/calendar" className="hover:text-sky-300 transition">Church Calendar</Link></li>
               <li><Link to="/laws" className="hover:text-sky-300 transition">Church Laws &amp; Policies</Link></li>
               <li><Link to="/quiz" className="hover:text-sky-300 transition">Bible Trivia Game</Link></li>

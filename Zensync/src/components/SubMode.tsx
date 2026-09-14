@@ -16,6 +16,7 @@ export const SubMode: React.FC<SubModeProps> = ({ sessionCode, onExit }) => {
   const [status, setStatus] = useState<ConnectionStatus>('reconnecting');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [sessionEnded, setSessionEnded] = useState(false);
+  const [headerVisible, setHeaderVisible] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
@@ -93,8 +94,6 @@ export const SubMode: React.FC<SubModeProps> = ({ sessionCode, onExit }) => {
       </div>
     );
   }
-
-  const [headerVisible, setHeaderVisible] = useState(true);
 
   return (
     <div

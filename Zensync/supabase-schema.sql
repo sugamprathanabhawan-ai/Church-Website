@@ -47,11 +47,13 @@ CREATE POLICY "Public can delete sessions"
 ALTER PUBLICATION supabase_realtime ADD TABLE public.sessions;
 
 -- 5. Create storage bucket for uploaded presentation slides
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('zen_sync_images', 'zen_sync_images', true)
-ON CONFLICT (id) DO NOTHING;
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES ('zen_sync_images', 'zen_sync_images', true, 10485760, ARRAY['image/png', 'image/jpeg', 'image/webp', 'image/gif'])
+ON CONFLICT (id) DO UPDATE SET
+    file_size_limit = 10485760,
+    allowed_mime_types = ARRAY['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
 
--- 6. Storage bucket policies for public access
+-- 6. Storage bucket policies
 DROP POLICY IF EXISTS "Public Access to zen_sync_images" ON storage.objects;
 CREATE POLICY "Public Access to zen_sync_images"
     ON storage.objects FOR SELECT
@@ -60,7 +62,10 @@ CREATE POLICY "Public Access to zen_sync_images"
 DROP POLICY IF EXISTS "Public Uploads to zen_sync_images" ON storage.objects;
 CREATE POLICY "Public Uploads to zen_sync_images"
     ON storage.objects FOR INSERT
-    WITH CHECK (bucket_id = 'zen_sync_images');
+    WITH CHECK (
+        bucket_id = 'zen_sync_images'
+        AND (LOWER(storage.extension(name)) = ANY(ARRAY['png', 'jpg', 'jpeg', 'webp', 'gif']))
+    );
 
 DROP POLICY IF EXISTS "Public Deletes in zen_sync_images" ON storage.objects;
 CREATE POLICY "Public Deletes in zen_sync_images"

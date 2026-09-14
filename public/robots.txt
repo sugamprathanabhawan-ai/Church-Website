@@ -1,0 +1,7 @@
+﻿User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /sync-live
+Disallow: /zensync
+
+Sitemap: https://sugamchurch.org/sitemap.xml

@@ -1,16 +1,28 @@
 import React, { useState, useEffect } from 'react';
+import { useData } from '../context/DataContext';
 import PDFViewer from '../components/PDFViewer';
-import { Calendar as CalendarIcon, Sparkles, Download, RotateCw } from 'lucide-react';
+import { Calendar as CalendarIcon } from 'lucide-react';
 
 const FALLBACK_CALENDARS = [
   { name: "Church Worship Calendar", file: "/calender/calender.pdf" }
 ];
 
 export default function CalendarPage() {
+  const { documents } = useData();
   const [calendars, setCalendars] = useState(FALLBACK_CALENDARS);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   useEffect(() => {
+    const dbCalendars = documents?.calendar || [];
+    if (dbCalendars.length > 0) {
+      setCalendars(dbCalendars.map(d => ({
+        id: d.id,
+        name: d.title || d.name,
+        file: d.fileUrl || d.file
+      })));
+      return;
+    }
+
     fetch('/calender/pdf-manifest.json')
       .then(res => res.json())
       .then(manifest => {
@@ -26,7 +38,7 @@ export default function CalendarPage() {
       .catch(() => {
         // use fallback
       });
-  }, []);
+  }, [documents?.calendar]);
 
   const activeCalendar = calendars[selectedIndex] || calendars[0];
 

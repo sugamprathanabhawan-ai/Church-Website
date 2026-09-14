@@ -61,26 +61,31 @@ export async function fetchYouthData() {
 
 export async function saveYouthData(data) {
   try {
-    // 1. Update Notices: Clear existing and insert new
+    // 1. Update Notices: Insert verified new records first, then remove obsolete
     if (Array.isArray(data.notices)) {
-      await supabase.from('youth_notices').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      if (data.notices.length > 0) {
-        const noticesToInsert = data.notices
-          .filter(t => t && t.trim())
-          .map((text, idx) => ({
-            text: text.trim(),
-            sort_order: idx
-          }));
-        if (noticesToInsert.length > 0) {
-          const { error } = await supabase.from('youth_notices').insert(noticesToInsert);
-          if (error) throw error;
+      const noticesToInsert = data.notices
+        .filter(t => t && t.trim())
+        .map((text, idx) => ({
+          text: text.trim(),
+          sort_order: idx
+        }));
+
+      const { data: existing } = await supabase.from('youth_notices').select('id');
+      const oldIds = (existing || []).map(r => r.id);
+
+      if (noticesToInsert.length > 0) {
+        const { error: insErr } = await supabase.from('youth_notices').insert(noticesToInsert);
+        if (insErr) throw insErr;
+        if (oldIds.length > 0) {
+          await supabase.from('youth_notices').delete().in('id', oldIds);
         }
+      } else if (oldIds.length > 0) {
+        await supabase.from('youth_notices').delete().in('id', oldIds);
       }
     }
 
-    // 2. Update Schedules: Clear existing and insert new
+    // 2. Update Schedules: Insert verified new records first, then remove obsolete
     if (Array.isArray(data.months)) {
-      await supabase.from('youth_schedules').delete().neq('id', '00000000-0000-0000-0000-000000000000');
       const schedulesToInsert = [];
       let sortOrder = 0;
       data.months.forEach(month => {
@@ -94,26 +99,43 @@ export async function saveYouthData(data) {
           });
         });
       });
+
+      const { data: existing } = await supabase.from('youth_schedules').select('id');
+      const oldIds = (existing || []).map(r => r.id);
+
       if (schedulesToInsert.length > 0) {
-        const { error } = await supabase.from('youth_schedules').insert(schedulesToInsert);
-        if (error) throw error;
+        const { error: insErr } = await supabase.from('youth_schedules').insert(schedulesToInsert);
+        if (insErr) throw insErr;
+        if (oldIds.length > 0) {
+          await supabase.from('youth_schedules').delete().in('id', oldIds);
+        }
+      } else if (oldIds.length > 0) {
+        await supabase.from('youth_schedules').delete().in('id', oldIds);
       }
     }
 
-    // 3. Update Groups: Clear existing and insert new
+    // 3. Update Groups: Insert verified new records first, then remove obsolete
     if (data.group) {
-      await supabase.from('youth_groups').delete().neq('id', '00000000-0000-0000-0000-000000000000');
       const leader = data.group.leader || 'Aryan Rai';
       const teams = data.group.teams || [];
-      if (teams.length > 0) {
-        const groupsToInsert = teams.map((team, idx) => ({
-          leader_name: leader,
-          captain_name: team.captain || '',
-          members: Array.isArray(team.members) ? team.members : (team.members ? String(team.members).split(',').map(m => m.trim()).filter(Boolean) : []),
-          sort_order: idx
-        }));
-        const { error } = await supabase.from('youth_groups').insert(groupsToInsert);
-        if (error) throw error;
+      const groupsToInsert = teams.map((team, idx) => ({
+        leader_name: leader,
+        captain_name: team.captain || '',
+        members: Array.isArray(team.members) ? team.members : (team.members ? String(team.members).split(',').map(m => m.trim()).filter(Boolean) : []),
+        sort_order: idx
+      }));
+
+      const { data: existing } = await supabase.from('youth_groups').select('id');
+      const oldIds = (existing || []).map(r => r.id);
+
+      if (groupsToInsert.length > 0) {
+        const { error: insErr } = await supabase.from('youth_groups').insert(groupsToInsert);
+        if (insErr) throw insErr;
+        if (oldIds.length > 0) {
+          await supabase.from('youth_groups').delete().in('id', oldIds);
+        }
+      } else if (oldIds.length > 0) {
+        await supabase.from('youth_groups').delete().in('id', oldIds);
       }
     }
 
@@ -191,24 +213,31 @@ export async function fetchChoirData() {
 
 export async function saveChoirData(data) {
   try {
-    // 1. Update Choir Notices
+    // 1. Update Choir Notices: Insert verified new records first, then remove obsolete
     if (Array.isArray(data.notices)) {
-      await supabase.from('choir_notices').delete().neq('id', '00000000-0000-0000-0000-000000000000');
       const noticesToInsert = data.notices
         .filter(t => t && t.trim())
         .map((text, idx) => ({
           text: text.trim(),
           sort_order: idx
         }));
+
+      const { data: existing } = await supabase.from('choir_notices').select('id');
+      const oldIds = (existing || []).map(r => r.id);
+
       if (noticesToInsert.length > 0) {
-        const { error } = await supabase.from('choir_notices').insert(noticesToInsert);
-        if (error) throw error;
+        const { error: insErr } = await supabase.from('choir_notices').insert(noticesToInsert);
+        if (insErr) throw insErr;
+        if (oldIds.length > 0) {
+          await supabase.from('choir_notices').delete().in('id', oldIds);
+        }
+      } else if (oldIds.length > 0) {
+        await supabase.from('choir_notices').delete().in('id', oldIds);
       }
     }
 
-    // 2. Update Choir Schedules
+    // 2. Update Choir Schedules: Insert verified new records first, then remove obsolete
     if (Array.isArray(data.months)) {
-      await supabase.from('choir_schedules').delete().neq('id', '00000000-0000-0000-0000-000000000000');
       const schedulesToInsert = [];
       let sortOrder = 0;
       data.months.forEach(month => {
@@ -226,15 +255,23 @@ export async function saveChoirData(data) {
           });
         });
       });
+
+      const { data: existing } = await supabase.from('choir_schedules').select('id');
+      const oldIds = (existing || []).map(r => r.id);
+
       if (schedulesToInsert.length > 0) {
-        const { error } = await supabase.from('choir_schedules').insert(schedulesToInsert);
-        if (error) throw error;
+        const { error: insErr } = await supabase.from('choir_schedules').insert(schedulesToInsert);
+        if (insErr) throw insErr;
+        if (oldIds.length > 0) {
+          await supabase.from('choir_schedules').delete().in('id', oldIds);
+        }
+      } else if (oldIds.length > 0) {
+        await supabase.from('choir_schedules').delete().in('id', oldIds);
       }
     }
 
-    // 3. Update Choir Layouts
+    // 3. Update Choir Layouts: Insert verified new records first, then remove obsolete
     if (Array.isArray(data.layoutGroups)) {
-      await supabase.from('choir_layouts').delete().neq('id', '00000000-0000-0000-0000-000000000000');
       const layoutsToInsert = [];
       let sortOrder = 0;
       data.layoutGroups.forEach(group => {
@@ -248,9 +285,18 @@ export async function saveChoirData(data) {
           });
         });
       });
+
+      const { data: existing } = await supabase.from('choir_layouts').select('id');
+      const oldIds = (existing || []).map(r => r.id);
+
       if (layoutsToInsert.length > 0) {
-        const { error } = await supabase.from('choir_layouts').insert(layoutsToInsert);
-        if (error) throw error;
+        const { error: insErr } = await supabase.from('choir_layouts').insert(layoutsToInsert);
+        if (insErr) throw insErr;
+        if (oldIds.length > 0) {
+          await supabase.from('choir_layouts').delete().in('id', oldIds);
+        }
+      } else if (oldIds.length > 0) {
+        await supabase.from('choir_layouts').delete().in('id', oldIds);
       }
     }
 
@@ -290,7 +336,9 @@ export async function fetchYouTubeSongs() {
 
 export async function saveYouTubeSongs(songsArray) {
   try {
-    await supabase.from('youtube_songs').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    const { data: existing } = await supabase.from('youtube_songs').select('id');
+    const oldIds = (existing || []).map(r => r.id);
+
     if (Array.isArray(songsArray) && songsArray.length > 0) {
       const toInsert = songsArray
         .filter(s => s && s.name && s.name.trim())
@@ -303,7 +351,14 @@ export async function saveYouTubeSongs(songsArray) {
       if (toInsert.length > 0) {
         const { error } = await supabase.from('youtube_songs').insert(toInsert);
         if (error) throw error;
+        if (oldIds.length > 0) {
+          await supabase.from('youtube_songs').delete().in('id', oldIds);
+        }
+      } else if (oldIds.length > 0) {
+        await supabase.from('youtube_songs').delete().in('id', oldIds);
       }
+    } else if (oldIds.length > 0) {
+      await supabase.from('youtube_songs').delete().in('id', oldIds);
     }
     return true;
   } catch (error) {
@@ -451,5 +506,264 @@ export async function testDatabaseConnection() {
     return { online: true, latency, songCount: count };
   } catch (err) {
     return { online: false, latency: 0, error: err.message };
+  }
+}
+
+// ============================================================================
+// 7. CHURCH DOCUMENTS & PDF REPOSITORY (CALENDAR, LAWS, CHOIR)
+// ============================================================================
+
+const DOCS_CACHE_KEY = 'sugam_church_docs_cache';
+
+export async function fetchChurchDocuments(section = null) {
+  try {
+    let query = supabase
+      .from('church_documents')
+      .select('*')
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: false });
+
+    if (section) {
+      query = query.eq('section', section);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    const list = (data || []).map(d => ({
+      id: d.id,
+      section: d.section,
+      title: d.title || d.name || 'Untitled Document',
+      name: d.title || d.name || 'Untitled Document',
+      file: d.file_url,
+      fileUrl: d.file_url,
+      fileName: d.file_name || 'document.pdf',
+      fileSize: d.file_size || 0,
+      createdAt: d.created_at
+    }));
+
+    // Update local cache
+    try {
+      const existing = JSON.parse(localStorage.getItem(DOCS_CACHE_KEY) || '{}');
+      if (section) {
+        existing[section] = list;
+      } else {
+        ['calendar', 'laws', 'choir'].forEach(sec => {
+          existing[sec] = list.filter(item => item.section === sec);
+        });
+      }
+      localStorage.setItem(DOCS_CACHE_KEY, JSON.stringify(existing));
+    } catch {}
+
+    return list;
+  } catch (error) {
+    console.warn('[supabaseService] Falling back for church documents:', error);
+    // 1. Try church_settings fallback
+    try {
+      const { data: settingsData } = await supabase
+        .from('church_settings')
+        .select('value')
+        .eq('key', 'church_documents')
+        .single();
+
+      if (settingsData && settingsData.value) {
+        const allDocs = Array.isArray(settingsData.value) ? settingsData.value : [];
+        const filtered = section ? allDocs.filter(d => d.section === section) : allDocs;
+        return filtered.map(d => ({
+          id: d.id || Math.random().toString(),
+          section: d.section,
+          title: d.title || d.name || 'Document',
+          name: d.title || d.name || 'Document',
+          file: d.fileUrl || d.file,
+          fileUrl: d.fileUrl || d.file,
+          fileName: d.fileName || 'document.pdf',
+          fileSize: d.fileSize || 0,
+          createdAt: d.createdAt || new Date().toISOString()
+        }));
+      }
+    } catch {}
+
+    // 2. Try localStorage cache fallback
+    try {
+      const cached = JSON.parse(localStorage.getItem(DOCS_CACHE_KEY) || '{}');
+      if (section && Array.isArray(cached[section])) {
+        return cached[section];
+      }
+      if (!section) {
+        return Object.values(cached).flat();
+      }
+    } catch {}
+
+    return [];
+  }
+}
+
+export async function addChurchDocument({ section, title, fileUrl, fileName = '', fileSize = 0 }) {
+  if (!section || !title || !fileUrl) {
+    throw new Error('Section, document title, and file URL are required');
+  }
+
+  const docData = {
+    section: section.toLowerCase().trim(),
+    title: title.trim(),
+    file_url: fileUrl.trim(),
+    file_name: fileName || title.trim() + '.pdf',
+    file_size: fileSize || 0,
+    sort_order: 0
+  };
+
+  try {
+    const { data, error } = await supabase
+      .from('church_documents')
+      .insert([docData])
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    const newDoc = {
+      id: data.id,
+      section: data.section,
+      title: data.title,
+      name: data.title,
+      file: data.file_url,
+      fileUrl: data.file_url,
+      fileName: data.file_name,
+      fileSize: data.file_size,
+      createdAt: data.created_at
+    };
+
+    // Keep church_settings synced
+    try {
+      const current = await fetchChurchDocuments();
+      await supabase.from('church_settings').upsert({
+        key: 'church_documents',
+        value: current
+      });
+    } catch {}
+
+    return newDoc;
+  } catch (error) {
+    console.error('[supabaseService] Failed to insert into church_documents, falling back to church_settings:', error);
+    
+    // Fallback: Save directly into church_settings
+    const fallbackId = 'doc_' + Date.now();
+    const newDoc = {
+      id: fallbackId,
+      section: docData.section,
+      title: docData.title,
+      name: docData.title,
+      file: docData.file_url,
+      fileUrl: docData.file_url,
+      fileName: docData.file_name,
+      fileSize: docData.file_size,
+      createdAt: new Date().toISOString()
+    };
+
+    try {
+      const current = await fetchChurchDocuments();
+      const updated = [newDoc, ...current];
+      await supabase.from('church_settings').upsert({
+        key: 'church_documents',
+        value: updated
+      });
+      
+      const cached = JSON.parse(localStorage.getItem(DOCS_CACHE_KEY) || '{}');
+      if (!cached[newDoc.section]) cached[newDoc.section] = [];
+      cached[newDoc.section].unshift(newDoc);
+      localStorage.setItem(DOCS_CACHE_KEY, JSON.stringify(cached));
+    } catch {}
+
+    return newDoc;
+  }
+}
+
+export async function deleteChurchDocument(id) {
+  if (!id) return false;
+
+  try {
+    const { error } = await supabase
+      .from('church_documents')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+
+    // Sync church_settings
+    try {
+      const current = await fetchChurchDocuments();
+      const updated = current.filter(d => d.id !== id);
+      await supabase.from('church_settings').upsert({
+        key: 'church_documents',
+        value: updated
+      });
+    } catch {}
+
+    return true;
+  } catch (error) {
+    console.error('[supabaseService] Failed to delete from church_documents, using fallback sync:', error);
+    try {
+      const current = await fetchChurchDocuments();
+      const updated = current.filter(d => d.id !== id);
+      await supabase.from('church_settings').upsert({
+        key: 'church_documents',
+        value: updated
+      });
+
+      const cached = JSON.parse(localStorage.getItem(DOCS_CACHE_KEY) || '{}');
+      for (const key of Object.keys(cached)) {
+        if (Array.isArray(cached[key])) {
+          cached[key] = cached[key].filter(d => d.id !== id);
+        }
+      }
+      localStorage.setItem(DOCS_CACHE_KEY, JSON.stringify(cached));
+      return true;
+    } catch {
+      throw error;
+    }
+  }
+}
+
+export async function uploadChurchDocumentFile(file) {
+  if (!file) throw new Error('No file provided for upload');
+
+  const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const filePath = `documents/${Date.now()}_${cleanName}`;
+
+  try {
+    // Attempt Supabase Storage upload
+    const { error } = await supabase.storage
+      .from('church_documents')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: true
+      });
+
+    if (error) throw error;
+
+    const { data: publicUrlData } = supabase.storage
+      .from('church_documents')
+      .getPublicUrl(filePath);
+
+    return {
+      fileUrl: publicUrlData.publicUrl,
+      fileName: file.name,
+      fileSize: file.size
+    };
+  } catch (storageError) {
+    console.warn('[supabaseService] Storage bucket upload failed, using Data URL fallback:', storageError);
+    // Base64 Data URL fallback so upload succeeds seamlessly
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        resolve({
+          fileUrl: reader.result,
+          fileName: file.name,
+          fileSize: file.size
+        });
+      };
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(file);
+    });
   }
 }

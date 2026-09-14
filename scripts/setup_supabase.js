@@ -27,7 +27,13 @@ function loadEnv() {
 }
 
 const env = loadEnv();
-const dbUrl = env.Db_url || 'postgresql://postgres:olutamhnkjnqexds@db.aiufpdabglxhojmmkedp.supabase.co:5432/postgres';
+const dbUrl = env.Db_url || env.DATABASE_URL || process.env.Db_url || process.env.DATABASE_URL;
+
+if (!dbUrl) {
+  console.error('Error: Db_url or DATABASE_URL environment variable is required to run database migration.');
+  console.error('Please configure Db_url in your local .env file.');
+  process.exit(1);
+}
 
 console.log('Connecting to Supabase PostgreSQL...');
 const client = new Client({

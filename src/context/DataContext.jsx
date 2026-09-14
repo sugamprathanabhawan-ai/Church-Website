@@ -7,6 +7,9 @@ import {
   saveChoirData,
   fetchYouTubeSongs,
   saveYouTubeSongs,
+  fetchChurchDocuments,
+  addChurchDocument,
+  deleteChurchDocument,
   testDatabaseConnection
 } from '../services/supabaseService';
 
@@ -26,6 +29,11 @@ export function DataProvider({ children }) {
   const [youtubeData, setYouTubeData] = useState({
     songs: []
   });
+  const [documents, setDocuments] = useState({
+    calendar: [],
+    laws: [],
+    choir: []
+  });
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -37,16 +45,28 @@ export function DataProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const [youth, choir, youtube, diag] = await Promise.all([
+      const [youth, choir, youtube, docs, diag] = await Promise.all([
         fetchYouthData(),
         fetchChoirData(),
         fetchYouTubeSongs(),
+        fetchChurchDocuments(),
         testDatabaseConnection()
       ]);
 
       setYouthData(youth);
       setChoirData(choir);
       setYouTubeData(youtube);
+
+      // Categorize docs by section
+      const docsBySection = { calendar: [], laws: [], choir: [] };
+      (docs || []).forEach(d => {
+        const sec = (d.section || '').toLowerCase();
+        if (docsBySection[sec]) {
+          docsBySection[sec].push(d);
+        }
+      });
+      setDocuments(docsBySection);
+
       setDbStatus(diag);
       setLastSyncTime(Date.now());
     } catch (err) {
@@ -100,6 +120,11 @@ export function DataProvider({ children }) {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'youtube_songs' },
+        () => loadAll()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'church_documents' },
         () => loadAll()
       )
       .subscribe();
@@ -167,12 +192,60 @@ export function DataProvider({ children }) {
     }
   };
 
+  // Add a Church PDF Document
+  const addDocument = async ({ section, title, fileUrl, fileName, fileSize }) => {
+    try {
+      setLoading(true);
+      const newDoc = await addChurchDocument({ section, title, fileUrl, fileName, fileSize });
+      setDocuments(prev => ({
+        ...prev,
+        [section]: [newDoc, ...(prev[section] || [])]
+      }));
+      setLastSyncTime(Date.now());
+      return newDoc;
+    } catch (err) {
+      console.error('[DataContext] Error adding church document:', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Delete a Church PDF Document
+  const deleteDocument = async (id, section) => {
+    try {
+      setLoading(true);
+      await deleteChurchDocument(id);
+      setDocuments(prev => {
+        if (section) {
+          return {
+            ...prev,
+            [section]: (prev[section] || []).filter(d => d.id !== id)
+          };
+        }
+        const next = {};
+        for (const key of Object.keys(prev)) {
+          next[key] = (prev[key] || []).filter(d => d.id !== id);
+        }
+        return next;
+      });
+      setLastSyncTime(Date.now());
+      return true;
+    } catch (err) {
+      console.error('[DataContext] Error deleting church document:', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <DataContext.Provider
       value={{
         youthData,
         choirData,
         youtubeData,
+        documents,
         loading,
         error,
         lastSyncTime,
@@ -180,7 +253,9 @@ export function DataProvider({ children }) {
         refreshData: loadAll,
         updateYouthData,
         updateChoirData,
-        updateYouTubeData
+        updateYouTubeData,
+        addDocument,
+        deleteDocument
       }}
     >
       {children}

@@ -144,7 +144,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
         <div className="navbar-actions">
           <a
-            href="#/"
+            href="/"
             className="btn-outline"
             style={{ fontSize: '0.85rem', padding: '0.4rem 0.85rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
             title="Return to Church Website"
@@ -155,7 +155,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       </header>
 
       {/* Main Hero & 3 Role Cards */}
-      <main className="home-container">
+      <section className="home-container">
         <div className="home-hero">
           <div className="home-badge">
             Choir &amp; Church Presentation System
@@ -231,7 +231,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             </div>
           </div>
         </div>
-      </main>
+      </section>
 
       {/* PIN Code Entry Modal for SUB and HELPER */}
       {modalRole && (
@@ -271,6 +271,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   pattern="[0-9]*"
                   maxLength={1}
                   value={digit}
+                  aria-label={`PIN Digit ${idx + 1}`}
                   onChange={(e) => handlePinChange(idx, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(idx, e)}
                   onPaste={handlePaste}

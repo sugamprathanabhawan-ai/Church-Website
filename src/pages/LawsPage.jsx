@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useData } from '../context/DataContext';
 import PDFViewer from '../components/PDFViewer';
-import { Scale, FileText, Search, RotateCw } from 'lucide-react';
+import { Scale, FileText, Search } from 'lucide-react';
 
 const FALLBACK_LAWS = [
   { name: "Sugam Choir Laws", file: "SUGAM CHOIR LAWS.pdf" },
@@ -13,11 +14,22 @@ const FALLBACK_LAWS = [
 ];
 
 export default function LawsPage() {
+  const { documents } = useData();
   const [laws, setLaws] = useState(FALLBACK_LAWS);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
+    const dbLaws = documents?.laws || [];
+    if (dbLaws.length > 0) {
+      setLaws(dbLaws.map(d => ({
+        id: d.id,
+        name: d.title || d.name,
+        file: d.fileUrl || d.file
+      })));
+      return;
+    }
+
     fetch('/law/pdf-manifest.json')
       .then(res => res.json())
       .then(manifest => {
@@ -33,14 +45,18 @@ export default function LawsPage() {
       .catch(() => {
         // use fallback
       });
-  }, []);
+  }, [documents?.laws]);
 
   const filteredLaws = laws.filter(l => 
     l.name.toLowerCase().includes(searchQuery.toLowerCase().trim())
   );
 
   const activeLaw = laws[selectedIndex] || laws[0];
-  const activeLawUrl = activeLaw ? `/law/${encodeURIComponent(activeLaw.file)}` : '';
+  const activeLawUrl = activeLaw
+    ? (activeLaw.file.startsWith('http') || activeLaw.file.startsWith('/') || activeLaw.file.startsWith('data:')
+        ? activeLaw.file
+        : `/law/${encodeURIComponent(activeLaw.file)}`)
+    : '';
 
   return (
     <div className="flex-grow flex flex-col items-center px-4 pb-16 w-full pt-28 sm:pt-32 max-w-7xl mx-auto">
@@ -80,6 +96,7 @@ export default function LawsPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
+                aria-label="Filter documents"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Filter documents..."

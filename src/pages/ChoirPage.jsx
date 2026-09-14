@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { extractYouTubeId } from '../utils/dataSyncEngine';
@@ -10,9 +10,7 @@ import {
   Search, 
   FileText, 
   History, 
-  Sparkles, 
   RotateCw,
-  ExternalLink,
   Play,
   Presentation
 } from 'lucide-react';
@@ -31,13 +29,24 @@ const FALLBACK_RESOURCES = [
 ];
 
 export default function ChoirPage() {
-  const { choirData, youtubeData, loading, refreshData } = useData();
+  const { choirData, youtubeData, documents, loading, refreshData } = useData();
   const [resources, setResources] = useState(FALLBACK_RESOURCES);
   const [selectedResourceIndex, setSelectedResourceIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [playingVideoId, setPlayingVideoId] = useState(null);
 
-  // Fetch resource manifest if available
+  // Fetch resource manifest if available, or sync from live documents
   useEffect(() => {
+    const dbChoirDocs = documents?.choir || [];
+    if (dbChoirDocs.length > 0) {
+      setResources(dbChoirDocs.map(d => ({
+        id: d.id,
+        name: d.title || d.name,
+        file: d.fileUrl || d.file
+      })));
+      return;
+    }
+
     fetch('/static/resource-manifest.json')
       .then(res => res.json())
       .then(manifest => {
@@ -53,7 +62,7 @@ export default function ChoirPage() {
       .catch(() => {
         // use default fallback
       });
-  }, []);
+  }, [documents?.choir]);
 
   // Filter YouTube Songs
   const songs = youtubeData.songs || [];
@@ -62,7 +71,11 @@ export default function ChoirPage() {
   );
 
   const activeResource = resources[selectedResourceIndex] || resources[0];
-  const activeResourceUrl = activeResource ? `/static/${encodeURIComponent(activeResource.file)}` : '';
+  const activeResourceUrl = activeResource
+    ? (activeResource.file.startsWith('http') || activeResource.file.startsWith('/') || activeResource.file.startsWith('data:')
+        ? activeResource.file
+        : `/static/${encodeURIComponent(activeResource.file)}`)
+    : '';
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -89,7 +102,16 @@ export default function ChoirPage() {
             Glorifying God through worship, choral praise, vocal training, and unity.
           </p>
 
-          <div className="flex flex-wrap justify-center gap-4">`n            <Link to="/zensync" className="px-7 py-3 bg-sky-400 hover:bg-sky-300 text-slate-950 font-bold rounded-full shadow-lg shadow-sky-400/40 hover:-translate-y-0.5 transition-all text-sm hover:scale-105 flex items-center gap-2">`n              <Presentation className="w-4 h-4" />`n              Zen Sync Live`n            </Link>`n            <a href="#choir-routine" 
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              to="/zensync"
+              className="px-7 py-3 bg-sky-400 hover:bg-sky-300 text-slate-950 font-bold rounded-full shadow-lg shadow-sky-400/40 hover:-translate-y-0.5 transition-all text-sm hover:scale-105 flex items-center gap-2"
+            >
+              <Presentation className="w-4 h-4" />
+              <span>Zen Sync Live</span>
+            </Link>
+            <a
+              href="#choir-routine"
               className="px-7 py-3 bg-sky-500 hover:bg-sky-400 text-white font-semibold rounded-full shadow-lg shadow-sky-500/30 hover:-translate-y-0.5 transition-all text-sm hover:scale-105"
             >
               View Routine
@@ -147,7 +169,7 @@ export default function ChoirPage() {
                 <ul className="space-y-1.5 text-xs sm:text-sm text-slate-700">
                   {choirData.notices.map((notice, idx) => (
                     <li key={idx} className="flex items-start gap-2">
-                      <span className="text-sky-500 font-bold">â€¢</span>
+                      <span className="text-sky-500 font-bold">•</span>
                       <span className="leading-relaxed">{notice}</span>
                     </li>
                   ))}
@@ -230,7 +252,7 @@ export default function ChoirPage() {
                           <ul className="space-y-1.5 text-xs sm:text-sm text-slate-700 pl-3">
                             {(day.activities || []).map((activity, actIdx) => (
                               <li key={actIdx} className="flex gap-2">
-                                <span className="text-sky-400">â€¢</span>
+                                <span className="text-sky-400">•</span>
                                 <span>{activity}</span>
                               </li>
                             ))}
@@ -331,6 +353,7 @@ export default function ChoirPage() {
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
               <input
                 type="text"
+                aria-label="Search songs by title"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search songs by title..."
@@ -344,22 +367,47 @@ export default function ChoirPage() {
             {filteredSongs.length > 0 ? (
               filteredSongs.map((song, idx) => {
                 const videoId = extractYouTubeId(song.link || song.videoId);
+                const isPlaying = playingVideoId === videoId;
+
                 return (
                   <article 
                     key={idx} 
                     className="rounded-3xl overflow-hidden bg-white border border-sky-100 shadow-md shadow-sky-100/60 hover:-translate-y-1.5 transition-all duration-300 flex flex-col glass-card-hover"
                   >
-                    <div className="aspect-video bg-slate-900 relative">
+                    <div className="aspect-video bg-slate-900 relative overflow-hidden">
                       {videoId ? (
-                        <iframe
-                          src={`https://www.youtube-nocookie.com/embed/${videoId}`}
-                          title={song.name}
-                          loading="lazy"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                          referrerPolicy="strict-origin-when-cross-origin"
-                          allowFullScreen
-                          className="w-full h-full border-0"
-                        />
+                        isPlaying ? (
+                          <iframe
+                            src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1`}
+                            title={song.name}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerPolicy="strict-origin-when-cross-origin"
+                            allowFullScreen
+                            className="w-full h-full border-0"
+                          />
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setPlayingVideoId(videoId)}
+                            className="w-full h-full relative group cursor-pointer overflow-hidden block text-left focus:outline-none focus:ring-2 focus:ring-sky-400"
+                            aria-label={`Play ${song.name}`}
+                          >
+                            <img
+                              src={`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`}
+                              alt={song.name}
+                              loading="lazy"
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              onError={(e) => {
+                                e.currentTarget.src = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+                              }}
+                            />
+                            <div className="absolute inset-0 bg-slate-950/30 group-hover:bg-slate-950/15 transition-colors flex items-center justify-center">
+                              <div className="w-13 h-13 rounded-full bg-rose-600/90 text-white flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-rose-600 transition-all duration-200">
+                                <Play className="w-6 h-6 fill-current ml-0.5" />
+                              </div>
+                            </div>
+                          </button>
+                        )
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs">
                           Video preview unavailable

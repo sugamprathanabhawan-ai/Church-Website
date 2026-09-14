@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { 
   Lock, 
@@ -10,19 +11,19 @@ import {
   Music, 
   Users, 
   CheckCircle2, 
-  Sparkles,
   Database,
   Wifi,
   WifiOff,
   Play,
   Trophy,
   AlertCircle,
-  HelpCircle,
-  Clock,
-  Layers,
-  ChevronRight
+  FileText,
+  Upload,
+  ExternalLink,
+  FileUp,
+  Globe
 } from 'lucide-react';
-import { fetchQuizLeaderboard, clearQuizLeaderboard } from '../services/supabaseService';
+import { fetchQuizLeaderboard, clearQuizLeaderboard, uploadChurchDocumentFile } from '../services/supabaseService';
 
 function YoutubeIcon({ className = "w-4 h-4" }) {
   return (
@@ -37,9 +38,12 @@ export default function AdminPage() {
     youthData, 
     choirData, 
     youtubeData, 
+    documents,
     updateYouthData, 
     updateChoirData, 
     updateYouTubeData,
+    addDocument,
+    deleteDocument,
     refreshData,
     loading: globalLoading,
     dbStatus
@@ -50,7 +54,7 @@ export default function AdminPage() {
   });
   const [pinInput, setPinInput] = useState('');
   const [authError, setAuthError] = useState('');
-  const [activeTab, setActiveTab] = useState('youth'); // 'youth', 'choir', 'youtube', 'quiz'
+  const [activeTab, setActiveTab] = useState('youth'); // 'youth', 'choir', 'youtube', 'quiz', 'documents'
   const [toastMessage, setToastMessage] = useState(null);
   const [saving, setSaving] = useState(false);
 
@@ -61,6 +65,15 @@ export default function AdminPage() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
   const [previewVideoId, setPreviewVideoId] = useState(null);
+
+  // PDF Documents state
+  const [docFilter, setDocFilter] = useState('all'); // 'all', 'calendar', 'laws', 'choir'
+  const [newDocSection, setNewDocSection] = useState('calendar');
+  const [newDocTitle, setNewDocTitle] = useState('');
+  const [newDocUrl, setNewDocUrl] = useState('');
+  const [newDocFile, setNewDocFile] = useState(null);
+  const [docUploadMode, setDocUploadMode] = useState('file'); // 'file' or 'url'
+  const [uploadingDoc, setUploadingDoc] = useState(false);
 
   // Synchronize local states when context updates from Supabase
   useEffect(() => {
@@ -221,7 +234,7 @@ export default function AdminPage() {
   const updateYouthLeader = (val) => {
     setLocalYouth(prev => ({
       ...prev,
-      group: { ...(prev.group || {}), leader: val }
+      group: { ...prev.group, leader: val }
     }));
   };
 
@@ -229,8 +242,8 @@ export default function AdminPage() {
     setLocalYouth(prev => ({
       ...prev,
       group: {
-        ...(prev.group || {}),
-        teams: [...((prev.group && prev.group.teams) || []), { captain: 'New Captain', members: [] }]
+        ...prev.group,
+        teams: [...(prev.group?.teams || []), { captain: 'New Captain', members: [] }]
       }
     }));
   };
@@ -239,7 +252,7 @@ export default function AdminPage() {
     setLocalYouth(prev => ({
       ...prev,
       group: {
-        ...(prev.group || {}),
+        ...prev.group,
         teams: (prev.group?.teams || []).map((t, idx) => (idx === tIdx ? { ...t, captain } : t))
       }
     }));
@@ -250,7 +263,7 @@ export default function AdminPage() {
     setLocalYouth(prev => ({
       ...prev,
       group: {
-        ...(prev.group || {}),
+        ...prev.group,
         teams: (prev.group?.teams || []).map((t, idx) => (idx === tIdx ? { ...t, members } : t))
       }
     }));
@@ -260,7 +273,7 @@ export default function AdminPage() {
     setLocalYouth(prev => ({
       ...prev,
       group: {
-        ...(prev.group || {}),
+        ...prev.group,
         teams: (prev.group?.teams || []).filter((_, idx) => idx !== tIdx)
       }
     }));
@@ -389,6 +402,71 @@ export default function AdminPage() {
     setLocalYoutube(prev => prev.filter((_, i) => i !== index));
   };
 
+  // --- PDF DOCUMENTS ACTIONS ---
+  const handleAddDocument = async (e) => {
+    e.preventDefault();
+    if (!newDocTitle.trim()) {
+      showToast('Please enter a document title', 'error');
+      return;
+    }
+
+    setUploadingDoc(true);
+    try {
+      let finalUrl = newDocUrl.trim();
+      let fileName = newDocTitle.trim() + '.pdf';
+      let fileSize = 0;
+
+      if (docUploadMode === 'file') {
+        if (!newDocFile) {
+          showToast('Please select a PDF file to upload', 'error');
+          setUploadingDoc(false);
+          return;
+        }
+        const uploadResult = await uploadChurchDocumentFile(newDocFile);
+        finalUrl = uploadResult.fileUrl;
+        fileName = uploadResult.fileName;
+        fileSize = uploadResult.fileSize;
+      } else {
+        if (!finalUrl) {
+          showToast('Please enter a valid file URL or path', 'error');
+          setUploadingDoc(false);
+          return;
+        }
+      }
+
+      await addDocument({
+        section: newDocSection,
+        title: newDocTitle.trim(),
+        fileUrl: finalUrl,
+        fileName,
+        fileSize
+      });
+
+      setNewDocTitle('');
+      setNewDocUrl('');
+      setNewDocFile(null);
+      showToast(`Document "${newDocTitle.trim()}" added to ${newDocSection} successfully!`);
+    } catch (err) {
+      console.error('Failed to add document:', err);
+      showToast('Failed to add document: ' + (err.message || 'Error occurred'), 'error');
+    } finally {
+      setUploadingDoc(false);
+    }
+  };
+
+  const handleDeleteDocument = async (id, section, title) => {
+    if (!window.confirm(`Are you sure you want to delete "${title || 'this document'}" from ${section}?`)) {
+      return;
+    }
+    try {
+      await deleteDocument(id, section);
+      showToast(`Deleted "${title}" successfully`);
+    } catch (err) {
+      console.error('Failed to delete document:', err);
+      showToast('Failed to delete document: ' + (err.message || 'Error occurred'), 'error');
+    }
+  };
+
   if (!authenticated) {
     return (
       <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-4 pt-28">
@@ -423,6 +501,15 @@ export default function AdminPage() {
       </div>
     );
   }
+
+  const allDocsList = [
+    ...(documents?.calendar || []).map(d => ({ ...d, section: 'calendar' })),
+    ...(documents?.laws || []).map(d => ({ ...d, section: 'laws' })),
+    ...(documents?.choir || []).map(d => ({ ...d, section: 'choir' }))
+  ];
+  const filteredDocsList = docFilter === 'all' 
+    ? allDocsList 
+    : allDocsList.filter(d => (d.section || '').toLowerCase() === docFilter);
 
   return (
     <div className="min-h-screen bg-slate-50/70 text-slate-800 flex flex-col pt-28 pb-16 px-4 sm:px-8 max-w-7xl mx-auto w-full">
@@ -471,6 +558,15 @@ export default function AdminPage() {
         </div>
 
         <div className="flex items-center gap-2.5 ml-auto">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-slate-100 hover:bg-sky-50 text-slate-700 hover:text-sky-700 rounded-xl text-xs font-semibold transition"
+            title="View live website"
+          >
+            <Globe className="w-3.5 h-3.5 text-sky-600" />
+            <span className="hidden sm:inline">View Website</span>
+          </Link>
+
           <button
             onClick={refreshData}
             disabled={globalLoading}
@@ -556,6 +652,21 @@ export default function AdminPage() {
         >
           <Trophy className="w-4 h-4" />
           <span>Quiz Leaderboard</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('documents')}
+          className={`px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 ${
+            activeTab === 'documents' ? 'bg-sky-600 text-white shadow-md shadow-sky-600/20 scale-[1.02]' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80'
+          }`}
+        >
+          <FileText className="w-4 h-4" />
+          <span>PDF Documents</span>
+          <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+            activeTab === 'documents' ? 'bg-sky-500 text-white' : 'bg-sky-100 text-sky-700'
+          }`}>
+            {allDocsList.length}
+          </span>
         </button>
       </div>
 
@@ -1004,6 +1115,269 @@ export default function AdminPage() {
               </table>
             </div>
           )}
+        </div>
+      )}
+
+      {/* 5. PDF DOCUMENTS TAB */}
+      {activeTab === 'documents' && (
+        <div className="space-y-6 animate-fade-in">
+          
+          {/* Header Card & Section Filter Pills */}
+          <div className="bg-white rounded-3xl p-6 border border-sky-100 shadow-sm space-y-5">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h3 className="font-bold text-slate-900 text-lg flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-sky-600" />
+                  <span>Church PDF Documents Repository</span>
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                  Upload, manage, and delete official church PDF files for Calendar, Laws, and Choir sections.
+                </p>
+              </div>
+
+              {/* Section Filters */}
+              <div className="flex flex-wrap items-center gap-1.5 bg-slate-100/80 p-1.5 rounded-2xl border border-slate-200/60">
+                {[
+                  { id: 'all', label: 'All Documents', count: allDocsList.length },
+                  { id: 'calendar', label: 'Church Calendar', count: (documents?.calendar || []).length },
+                  { id: 'laws', label: 'Church Laws', count: (documents?.laws || []).length },
+                  { id: 'choir', label: 'Choir Resources', count: (documents?.choir || []).length }
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setDocFilter(tab.id)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                      docFilter === tab.id
+                        ? 'bg-white text-sky-800 shadow-xs font-bold'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <span>{tab.label}</span>
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200/70 text-slate-700">
+                      {tab.count}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Add New Document Card */}
+          <div className="bg-white rounded-3xl p-6 border border-sky-100 shadow-sm space-y-4">
+            <h4 className="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2">
+              <FileUp className="w-4 h-4 text-sky-600" />
+              <span>Add New PDF to Section</span>
+            </h4>
+
+            <form onSubmit={handleAddDocument} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Target Section */}
+                <div>
+                  <label htmlFor="doc-section-select" className="block text-xs font-bold text-slate-700 mb-1.5">
+                    Target Section:
+                  </label>
+                  <select
+                    id="doc-section-select"
+                    value={newDocSection}
+                    onChange={(e) => setNewDocSection(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-sky-100 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+                  >
+                    <option value="calendar">Church Calendar (/calendar)</option>
+                    <option value="laws">Church Laws & Governance (/laws)</option>
+                    <option value="choir">Choir Songbook & Resources (/choir)</option>
+                  </select>
+                </div>
+
+                {/* Document Title */}
+                <div className="sm:col-span-2">
+                  <label htmlFor="doc-title-input" className="block text-xs font-bold text-slate-700 mb-1.5">
+                    Document Title / Display Name:
+                  </label>
+                  <input
+                    id="doc-title-input"
+                    type="text"
+                    value={newDocTitle}
+                    onChange={(e) => setNewDocTitle(e.target.value)}
+                    placeholder="e.g. Annual Church Calendar 2026, Choir Practice Guidelines"
+                    required
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-sky-100 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sky-400"
+                  />
+                </div>
+              </div>
+
+              {/* Upload Mode Selector */}
+              <div className="flex items-center gap-3 pt-1">
+                <span className="text-xs font-bold text-slate-700">Source:</span>
+                <button
+                  type="button"
+                  onClick={() => setDocUploadMode('file')}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${
+                    docUploadMode === 'file'
+                      ? 'bg-sky-100 text-sky-800 border border-sky-300 font-bold'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  Upload Local File (.pdf)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDocUploadMode('url')}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${
+                    docUploadMode === 'url'
+                      ? 'bg-sky-100 text-sky-800 border border-sky-300 font-bold'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  Enter File URL / Path
+                </button>
+              </div>
+
+              {/* File Upload Box */}
+              {docUploadMode === 'file' ? (
+                <div className="border-2 border-dashed border-sky-200 hover:border-sky-400 bg-sky-50/40 rounded-2xl p-5 text-center transition-colors">
+                  <input
+                    type="file"
+                    id="doc-file-input"
+                    accept=".pdf,application/pdf,image/png,image/jpeg"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setNewDocFile(file);
+                        if (!newDocTitle.trim()) {
+                          setNewDocTitle(file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '));
+                        }
+                      }
+                    }}
+                    className="hidden"
+                  />
+                  <label htmlFor="doc-file-input" className="cursor-pointer block">
+                    <Upload className="w-8 h-8 text-sky-500 mx-auto mb-2" />
+                    {newDocFile ? (
+                      <div>
+                        <p className="text-sm font-bold text-sky-950">{newDocFile.name}</p>
+                        <p className="text-xs text-sky-700 mt-0.5">
+                          {(newDocFile.size / 1024).toFixed(1)} KB • Click to choose another file
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-xs sm:text-sm font-semibold text-slate-700">
+                          Click to select a PDF document from your device
+                        </p>
+                        <p className="text-[11px] text-slate-400 mt-1">Supports PDF files (up to 25MB)</p>
+                      </div>
+                    )}
+                  </label>
+                </div>
+              ) : (
+                <div>
+                  <label htmlFor="doc-url-input" className="block text-xs font-bold text-slate-700 mb-1.5">
+                    File URL or Path (e.g. /calender/calender.pdf or https://...):
+                  </label>
+                  <input
+                    id="doc-url-input"
+                    type="text"
+                    value={newDocUrl}
+                    onChange={(e) => setNewDocUrl(e.target.value)}
+                    placeholder="https://... or /calender/calender.pdf"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-sky-100 rounded-xl text-xs sm:text-sm font-mono focus:outline-none focus:ring-2 focus:ring-sky-400"
+                  />
+                </div>
+              )}
+
+              <div className="flex justify-end pt-2">
+                <button
+                  type="submit"
+                  disabled={uploadingDoc || !newDocTitle.trim()}
+                  className="px-6 py-2.5 bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white text-xs sm:text-sm font-bold rounded-xl transition shadow-md flex items-center gap-2 hover:scale-[1.02]"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>{uploadingDoc ? 'Uploading Document...' : 'Add Document to Section'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Current Documents List */}
+          <div className="bg-white rounded-3xl p-6 border border-sky-100 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h4 className="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2">
+                <span>Active Documents</span>
+                <span className="text-xs bg-sky-100 text-sky-800 font-bold px-2 py-0.5 rounded-full">
+                  {filteredDocsList.length}
+                </span>
+              </h4>
+              <span className="text-xs text-slate-400">
+                {docFilter === 'all' ? 'All Sections' : `Section: ${docFilter}`}
+              </span>
+            </div>
+
+            {filteredDocsList.length === 0 ? (
+              <div className="text-center py-12 text-slate-400 text-xs sm:text-sm">
+                <FileText className="w-10 h-10 mx-auto mb-2 opacity-30 text-sky-500" />
+                <p>No documents uploaded in this section yet.</p>
+                <p className="text-slate-400 text-xs mt-1">Use the form above to add your first PDF document.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {filteredDocsList.map((doc) => {
+                  const sectionBadge = {
+                    calendar: { label: 'Calendar', bg: 'bg-amber-100 text-amber-900 border-amber-200' },
+                    laws: { label: 'Church Laws', bg: 'bg-sky-100 text-sky-900 border-sky-200' },
+                    choir: { label: 'Choir Resource', bg: 'bg-purple-100 text-purple-900 border-purple-200' }
+                  }[doc.section] || { label: doc.section, bg: 'bg-slate-100 text-slate-800 border-slate-200' };
+
+                  return (
+                    <div
+                      key={doc.id}
+                      className="p-4 rounded-2xl border border-sky-100 bg-slate-50/50 hover:bg-white hover:border-sky-300 hover:shadow-md transition-all flex flex-col justify-between gap-3 group"
+                    >
+                      <div>
+                        <div className="flex items-start justify-between gap-2 mb-1.5">
+                          <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md border ${sectionBadge.bg}`}>
+                            {sectionBadge.label}
+                          </span>
+                          <span className="text-[11px] text-slate-400">
+                            {doc.createdAt ? new Date(doc.createdAt).toLocaleDateString() : ''}
+                          </span>
+                        </div>
+                        <h5 className="font-bold text-sm text-slate-900 group-hover:text-sky-900 transition-colors">
+                          {doc.title || doc.name}
+                        </h5>
+                        <p className="text-xs text-slate-500 truncate mt-0.5 font-mono">
+                          {doc.fileName || doc.file || doc.fileUrl}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center justify-between border-t border-slate-200/60 pt-3 mt-1">
+                        <a
+                          href={doc.fileUrl || doc.file}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-sky-600 hover:text-sky-800 font-semibold flex items-center gap-1 hover:underline"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span>Open / View</span>
+                        </a>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteDocument(doc.id, doc.section, doc.title || doc.name)}
+                          className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-xl transition flex items-center gap-1 hover:scale-105"
+                          title="Delete PDF document"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Delete</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
         </div>
       )}
 

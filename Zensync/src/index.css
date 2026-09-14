@@ -1192,3 +1192,409 @@
   }
 }
 
+/* ==========================================================================
+   Admin Session Manager Modal & Cards
+   ========================================================================== */
+.admin-modal-card {
+  background-color: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+  border: 1px solid var(--border-color);
+  width: 100%;
+  max-width: 920px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalScaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.admin-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  background-color: var(--bg-tertiary);
+}
+
+.admin-header-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.admin-badge-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background-color: #ecfdf5;
+  border: 1.5px solid #a7f3d0;
+  color: #059669;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.admin-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.admin-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 0.2rem 0 0;
+}
+
+.admin-pill-badge {
+  background-color: #ecfdf5;
+  color: #047857;
+  border: 1px solid #6ee7b7;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.admin-btn-refresh {
+  padding: 0.5rem 0.85rem;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.admin-toolbar {
+  padding: 0.85rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  background-color: #ffffff;
+  flex-wrap: wrap;
+}
+
+.admin-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+}
+
+.admin-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-light);
+  pointer-events: none;
+}
+
+.admin-search-input {
+  width: 100%;
+  padding: 0.5rem 0.85rem 0.5rem 2.2rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.admin-search-input:focus {
+  border-color: var(--primary);
+}
+
+.admin-btn-delete-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  background-color: #fff1f2;
+  color: #e11d48;
+  border: 1px solid #fecdd3;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.admin-btn-delete-all:hover {
+  background-color: #ffe4e6;
+  border-color: #fda4af;
+}
+
+.admin-btn-new {
+  font-size: 0.85rem;
+  padding: 0.5rem 0.9rem;
+}
+
+.admin-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+  background-color: var(--bg-page);
+}
+
+.admin-loading-state, .admin-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3.5rem 1.5rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.admin-empty-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-full);
+  background-color: var(--primary-soft);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.admin-empty-state h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 0.4rem;
+}
+
+.admin-empty-state p {
+  font-size: 0.88rem;
+  max-width: 420px;
+  line-height: 1.4;
+}
+
+.admin-sessions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 1rem;
+}
+
+.admin-session-card {
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.15rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+}
+
+.admin-session-card:hover {
+  border-color: var(--primary-border);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.admin-session-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-code-badge {
+  background-color: var(--primary-soft);
+  color: var(--primary);
+  border: 1.5px solid var(--primary-border);
+  font-family: monospace;
+  font-size: 1.1rem;
+  font-weight: 800;
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.05em;
+}
+
+.admin-date-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.76rem;
+  color: var(--text-light);
+}
+
+.admin-device-info {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.75rem;
+  background-color: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  border: 1px solid #f1f5f9;
+}
+
+.admin-device-text {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.admin-device-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-device-meta {
+  font-size: 0.74rem;
+  color: var(--text-light);
+}
+
+.admin-stats-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.admin-stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.55rem;
+  background-color: var(--primary-soft);
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.admin-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.admin-action-btn {
+  padding: 0.4rem 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  gap: 0.3rem;
+  border-radius: var(--radius-sm);
+}
+
+.admin-btn-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.7rem;
+  background-color: #fff1f2;
+  color: var(--danger);
+  border: 1px solid #fecdd3;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.admin-btn-delete:hover {
+  background-color: var(--danger);
+  color: #ffffff;
+}
+
+.admin-confirm-delete-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.admin-btn-delete-confirm {
+  padding: 0.3rem 0.6rem;
+  background-color: var(--danger);
+  color: #ffffff;
+  border-radius: var(--radius-sm);
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-btn-delete-cancel {
+  padding: 0.3rem 0.55rem;
+  background-color: var(--bg-tertiary);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 0.76rem;
+  cursor: pointer;
+}
+
+.admin-confirm-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 50;
+  animation: fadeIn 0.15s ease;
+}
+
+.admin-confirm-box {
+  background-color: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 1.75rem 1.5rem;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-color);
+}
+
+.admin-confirm-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-full);
+  background-color: #fef2f2;
+  color: var(--danger);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.75rem;
+}
+
+.admin-btn-delete-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background-color: var(--danger);
+  color: #ffffff;
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: opacity 0.15s ease;
+}
+
+.admin-btn-delete-danger:hover {
+  opacity: 0.9;
+}
+

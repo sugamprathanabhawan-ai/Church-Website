@@ -15,13 +15,32 @@ import {
 } from 'lucide-react';
 
 const USER_IMAGES = {
+  // Youth Leader & Captains
   "aryan rai": "/images/you3.png",
   "aryanrai": "/images/you3.png",
-  "mams": "/images/you1.png",
-  "mamatarai": "/images/you1.png",
-  "mamta rai": "/images/you1.png",
-  "naren rai": "/images/you2.png",
-  "narenrai": "/images/you2.png",
+  "aryan": "/images/you3.png",
+
+  "sara poudel": "/images/you1.jpg",
+  "sarapoudel": "/images/you1.jpg",
+  "sara": "/images/you1.jpg",
+  "patrus": "/images/you1.jpg",
+  "mams": "/images/you1.jpg",
+  "mamatarai": "/images/you1.jpg",
+  "mamta rai": "/images/you1.jpg",
+
+  "suraj pokhrel": "/images/you2.jpg",
+  "surajpokhrel": "/images/you2.jpg",
+  "suraj": "/images/you2.jpg",
+  "yakub": "/images/you2.jpg",
+  "naren rai": "/images/you2.jpg",
+  "narenrai": "/images/you2.jpg",
+
+  "urmila chaudhary": "/images/you4.jpg",
+  "urmilachaudhary": "/images/you4.jpg",
+  "urmila": "/images/you4.jpg",
+  "yahunna": "/images/you4.jpg",
+
+  // Church Elders & Pastoral Staff
   "kiran thapa": "/images/ag1.webp",
   "deepak thapa": "/images/ag2.webp",
   "naresh rai": "/images/ag3.webp",
@@ -31,11 +50,32 @@ const USER_IMAGES = {
   "stephen tamang": "/images/ag8.webp"
 };
 
-function getMemberAvatar(name) {
+function getMemberAvatar(name, index) {
   if (!name) return null;
-  const clean = name.trim().toLowerCase();
-  const noSpace = clean.replace(/\s+/g, '');
-  return USER_IMAGES[clean] || USER_IMAGES[noSpace] || null;
+  const rawClean = name.trim().toLowerCase();
+  // Strip parenthetical designations like (Patrus), (Yakub), (Yahunna)
+  const noParens = rawClean.replace(/\(.*?\)/g, '').trim();
+  const noSpace = noParens.replace(/\s+/g, '');
+  const rawNoSpace = rawClean.replace(/\s+/g, '');
+
+  if (USER_IMAGES[noParens]) return USER_IMAGES[noParens];
+  if (USER_IMAGES[noSpace]) return USER_IMAGES[noSpace];
+  if (USER_IMAGES[rawClean]) return USER_IMAGES[rawClean];
+  if (USER_IMAGES[rawNoSpace]) return USER_IMAGES[rawNoSpace];
+
+  // Check substring keywords
+  if (noParens.includes('sara') || rawClean.includes('patrus')) return '/images/you1.jpg';
+  if (noParens.includes('suraj') || rawClean.includes('yakub')) return '/images/you2.jpg';
+  if (noParens.includes('aryan')) return '/images/you3.png';
+  if (noParens.includes('urmila') || rawClean.includes('yahunna')) return '/images/you4.jpg';
+
+  // Fallback by captain index if available
+  if (typeof index === 'number') {
+    const captainDefaults = ['/images/you1.jpg', '/images/you2.jpg', '/images/you4.jpg'];
+    return captainDefaults[index % captainDefaults.length];
+  }
+
+  return null;
 }
 
 export default function YouthRoutinePage() {
@@ -240,15 +280,12 @@ export default function YouthRoutinePage() {
             {youthData.group.leader && (
               <div className="flex items-center justify-center mb-8">
                 <div className="bg-sky-50/80 px-6 py-3 rounded-full border border-sky-200 shadow-2xs flex items-center gap-3">
-                  {getMemberAvatar(youthData.group.leader) ? (
-                    <img 
-                      src={getMemberAvatar(youthData.group.leader)} 
-                      alt={youthData.group.leader} 
-                      className="w-7 h-7 rounded-full object-cover border border-sky-300 shadow-2xs shrink-0"
-                    />
-                  ) : (
-                    <UserCheck className="w-5 h-5 text-sky-600" />
-                  )}
+                  <img 
+                    src={getMemberAvatar(youthData.group.leader) || '/images/you3.png'} 
+                    alt={youthData.group.leader} 
+                    className="w-7 h-7 rounded-full object-cover border border-sky-300 shadow-2xs shrink-0"
+                    onError={(e) => { e.currentTarget.src = '/images/you3.png'; }}
+                  />
                   <span className="text-xs sm:text-sm font-semibold text-slate-600 uppercase tracking-wide">
                     Fellowship Leader: <span className="text-sky-700 font-bold ml-1">{youthData.group.leader}</span>
                   </span>
@@ -258,19 +295,17 @@ export default function YouthRoutinePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {(youthData.group.teams || []).map((team, tIdx) => {
-                const captainAvatar = getMemberAvatar(team.captain);
+                const defaultCaptainAvatars = ['/images/you1.jpg', '/images/you2.jpg', '/images/you4.jpg'];
+                const captainAvatar = getMemberAvatar(team.captain, tIdx) || defaultCaptainAvatars[tIdx % defaultCaptainAvatars.length];
                 return (
                   <div key={tIdx} className="bg-sky-50/60 rounded-2xl p-5 border border-sky-100 shadow-2xs hover:shadow-md transition-all h-full glass-card-hover">
                     <h3 className="font-bold text-sm sm:text-base text-sky-950 flex items-center gap-2.5 mb-3 border-b border-sky-200/60 pb-2.5">
-                      {captainAvatar ? (
-                        <img 
-                          src={captainAvatar} 
-                          alt={team.captain} 
-                          className="w-6 h-6 rounded-full object-cover border border-sky-300 shadow-2xs shrink-0"
-                        />
-                      ) : (
-                        <Users className="w-4 h-4 text-sky-600" />
-                      )}
+                      <img 
+                        src={captainAvatar} 
+                        alt={team.captain} 
+                        className="w-6 h-6 rounded-full object-cover border border-sky-300 shadow-2xs shrink-0"
+                        onError={(e) => { e.currentTarget.src = defaultCaptainAvatars[tIdx % defaultCaptainAvatars.length]; }}
+                      />
                       <span>Captain: <span className="text-sky-700 font-bold">{team.captain}</span></span>
                     </h3>
                     <div>
@@ -313,10 +348,10 @@ export default function YouthRoutinePage() {
               <div className="relative w-[95px] h-[95px] flex justify-center items-center mb-3">
                 <div className="loader-red absolute inset-0"></div>
                 <img 
-                  src={getMemberAvatar(youthData.group.leader) || '/images/logos.webp'} 
+                  src={getMemberAvatar(youthData.group.leader) || '/images/you3.png'} 
                   alt={youthData.group.leader} 
                   className="w-[78px] h-[78px] rounded-full object-cover relative z-10 border-2 border-white shadow-md"
-                  onError={(e) => { e.currentTarget.src = '/images/logos.webp'; }}
+                  onError={(e) => { e.currentTarget.src = '/images/you3.png'; }}
                 />
               </div>
               <span className="bg-rose-500 text-white text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider mb-1 shadow-xs">
@@ -329,7 +364,9 @@ export default function YouthRoutinePage() {
 
           {/* Dynamic Team Captains */}
           {(youthData.group?.teams || []).map((team, idx) => {
-            const avatar = getMemberAvatar(team.captain) || '/images/logos.webp';
+            const defaultCaptainAvatars = ['/images/you1.jpg', '/images/you2.jpg', '/images/you4.jpg'];
+            const fallbackAvatar = defaultCaptainAvatars[idx % defaultCaptainAvatars.length];
+            const avatar = getMemberAvatar(team.captain, idx) || fallbackAvatar;
             const cleanName = team.captain.replace(/\(.*?\)/, '').trim();
             const groupTag = team.captain.match(/\((.*?)\)/)?.[0] || '';
 
@@ -341,7 +378,7 @@ export default function YouthRoutinePage() {
                     src={avatar} 
                     alt={cleanName || team.captain} 
                     className="w-[78px] h-[78px] rounded-full object-cover relative z-10 border-2 border-white shadow-md"
-                    onError={(e) => { e.currentTarget.src = '/images/logos.webp'; }}
+                    onError={(e) => { e.currentTarget.src = fallbackAvatar; }}
                   />
                 </div>
                 <span className="bg-sky-500 text-white text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider mb-1 shadow-xs">

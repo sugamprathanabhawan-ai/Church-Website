@@ -31,7 +31,7 @@ export function App() {
   const handleSelectRole = (newRole: UserRole, code?: string, devInfo?: DeviceAuditInfo) => {
     const basePath = getBasePath();
     if (newRole === 'main') {
-      const newCode = generateSessionCode();
+      const newCode = code || generateSessionCode();
       setSessionCode(newCode);
       setDeviceInfo(devInfo);
       setRole('main');

@@ -341,6 +341,114 @@ export async function deleteSession(code: string): Promise<void> {
 }
 
 /**
+ * Fetches all presentation sessions from Supabase and local storage (for Admin mode)
+ */
+export async function fetchAllSessions(): Promise<SessionData[]> {
+  const sessionMap = new Map<string, SessionData>();
+
+  // 1. Fetch from Supabase Remote Database
+  const client = getSupabase();
+  if (client) {
+    try {
+      const { data, error } = await client
+        .from('sessions')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && Array.isArray(data)) {
+        for (const row of data) {
+          sessionMap.set(row.code, {
+            code: row.code,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+            device_info: row.device_info || row.content?.device_info,
+            content: {
+              sections: row.content?.sections || [],
+              device_info: row.content?.device_info || row.device_info,
+            },
+            current_slide: row.current_slide || { sectionId: '', slideIndex: 0, globalIndex: 0 },
+          });
+        }
+      } else if (error) {
+        console.warn('Supabase fetchAllSessions error:', error.message);
+      }
+    } catch (err) {
+      console.warn('Could not query Supabase sessions table:', err);
+    }
+  }
+
+  // 2. Fetch and merge from Local Storage
+  if (typeof window !== 'undefined' && window.localStorage) {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('zensync_session_')) {
+        try {
+          const raw = localStorage.getItem(key);
+          if (raw) {
+            const parsed: SessionData = JSON.parse(raw);
+            if (parsed && parsed.code) {
+              if (!sessionMap.has(parsed.code)) {
+                sessionMap.set(parsed.code, parsed);
+              }
+            }
+          }
+        } catch {
+          // ignore JSON parse errors
+        }
+      }
+    }
+  }
+
+  // Return sorted by created_at descending
+  return Array.from(sessionMap.values()).sort((a, b) => {
+    const timeA = new Date(a.created_at || a.updated_at || 0).getTime();
+    const timeB = new Date(b.created_at || b.updated_at || 0).getTime();
+    return timeB - timeA;
+  });
+}
+
+/**
+ * Permanently deletes all sessions from PostgreSQL and clears local storage
+ */
+export async function deleteAllSessions(): Promise<void> {
+  const client = getSupabase();
+  if (client) {
+    try {
+      // Query all session codes first to clean up their storage
+      const { data: allSessions } = await client.from('sessions').select('code');
+      if (allSessions && allSessions.length > 0) {
+        for (const s of allSessions) {
+          try {
+            const { data: files } = await client.storage.from('zen_sync_images').list(s.code);
+            if (files && files.length > 0) {
+              const filePaths = files.map((f) => `${s.code}/${f.name}`);
+              await client.storage.from('zen_sync_images').remove(filePaths);
+            }
+          } catch {
+            // ignore
+          }
+        }
+      }
+      await client.from('sessions').delete().neq('code', '');
+    } catch (err) {
+      console.warn('Error deleting all sessions in Supabase:', err);
+    }
+  }
+
+  // Clean localStorage
+  if (typeof window !== 'undefined' && window.localStorage) {
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('zensync_session_')) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach((k) => localStorage.removeItem(k));
+  }
+}
+
+/**
  * Subscribes to realtime updates for a session
  */
 export function subscribeToSession(

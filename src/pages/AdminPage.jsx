@@ -21,9 +21,20 @@ import {
   Upload,
   ExternalLink,
   FileUp,
-  Globe
+  Globe,
+  Image as ImageIcon,
+  Edit2,
+  Camera,
+  Layers,
+  Link as LinkIcon,
+  RotateCcw
 } from 'lucide-react';
-import { fetchQuizLeaderboard, clearQuizLeaderboard, uploadChurchDocumentFile } from '../services/supabaseService';
+import { 
+  fetchQuizLeaderboard, 
+  clearQuizLeaderboard, 
+  uploadChurchDocumentFile,
+  DEFAULT_WEBSITE_PICTURES 
+} from '../services/supabaseService';
 
 function YoutubeIcon({ className = "w-4 h-4" }) {
   return (
@@ -39,11 +50,14 @@ export default function AdminPage() {
     choirData, 
     youtubeData, 
     documents,
+    websitePictures,
     updateYouthData, 
     updateChoirData, 
     updateYouTubeData,
     addDocument,
     deleteDocument,
+    updateWebsitePictures,
+    uploadWebsiteImage,
     refreshData,
     loading: globalLoading,
     dbStatus
@@ -54,7 +68,13 @@ export default function AdminPage() {
   });
   const [pinInput, setPinInput] = useState('');
   const [authError, setAuthError] = useState('');
-  const [activeTab, setActiveTab] = useState('youth'); // 'youth', 'choir', 'youtube', 'quiz', 'documents'
+  
+  // URL tab support (e.g. /admin?tab=photos)
+  const searchParams = new URLSearchParams(window.location.search);
+  const paramTab = searchParams.get('tab');
+  const validTabs = ['youth', 'choir', 'youtube', 'quiz', 'documents', 'photos'];
+  const [activeTab, setActiveTab] = useState(validTabs.includes(paramTab) ? paramTab : 'youth');
+
   const [toastMessage, setToastMessage] = useState(null);
   const [saving, setSaving] = useState(false);
 
@@ -62,6 +82,7 @@ export default function AdminPage() {
   const [localYouth, setLocalYouth] = useState(youthData);
   const [localChoir, setLocalChoir] = useState(choirData);
   const [localYoutube, setLocalYoutube] = useState(youtubeData.songs || []);
+  const [localPictures, setLocalPictures] = useState(websitePictures || DEFAULT_WEBSITE_PICTURES);
   const [leaderboard, setLeaderboard] = useState([]);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
   const [previewVideoId, setPreviewVideoId] = useState(null);
@@ -75,12 +96,27 @@ export default function AdminPage() {
   const [docUploadMode, setDocUploadMode] = useState('file'); // 'file' or 'url'
   const [uploadingDoc, setUploadingDoc] = useState(false);
 
+  // Website Pictures state
+  const [photoCategory, setPhotoCategory] = useState('all'); // 'all', 'carousel', 'gallery', 'leaders'
+  const [showAddPhotoModal, setShowAddPhotoModal] = useState(false);
+  const [newPhotoCategory, setNewPhotoCategory] = useState('gallery'); // 'carousel', 'gallery', 'leaders'
+  const [newPhotoTitle, setNewPhotoTitle] = useState('');
+  const [newPhotoRole, setNewPhotoRole] = useState('');
+  const [newPhotoUrl, setNewPhotoUrl] = useState('');
+  const [newPhotoFile, setNewPhotoFile] = useState(null);
+  const [photoUploadMode, setPhotoUploadMode] = useState('file'); // 'file' or 'url'
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [editingPhoto, setEditingPhoto] = useState(null);
+
   // Synchronize local states when context updates from Supabase
   useEffect(() => {
     setLocalYouth(youthData);
     setLocalChoir(choirData);
     setLocalYoutube(youtubeData.songs || []);
-  }, [youthData, choirData, youtubeData]);
+    if (websitePictures) {
+      setLocalPictures(websitePictures);
+    }
+  }, [youthData, choirData, youtubeData, websitePictures]);
 
   // Fetch leaderboard when quiz tab is active
   useEffect(() => {
@@ -114,9 +150,11 @@ export default function AdminPage() {
     setTimeout(() => setToastMessage(null), 4000);
   };
 
+  // Support both 336676 and 2244 for admin authentication
   const handleLogin = (e) => {
     e.preventDefault();
-    if (pinInput.trim() === '336676') {
+    const cleanPin = pinInput.trim();
+    if (cleanPin === '336676' || cleanPin === '2244') {
       setAuthenticated(true);
       sessionStorage.setItem('sugam_admin_auth', 'true');
       setAuthError('');
@@ -136,13 +174,137 @@ export default function AdminPage() {
       await Promise.all([
         updateYouthData(localYouth),
         updateChoirData(localChoir),
-        updateYouTubeData(localYoutube)
+        updateYouTubeData(localYoutube),
+        updateWebsitePictures(localPictures)
       ]);
       showToast('All changes saved directly to Supabase database! Live across all devices.');
     } catch (err) {
       showToast(err.message || 'Failed to save changes to Supabase', 'error');
     } finally {
       setSaving(false);
+    }
+  };
+
+  // --- PHOTO & GALLERY ACTIONS ---
+  const handleAddPhoto = async (e) => {
+    if (e) e.preventDefault();
+    setUploadingPhoto(true);
+    try {
+      let finalUrl = newPhotoUrl.trim();
+      if (photoUploadMode === 'file' && newPhotoFile) {
+        finalUrl = await uploadWebsiteImage(newPhotoFile);
+      }
+      if (!finalUrl) {
+        showToast('Please upload an image file or enter an image URL', 'error');
+        return;
+      }
+
+      const newId = 'pic_' + Date.now();
+      const updated = { ...localPictures };
+
+      if (newPhotoCategory === 'carousel') {
+        const item = {
+          id: newId,
+          image: finalUrl,
+          text: newPhotoTitle.trim() || 'Church Fellowship'
+        };
+        updated.carousel = [item, ...(updated.carousel || [])];
+      } else if (newPhotoCategory === 'gallery') {
+        const item = {
+          id: newId,
+          src: finalUrl,
+          caption: newPhotoTitle.trim() || 'Church Moment'
+        };
+        updated.gallery = [item, ...(updated.gallery || [])];
+      } else if (newPhotoCategory === 'leaders') {
+        const item = {
+          id: newId,
+          name: newPhotoTitle.trim() || 'Leader Name',
+          role: newPhotoRole.trim() || 'Servant Leader',
+          image: finalUrl
+        };
+        updated.leaders = [...(updated.leaders || []), item];
+      }
+
+      setLocalPictures(updated);
+      await updateWebsitePictures(updated);
+      showToast('Picture added and saved to website successfully!');
+      setShowAddPhotoModal(false);
+      setNewPhotoTitle('');
+      setNewPhotoRole('');
+      setNewPhotoUrl('');
+      setNewPhotoFile(null);
+    } catch (err) {
+      console.error('Error adding photo:', err);
+      showToast(err.message || 'Failed to add photo', 'error');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const handleDeletePhoto = async (category, id) => {
+    if (!window.confirm('Are you sure you want to delete this picture from the website?')) return;
+    try {
+      const updated = { ...localPictures };
+      if (category === 'carousel') {
+        updated.carousel = (updated.carousel || []).filter(item => item.id !== id);
+      } else if (category === 'gallery') {
+        updated.gallery = (updated.gallery || []).filter(item => item.id !== id);
+      } else if (category === 'leaders') {
+        updated.leaders = (updated.leaders || []).filter(item => item.id !== id);
+      }
+      setLocalPictures(updated);
+      await updateWebsitePictures(updated);
+      showToast('Picture deleted successfully from website!');
+    } catch (err) {
+      showToast(err.message || 'Failed to delete picture', 'error');
+    }
+  };
+
+  const handleUpdatePhoto = async (e) => {
+    if (e) e.preventDefault();
+    if (!editingPhoto) return;
+    setUploadingPhoto(true);
+    try {
+      let finalUrl = editingPhoto.url.trim();
+      if (editingPhoto.newFile) {
+        finalUrl = await uploadWebsiteImage(editingPhoto.newFile);
+      }
+
+      const updated = { ...localPictures };
+      if (editingPhoto.category === 'carousel') {
+        updated.carousel = (updated.carousel || []).map(item =>
+          item.id === editingPhoto.id ? { ...item, image: finalUrl, text: editingPhoto.title } : item
+        );
+      } else if (editingPhoto.category === 'gallery') {
+        updated.gallery = (updated.gallery || []).map(item =>
+          item.id === editingPhoto.id ? { ...item, src: finalUrl, caption: editingPhoto.title } : item
+        );
+      } else if (editingPhoto.category === 'leaders') {
+        updated.leaders = (updated.leaders || []).map(item =>
+          item.id === editingPhoto.id ? { ...item, image: finalUrl, name: editingPhoto.title, role: editingPhoto.role } : item
+        );
+      }
+
+      setLocalPictures(updated);
+      await updateWebsitePictures(updated);
+      showToast('Picture updated successfully!');
+      setEditingPhoto(null);
+    } catch (err) {
+      showToast(err.message || 'Failed to update picture', 'error');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const handleResetPictures = async () => {
+    if (!window.confirm('Reset all website pictures to default church photos? This will restore original slider, gallery, and leader photos.')) return;
+    try {
+      setLocalPictures(DEFAULT_WEBSITE_PICTURES);
+      await updateWebsitePictures(DEFAULT_WEBSITE_PICTURES);
+      showToast('All website pictures reset to default church photos!');
+    } catch (err) {
+      showToast(err.message || 'Failed to reset pictures', 'error');
     }
   };
 
@@ -511,6 +673,45 @@ export default function AdminPage() {
     ? allDocsList 
     : allDocsList.filter(d => (d.section || '').toLowerCase() === docFilter);
 
+  const carouselItems = (localPictures?.carousel || []).map(item => ({
+    id: item.id,
+    category: 'carousel',
+    categoryLabel: 'Hero Slider',
+    badgeColor: 'bg-sky-50 text-sky-700 border-sky-200',
+    title: item.text || 'Hero Slide',
+    image: item.image,
+    role: null,
+  }));
+
+  const galleryItems = (localPictures?.gallery || []).map(item => ({
+    id: item.id,
+    category: 'gallery',
+    categoryLabel: 'Photo Gallery',
+    badgeColor: 'bg-purple-50 text-purple-700 border-purple-200',
+    title: item.caption || 'Gallery Photo',
+    image: item.src,
+    role: null,
+  }));
+
+  const leaderItems = (localPictures?.leaders || []).map(item => ({
+    id: item.id,
+    category: 'leaders',
+    categoryLabel: 'Leadership',
+    badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    title: item.name || 'Leader Name',
+    image: item.image,
+    role: item.role || 'Servant Leader',
+  }));
+
+  const allPhotosList = [...carouselItems, ...galleryItems, ...leaderItems];
+  const filteredPhotosList = photoCategory === 'all'
+    ? allPhotosList
+    : photoCategory === 'carousel'
+    ? carouselItems
+    : photoCategory === 'gallery'
+    ? galleryItems
+    : leaderItems;
+
   return (
     <div className="min-h-screen bg-slate-50/70 text-slate-800 flex flex-col pt-28 pb-16 px-4 sm:px-8 max-w-7xl mx-auto w-full">
       
@@ -666,6 +867,21 @@ export default function AdminPage() {
             activeTab === 'documents' ? 'bg-sky-500 text-white' : 'bg-sky-100 text-sky-700'
           }`}>
             {allDocsList.length}
+          </span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('photos')}
+          className={`px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 ${
+            activeTab === 'photos' ? 'bg-sky-600 text-white shadow-md shadow-sky-600/20 scale-[1.02]' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80'
+          }`}
+        >
+          <ImageIcon className="w-4 h-4" />
+          <span>Photos & Gallery</span>
+          <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+            activeTab === 'photos' ? 'bg-sky-500 text-white' : 'bg-sky-100 text-sky-700'
+          }`}>
+            {(localPictures?.carousel?.length || 0) + (localPictures?.gallery?.length || 0) + (localPictures?.leaders?.length || 0)}
           </span>
         </button>
       </div>
@@ -1378,6 +1594,452 @@ export default function AdminPage() {
             )}
           </div>
 
+        </div>
+      )}
+
+      {/* 6. WEBSITE PHOTOS & GALLERY TAB */}
+      {activeTab === 'photos' && (
+        <div className="space-y-6 animate-fade-in">
+          
+          {/* Header Card & Category Filter Pills */}
+          <div className="bg-white rounded-3xl p-6 border border-sky-100 shadow-sm space-y-5">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h3 className="font-bold text-slate-900 text-lg flex items-center gap-2">
+                  <Camera className="w-5 h-5 text-sky-600" />
+                  <span>Website Pictures &amp; Gallery Manager</span>
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                  Manage hero carousel slider photos, church photo gallery, and leadership profiles across the whole website.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={handleResetPictures}
+                  className="px-3.5 py-2 rounded-xl border border-slate-200 hover:border-rose-200 hover:bg-rose-50 text-slate-600 hover:text-rose-700 text-xs font-semibold transition flex items-center gap-1.5"
+                  title="Restore default church website photos"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Reset Defaults</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowAddPhotoModal(true)}
+                  className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs sm:text-sm font-bold shadow-md shadow-sky-600/20 transition flex items-center gap-1.5"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Picture</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Category Filter Pills */}
+            <div className="flex flex-wrap items-center gap-1.5 bg-slate-100/80 p-1.5 rounded-2xl border border-slate-200/60">
+              {[
+                { id: 'all', label: 'All Pictures', count: allPhotosList.length },
+                { id: 'carousel', label: 'Hero Home Slider', count: carouselItems.length },
+                { id: 'gallery', label: 'Church Gallery', count: galleryItems.length },
+                { id: 'leaders', label: 'Leadership Profiles', count: leaderItems.length }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setPhotoCategory(tab.id)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                    photoCategory === tab.id
+                      ? 'bg-white text-sky-800 shadow-xs font-bold'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <span>{tab.label}</span>
+                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200/70 text-slate-700 font-bold">
+                    {tab.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Picture Grid Display */}
+          <div className="space-y-4">
+            {filteredPhotosList.length === 0 ? (
+              <div className="bg-white rounded-3xl p-12 text-center border border-dashed border-sky-200 space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center mx-auto">
+                  <ImageIcon className="w-6 h-6" />
+                </div>
+                <h4 className="font-bold text-slate-800 text-base">No pictures found</h4>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                  There are no photos currently added in this category. Click &quot;Add Picture&quot; above to upload or link an image.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowAddPhotoModal(true)}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-sky-600 text-white rounded-xl text-xs font-bold hover:bg-sky-500 shadow-md transition"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add First Picture</span>
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {filteredPhotosList.map((pic) => (
+                  <div
+                    key={pic.category + '-' + pic.id}
+                    className="bg-white rounded-2xl border border-slate-200/80 hover:border-sky-300 hover:shadow-md transition-all overflow-hidden flex flex-col justify-between group"
+                  >
+                    {/* Image Thumbnail */}
+                    <div className="relative aspect-[4/3] bg-slate-100 overflow-hidden">
+                      <img
+                        src={pic.image}
+                        alt={pic.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = '/pic/logos.webp';
+                        }}
+                      />
+                      <span className={`absolute top-2 left-2 text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md border backdrop-blur-md bg-white/95 shadow-xs ${pic.badgeColor}`}>
+                        {pic.categoryLabel}
+                      </span>
+                    </div>
+
+                    {/* Metadata & Actions */}
+                    <div className="p-3.5 flex-1 flex flex-col justify-between">
+                      <div>
+                        <h5 className="font-bold text-sm text-slate-900 line-clamp-1 group-hover:text-sky-700 transition-colors" title={pic.title}>
+                          {pic.title}
+                        </h5>
+                        {pic.role && (
+                          <p className="text-xs text-emerald-600 font-semibold truncate mt-0.5">
+                            {pic.role}
+                          </p>
+                        )}
+                        <p className="text-[11px] text-slate-400 font-mono truncate mt-1" title={pic.image}>
+                          {pic.image}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-3">
+                        <button
+                          type="button"
+                          onClick={() => setEditingPhoto({
+                            id: pic.id,
+                            category: pic.category,
+                            title: pic.title,
+                            role: pic.role || '',
+                            url: pic.image,
+                            newFile: null
+                          })}
+                          className="text-xs text-sky-600 hover:text-sky-800 font-semibold flex items-center gap-1 hover:underline"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                          <span>Edit</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeletePhoto(pic.category, pic.id)}
+                          className="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-xl transition flex items-center gap-1 hover:scale-105"
+                          title="Delete picture from website"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Delete</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+        </div>
+      )}
+
+      {/* ADD PHOTO MODAL */}
+      {showAddPhotoModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-sky-100 space-y-5 animate-fade-in-up my-8">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center">
+                  <Camera className="w-4 h-4" />
+                </div>
+                <h4 className="font-bold text-slate-900 text-base">Add New Website Picture</h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddPhotoModal(false)}
+                className="text-slate-400 hover:text-slate-600 font-bold text-lg px-2"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleAddPhoto} className="space-y-4">
+              <div>
+                <label htmlFor="new-photo-category-select" className="block text-xs font-bold text-slate-700 mb-1.5">
+                  Placement / Category:
+                </label>
+                <select
+                  id="new-photo-category-select"
+                  value={newPhotoCategory}
+                  onChange={(e) => setNewPhotoCategory(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-sky-100 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+                >
+                  <option value="carousel">Hero Home Slider (Carousel)</option>
+                  <option value="gallery">Church Photo Gallery (Home Grid)</option>
+                  <option value="leaders">Church Leadership Profile</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="new-photo-title-input" className="block text-xs font-bold text-slate-700 mb-1.5">
+                  {newPhotoCategory === 'leaders' ? 'Leader Full Name:' : 'Caption / Title Text:'}
+                </label>
+                <input
+                  id="new-photo-title-input"
+                  type="text"
+                  value={newPhotoTitle}
+                  onChange={(e) => setNewPhotoTitle(e.target.value)}
+                  placeholder={newPhotoCategory === 'leaders' ? 'e.g. Aryan Rai, Pastor David...' : 'e.g. Fellowship Gathering, Youth Conference...'}
+                  required
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-sky-100 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sky-400"
+                />
+              </div>
+
+              {newPhotoCategory === 'leaders' && (
+                <div>
+                  <label htmlFor="new-photo-role-input" className="block text-xs font-bold text-slate-700 mb-1.5">
+                    Leader Ministry Role / Title:
+                  </label>
+                  <input
+                    id="new-photo-role-input"
+                    type="text"
+                    value={newPhotoRole}
+                    onChange={(e) => setNewPhotoRole(e.target.value)}
+                    placeholder="e.g. Youth Leader, Senior Pastor, Choir Director"
+                    required
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-sky-100 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sky-400"
+                  />
+                </div>
+              )}
+
+              {/* Mode switch: File vs URL */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-slate-700">Image Source:</span>
+                  <button
+                    type="button"
+                    onClick={() => setPhotoUploadMode('file')}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${
+                      photoUploadMode === 'file'
+                        ? 'bg-sky-100 text-sky-800 border border-sky-300 font-bold'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    Upload File
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPhotoUploadMode('url')}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${
+                      photoUploadMode === 'url'
+                        ? 'bg-sky-100 text-sky-800 border border-sky-300 font-bold'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    Image URL / Path
+                  </button>
+                </div>
+
+                {photoUploadMode === 'file' ? (
+                  <div className="border-2 border-dashed border-sky-200 hover:border-sky-400 bg-sky-50/40 rounded-2xl p-5 text-center transition-colors">
+                    <input
+                      type="file"
+                      id="photo-file-input"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setNewPhotoFile(file);
+                          setNewPhotoUrl('');
+                        }
+                      }}
+                      className="hidden"
+                    />
+                    <label htmlFor="photo-file-input" className="cursor-pointer block">
+                      <Upload className="w-7 h-7 mx-auto text-sky-500 mb-2" />
+                      {newPhotoFile ? (
+                        <div>
+                          <p className="text-xs font-bold text-sky-900">{newPhotoFile.name}</p>
+                          <p className="text-[11px] text-slate-500">{(newPhotoFile.size / 1024).toFixed(1)} KB (Ready to upload)</p>
+                        </div>
+                      ) : (
+                        <div>
+                          <p className="text-xs font-bold text-slate-700">Click to select an image from your device</p>
+                          <p className="text-[11px] text-slate-400 mt-0.5">JPG, PNG, WEBP supported (auto-syncs to cloud)</p>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+                ) : (
+                  <div>
+                    <label htmlFor="new-photo-url-input" className="sr-only">Image URL or Local Path</label>
+                    <input
+                      id="new-photo-url-input"
+                      type="text"
+                      value={newPhotoUrl}
+                      onChange={(e) => {
+                        setNewPhotoUrl(e.target.value);
+                        setNewPhotoFile(null);
+                      }}
+                      placeholder="https://... or /pic/you3.png"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-sky-100 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sky-400"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowAddPhotoModal(false)}
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-bold transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={uploadingPhoto || (photoUploadMode === 'file' ? !newPhotoFile : !newPhotoUrl.trim())}
+                  className="px-5 py-2.5 bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white text-xs sm:text-sm font-bold rounded-xl shadow-md transition flex items-center gap-2"
+                >
+                  <Upload className={`w-4 h-4 ${uploadingPhoto ? 'animate-bounce' : ''}`} />
+                  <span>{uploadingPhoto ? 'Saving Picture...' : 'Add Picture'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT PHOTO MODAL */}
+      {editingPhoto && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-sky-100 space-y-5 animate-fade-in-up my-8">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
+                  <Edit2 className="w-4 h-4" />
+                </div>
+                <h4 className="font-bold text-slate-900 text-base">
+                  Edit {editingPhoto.category === 'carousel' ? 'Slider Image' : editingPhoto.category === 'leaders' ? 'Leader Profile' : 'Gallery Photo'}
+                </h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingPhoto(null)}
+                className="text-slate-400 hover:text-slate-600 font-bold text-lg px-2"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdatePhoto} className="space-y-4">
+              {/* Current preview */}
+              <div className="relative aspect-video max-h-48 w-full bg-slate-100 rounded-xl overflow-hidden border border-slate-200">
+                <img
+                  src={editingPhoto.url}
+                  alt="Preview"
+                  className="w-full h-full object-cover"
+                  onError={(e) => { e.currentTarget.src = '/pic/logos.webp'; }}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="edit-photo-title-input" className="block text-xs font-bold text-slate-700 mb-1.5">
+                  {editingPhoto.category === 'leaders' ? 'Leader Full Name:' : 'Caption / Title Text:'}
+                </label>
+                <input
+                  id="edit-photo-title-input"
+                  type="text"
+                  value={editingPhoto.title}
+                  onChange={(e) => setEditingPhoto({ ...editingPhoto, title: e.target.value })}
+                  required
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-sky-100 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sky-400"
+                />
+              </div>
+
+              {editingPhoto.category === 'leaders' && (
+                <div>
+                  <label htmlFor="edit-photo-role-input" className="block text-xs font-bold text-slate-700 mb-1.5">
+                    Leader Ministry Role:
+                  </label>
+                  <input
+                    id="edit-photo-role-input"
+                    type="text"
+                    value={editingPhoto.role}
+                    onChange={(e) => setEditingPhoto({ ...editingPhoto, role: e.target.value })}
+                    required
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-sky-100 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sky-400"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label htmlFor="edit-photo-url-input" className="block text-xs font-bold text-slate-700 mb-1.5">
+                  Image URL / Path (or upload replacement below):
+                </label>
+                <input
+                  id="edit-photo-url-input"
+                  type="text"
+                  value={editingPhoto.url}
+                  onChange={(e) => setEditingPhoto({ ...editingPhoto, url: e.target.value, newFile: null })}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-sky-100 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sky-400"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="edit-photo-file-input" className="block text-xs font-bold text-slate-700 mb-1.5">
+                  Replace with local file:
+                </label>
+                <input
+                  id="edit-photo-file-input"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const previewUrl = URL.createObjectURL(file);
+                      setEditingPhoto({ ...editingPhoto, newFile: file, url: previewUrl });
+                    }
+                  }}
+                  className="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 cursor-pointer"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setEditingPhoto(null)}
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-bold transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={uploadingPhoto}
+                  className="px-5 py-2.5 bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white text-xs sm:text-sm font-bold rounded-xl shadow-md transition flex items-center gap-2"
+                >
+                  <Save className={`w-4 h-4 ${uploadingPhoto ? 'animate-spin' : ''}`} />
+                  <span>{uploadingPhoto ? 'Saving...' : 'Save Changes'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 

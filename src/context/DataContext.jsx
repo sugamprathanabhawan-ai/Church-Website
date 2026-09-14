@@ -10,6 +10,10 @@ import {
   fetchChurchDocuments,
   addChurchDocument,
   deleteChurchDocument,
+  fetchWebsitePictures,
+  saveWebsitePictures,
+  uploadWebsiteImage,
+  DEFAULT_WEBSITE_PICTURES,
   testDatabaseConnection
 } from '../services/supabaseService';
 
@@ -34,6 +38,7 @@ export function DataProvider({ children }) {
     laws: [],
     choir: []
   });
+  const [websitePictures, setWebsitePictures] = useState(DEFAULT_WEBSITE_PICTURES);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -45,17 +50,19 @@ export function DataProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const [youth, choir, youtube, docs, diag] = await Promise.all([
+      const [youth, choir, youtube, docs, pics, diag] = await Promise.all([
         fetchYouthData(),
         fetchChoirData(),
         fetchYouTubeSongs(),
         fetchChurchDocuments(),
+        fetchWebsitePictures(),
         testDatabaseConnection()
       ]);
 
       setYouthData(youth);
       setChoirData(choir);
       setYouTubeData(youtube);
+      setWebsitePictures(pics);
 
       // Categorize docs by section
       const docsBySection = { calendar: [], laws: [], choir: [] };
@@ -125,6 +132,11 @@ export function DataProvider({ children }) {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'church_documents' },
+        () => loadAll()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'church_settings' },
         () => loadAll()
       )
       .subscribe();
@@ -239,6 +251,22 @@ export function DataProvider({ children }) {
     }
   };
 
+  // Update Website Pictures directly in Supabase
+  const updateWebsitePictures = async (data) => {
+    try {
+      setLoading(true);
+      await saveWebsitePictures(data);
+      setWebsitePictures(data);
+      setLastSyncTime(Date.now());
+      return true;
+    } catch (err) {
+      console.error('[DataContext] Error saving website pictures:', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <DataContext.Provider
       value={{
@@ -246,6 +274,7 @@ export function DataProvider({ children }) {
         choirData,
         youtubeData,
         documents,
+        websitePictures,
         loading,
         error,
         lastSyncTime,
@@ -255,7 +284,9 @@ export function DataProvider({ children }) {
         updateChoirData,
         updateYouTubeData,
         addDocument,
-        deleteDocument
+        deleteDocument,
+        updateWebsitePictures,
+        uploadWebsiteImage
       }}
     >
       {children}

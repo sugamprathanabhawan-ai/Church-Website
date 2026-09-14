@@ -137,7 +137,7 @@ export const AdminSessionManager: React.FC<AdminSessionManagerProps> = ({
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
                 <h2 className="admin-title">Zen Sync Admin Account</h2>
                 <span className="admin-pill-badge">
-                  PIN 2244 Verified
+                  Super Admin Mode
                 </span>
               </div>
               <p className="admin-subtitle">
@@ -146,7 +146,16 @@ export const AdminSessionManager: React.FC<AdminSessionManagerProps> = ({
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <a
+              href="/admin?tab=photos"
+              className="btn-outline admin-btn-refresh"
+              style={{ textDecoration: 'none', color: 'var(--primary)', borderColor: 'var(--primary-border)' }}
+              title="Manage all photos on church website"
+            >
+              <span>🖼️ Website Photos</span>
+            </a>
+
             <button
               onClick={loadSessions}
               disabled={loading}

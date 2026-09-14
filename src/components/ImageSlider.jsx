@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useData } from '../context/DataContext';
 
-const CAROUSEL_DATA = [
+const DEFAULT_SLIDES = [
   { image: "/images/start.webp", text: "Welcome to Our Saturday Service" },
   { image: "/images/com.webp", text: "Community & Fellowship Programs" },
   { image: "/images/js3.webp", text: "Empowering Next Generation Youth" },
@@ -20,25 +21,39 @@ const CAROUSEL_DATA = [
 ];
 
 export default function ImageSlider() {
+  const { websitePictures } = useData();
+  const slides = (websitePictures?.carousel && websitePictures.carousel.length > 0)
+    ? websitePictures.carousel
+    : DEFAULT_SLIDES;
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
+  // Keep index within bounds if slides count changes
   useEffect(() => {
-    if (isPaused) return;
+    if (currentIndex >= slides.length) {
+      setCurrentIndex(0);
+    }
+  }, [slides.length, currentIndex]);
+
+  useEffect(() => {
+    if (isPaused || slides.length === 0) return;
     const interval = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % CAROUSEL_DATA.length);
+      setCurrentIndex(prev => (prev + 1) % slides.length);
     }, 3200);
     return () => clearInterval(interval);
-  }, [isPaused]);
+  }, [isPaused, slides.length]);
 
   const handleNext = () => {
-    setCurrentIndex(prev => (prev + 1) % CAROUSEL_DATA.length);
+    if (slides.length === 0) return;
+    setCurrentIndex(prev => (prev + 1) % slides.length);
   };
 
   const handlePrev = () => {
-    setCurrentIndex(prev => (prev - 1 + CAROUSEL_DATA.length) % CAROUSEL_DATA.length);
+    if (slides.length === 0) return;
+    setCurrentIndex(prev => (prev - 1 + slides.length) % slides.length);
   };
 
   // Touch Swipe for mobile devices
@@ -65,11 +80,11 @@ export default function ImageSlider() {
       onTouchEnd={handleTouchEnd}
     >
       {/* Slides */}
-      {CAROUSEL_DATA.map((item, index) => {
+      {slides.map((item, index) => {
         const isActive = index === currentIndex;
         return (
           <div
-            key={index}
+            key={item.id || index}
             className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
               isActive ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
             }`}
@@ -110,7 +125,7 @@ export default function ImageSlider() {
 
       {/* Dots Indicator */}
       <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex space-x-2 z-20">
-        {CAROUSEL_DATA.map((_, index) => (
+        {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentIndex(index)}

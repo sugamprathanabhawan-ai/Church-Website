@@ -767,3 +767,144 @@ export async function uploadChurchDocumentFile(file) {
     });
   }
 }
+
+// ============================================================================
+// 6. WEBSITE PICTURES & MEDIA MANAGEMENT SERVICES
+// ============================================================================
+
+export const DEFAULT_WEBSITE_PICTURES = {
+  carousel: [
+    { id: 'c1', image: "/images/start.webp", text: "Welcome to Our Saturday Service" },
+    { id: 'c2', image: "/images/com.webp", text: "Community & Fellowship Programs" },
+    { id: 'c3', image: "/images/js3.webp", text: "Empowering Next Generation Youth" },
+    { id: 'c4', image: "/images/js2.webp", text: "Youth Fellowship in Action" },
+    { id: 'c5', image: "/images/js.webp", text: "Youth Praise & Prayer" },
+    { id: 'c6', image: "/images/gs.webp", text: "House Fellowship Ministry" },
+    { id: 'c7', image: "/images/bs.webp", text: "Joyful Children's Ministry" },
+    { id: 'c8', image: "/images/bs2.webp", text: "Sunday School & Kids Fellowship" },
+    { id: 'c9', image: "/images/bs4.webp", text: "Bible Teaching for Children" },
+    { id: 'c10', image: "/images/ama4.webp", text: "Mothers' Prayer Fellowship" },
+    { id: 'c11', image: "/images/ama.webp", text: "Women's Ministry in Faith" },
+    { id: 'c12', image: "/images/carol1.webp", text: "Christmas Carol Celebration" },
+    { id: 'c13', image: "/images/carol2.webp", text: "Joyous Carol Service" },
+    { id: 'c14', image: "/images/choir1.webp", text: "Harmonious Choir Ministry" },
+    { id: 'c15', image: "/images/choir2.webp", text: "Choir Praise and Worship" },
+  ],
+  gallery: [
+    { id: 'g1', src: "/images/img1.webp", caption: "Church Fellowship & Community" },
+    { id: 'g2', src: "/images/img2.webp", caption: "Worship & Praise Service" },
+    { id: 'g3', src: "/images/img3.webp", caption: "Youth Gathering" },
+    { id: 'g4', src: "/images/img4.webp", caption: "Prayer Meeting Moments" },
+    { id: 'g5', src: "/images/img5.webp", caption: "Church Celebration" },
+    { id: 'g6', src: "/images/img6.webp", caption: "Worship Time" },
+    { id: 'g7', src: "/images/img7.webp", caption: "Church Events & Fellowship" },
+    { id: 'g8', src: "/images/img8.webp", caption: "Community Outreach" },
+    { id: 'g9', src: "/images/img9.webp", caption: "Choir Practice" },
+    { id: 'g10', src: "/images/img10.webp", caption: "Joyful Worship Service" },
+    { id: 'g11', src: "/images/img11.webp", caption: "Church Family Gathering" },
+  ],
+  leaders: [
+    { id: 'l1', name: "किरण थापा", role: "पास्टर", image: "/images/ag1.webp" },
+    { id: 'l2', name: "दीपक थापा", role: "सह पास्टर", image: "/images/ag2.webp" },
+    { id: 'l3', name: "नरेश राई", role: "एल्डर", image: "/images/ag3.webp" },
+    { id: 'l4', name: "खड्क चौधरी", role: "डिकन", image: "/images/ag4.webp" },
+    { id: 'l5', name: "बिलास पोख्रेल", role: "डिकन", image: "/images/ag5.webp" },
+    { id: 'l6', name: "नरेन राई", role: "डिकन", image: "/images/ag6.webp" },
+    { id: 'l7', name: "मान बहादुर श्रेष्ठ", role: "डिकन", image: "/images/ag7.webp" },
+    { id: 'l8', name: "स्टीफन तामाङ", role: "डिकन", image: "/images/ag8.webp" },
+    { id: 'l9', name: "आर्यन राई", role: "आराधक / Youth Leader", image: "/images/you3.png" },
+    { id: 'l10', name: "ममता राई", role: "आराधक / Youth Captain", image: "/images/you1.jpg" },
+    { id: 'l11', name: "सृष्टि खड्का", role: "आराधक", image: "/images/you4.jpg" },
+  ]
+};
+
+const PICS_CACHE_KEY = 'sugam_website_pictures';
+
+export async function fetchWebsitePictures() {
+  try {
+    const { data, error } = await supabase
+      .from('church_settings')
+      .select('value')
+      .eq('key', 'website_pictures')
+      .maybeSingle();
+
+    if (!error && data && data.value) {
+      localStorage.setItem(PICS_CACHE_KEY, JSON.stringify(data.value));
+      return {
+        carousel: data.value.carousel || DEFAULT_WEBSITE_PICTURES.carousel,
+        gallery: data.value.gallery || DEFAULT_WEBSITE_PICTURES.gallery,
+        leaders: data.value.leaders || DEFAULT_WEBSITE_PICTURES.leaders,
+      };
+    }
+  } catch (err) {
+    console.warn('[supabaseService] Error fetching website_pictures:', err);
+  }
+
+  // Fallback to local storage
+  const cached = localStorage.getItem(PICS_CACHE_KEY);
+  if (cached) {
+    try {
+      const parsed = JSON.parse(cached);
+      return {
+        carousel: parsed.carousel || DEFAULT_WEBSITE_PICTURES.carousel,
+        gallery: parsed.gallery || DEFAULT_WEBSITE_PICTURES.gallery,
+        leaders: parsed.leaders || DEFAULT_WEBSITE_PICTURES.leaders,
+      };
+    } catch {
+      // ignore
+    }
+  }
+
+  return DEFAULT_WEBSITE_PICTURES;
+}
+
+export async function saveWebsitePictures(data) {
+  const payload = {
+    carousel: data.carousel || [],
+    gallery: data.gallery || [],
+    leaders: data.leaders || [],
+  };
+
+  localStorage.setItem(PICS_CACHE_KEY, JSON.stringify(payload));
+
+  try {
+    const { error } = await supabase.from('church_settings').upsert({
+      key: 'website_pictures',
+      value: payload
+    });
+    if (error) throw error;
+  } catch (err) {
+    console.error('[supabaseService] Error saving website_pictures to church_settings:', err);
+    throw err;
+  }
+}
+
+export async function uploadWebsiteImage(file) {
+  if (!file) throw new Error('No image file provided for upload');
+  const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const filePath = `website_media/${Date.now()}_${cleanName}`;
+
+  try {
+    const { error } = await supabase.storage
+      .from('church_documents')
+      .upload(filePath, file, { cacheControl: '3600', upsert: true });
+
+    if (!error) {
+      const { data: publicUrlData } = supabase.storage
+        .from('church_documents')
+        .getPublicUrl(filePath);
+      return publicUrlData.publicUrl;
+    }
+  } catch (err) {
+    console.warn('[supabaseService] Storage upload error, using Data URL fallback:', err);
+  }
+
+  // Fallback to Data URL
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+

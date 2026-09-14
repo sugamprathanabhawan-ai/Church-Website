@@ -1,8 +1,8 @@
 import { createClient, type SupabaseClient, type RealtimeChannel } from '@supabase/supabase-js';
 import type { CurrentSlideState, SectionItem, SessionData, ConnectionStatus, DeviceAuditInfo } from '../types';
 
-const envUrl = (import.meta.env.VITE_SUPABASE_URL as string || '').trim();
-const envKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string || '').trim();
+const envUrl = (import.meta.env.VITE_SUPABASE_URL as string || 'https://aiufpdabglxhojmmkedp.supabase.co').trim();
+const envKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string || 'sb_publishable_qDJqr6BpPMTWLaL_C9n8Cw_TgKfgCBB').trim();
 
 let supabaseInstance: SupabaseClient | null = null;
 

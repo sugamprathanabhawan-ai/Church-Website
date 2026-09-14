@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import ImageSlider from '../components/ImageSlider';
 import Lightbox from '../components/Lightbox';
+import { useData } from '../context/DataContext';
 
 function FacebookIcon({ className = "w-4 h-4" }) {
   return (
@@ -35,44 +36,56 @@ function YoutubeIcon({ className = "w-4 h-4" }) {
 
 const MINISTRIES = [
   {
-    title: "Worship Ministry",
+    title: "Saturday Worship Service",
+    time: "11:00 AM - 1:00 PM",
     icon: Music,
-    desc: "Leading the congregation into the presence of God through spirit-filled praise and worship.",
-    link: "/choir"
-  },
-  {
-    title: "Youth Fellowship",
-    icon: Users,
-    desc: "Empowering the next generation to stand firm in their faith, learn Scripture, and impact the world.",
-    link: "/youth"
-  },
-  {
-    title: "Choir Ministry",
-    icon: Mic2,
-    desc: "Glorifying God through harmonious voices, vocal training, and beautiful musical arrangements.",
-    link: "/choir"
-  },
-  {
-    title: "Children’s Ministry",
-    icon: HeartHandshake,
-    desc: "Building a strong biblical foundation for kids in a fun, safe, and loving Christ-centered environment.",
-    link: "/#slider"
-  },
-  {
-    title: "Prayer Ministry",
-    icon: Flame,
-    desc: "Standing in the gap for our church, families, community, and nation through dedicated intercession.",
+    color: "from-sky-500 to-blue-600",
+    desc: "Our weekly gathering for congregation worship, heartfelt prayer, and biblical preachings in Nepali.",
     link: "/#contact"
   },
   {
-    title: "Evangelism Ministry",
+    title: "Youth Fellowship (संगति)",
+    time: "Saturday 1:00 PM - 3:00 PM",
+    icon: Users,
+    color: "from-blue-600 to-indigo-600",
+    desc: "Energetic worship, Bible discussion, fellowship groups (Patrus, Yakub, Yahunna), and youth routine activities.",
+    link: "/youth"
+  },
+  {
+    title: "Choir & Music Ministry",
+    time: "Saturday 9:00 AM - 10:50 AM",
+    icon: Mic2,
+    color: "from-indigo-600 to-purple-600",
+    desc: "Dedicated practice, vocal harmony training, and leading the congregation in praises to the Almighty.",
+    link: "/choir"
+  },
+  {
+    title: "Fasting & Prayer (उपवास)",
+    time: "Tuesday & Friday Morning",
+    icon: Flame,
+    color: "from-rose-500 to-amber-600",
+    desc: "Seeking the Holy Spirit's guidance, interceding for our community, healing, and spiritual renewal.",
+    link: "/#contact"
+  },
+  {
+    title: "House Fellowship (संगति)",
+    time: "Weekly in Local Areas",
+    icon: HeartHandshake,
+    color: "from-teal-500 to-emerald-600",
+    desc: "Intimate neighborhood group gatherings for prayer, Bible study, and mutual encouragement.",
+    link: "/#contact"
+  },
+  {
+    title: "Outreach & Mission",
+    time: "Monthly Initiatives",
     icon: Globe2,
+    color: "from-violet-600 to-sky-600",
     desc: "Sharing the Good News and love of Jesus Christ to the unreached areas of Nepal and beyond.",
     link: "/#contact"
   }
 ];
 
-const LEADERS = [
+const DEFAULT_LEADERS = [
   { name: "किरण थापा", role: "पास्टर", image: "/images/ag1.webp" },
   { name: "दीपक थापा", role: "सह पास्टर", image: "/images/ag2.webp" },
   { name: "नरेश राई", role: "एल्डर", image: "/images/ag3.webp" },
@@ -81,12 +94,12 @@ const LEADERS = [
   { name: "नरेन राई", role: "डिकन", image: "/images/ag6.webp" },
   { name: "मान बहादुर श्रेष्ठ", role: "डिकन", image: "/images/ag7.webp" },
   { name: "स्टीफन तामाङ", role: "डिकन", image: "/images/ag8.webp" },
-  { name: "आर्यन राई", role: "आराधक", image: "/images/logos.webp" },
-  { name: "ममता राई", role: "आराधक", image: "/images/logos.webp" },
-  { name: "सृष्टि खड्का", role: "आराधक", image: "/images/logos.webp" },
+  { name: "आर्यन राई", role: "आराधक / Youth Leader", image: "/images/you3.png" },
+  { name: "ममता राई", role: "आराधक / Youth Captain", image: "/images/you1.jpg" },
+  { name: "सृष्टि खड्का", role: "आराधक", image: "/images/you4.jpg" },
 ];
 
-const GALLERY_IMAGES = [
+const DEFAULT_GALLERY = [
   { src: "/images/img1.webp", caption: "Church Fellowship & Community" },
   { src: "/images/img2.webp", caption: "Worship & Praise Service" },
   { src: "/images/img3.webp", caption: "Youth Gathering" },
@@ -101,6 +114,14 @@ const GALLERY_IMAGES = [
 ];
 
 export default function HomePage() {
+  const { websitePictures } = useData();
+  const leadersList = (websitePictures?.leaders && websitePictures.leaders.length > 0)
+    ? websitePictures.leaders
+    : DEFAULT_LEADERS;
+  const galleryList = (websitePictures?.gallery && websitePictures.gallery.length > 0)
+    ? websitePictures.gallery
+    : DEFAULT_GALLERY;
+
   const [stats, setStats] = useState({ years: 0, members: 0, youth: 0 });
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -275,8 +296,8 @@ export default function HomePage() {
           <h2 className="text-3xl sm:text-5xl font-serif font-bold text-slate-900 mt-2 mb-16">Church Leadership</h2>
           
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-            {LEADERS.map((leader, index) => (
-              <div key={index} className="group flex flex-col items-center">
+            {leadersList.map((leader, index) => (
+              <div key={leader.id || index} className="group flex flex-col items-center">
                 <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden mb-4 border-4 border-white shadow-md group-hover:border-sky-400 group-hover:shadow-lg transition-all duration-300">
                   <img 
                     src={leader.image} 
@@ -301,9 +322,9 @@ export default function HomePage() {
           <h2 className="text-3xl sm:text-5xl font-serif font-bold text-white mt-2 mb-16">Church Gallery</h2>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {GALLERY_IMAGES.map((img, idx) => (
+            {galleryList.map((img, idx) => (
               <button 
-                key={idx} 
+                key={img.id || idx} 
                 type="button"
                 onClick={() => openLightbox(idx)}
                 aria-label={`View photo: ${img.caption}`}
@@ -413,11 +434,11 @@ export default function HomePage() {
       {/* Lightbox Component */}
       <Lightbox
         isOpen={lightboxOpen}
-        images={GALLERY_IMAGES}
+        images={galleryList}
         currentIndex={lightboxIndex}
         onClose={() => setLightboxOpen(false)}
-        onPrev={() => setLightboxIndex(prev => (prev - 1 + GALLERY_IMAGES.length) % GALLERY_IMAGES.length)}
-        onNext={() => setLightboxIndex(prev => (prev + 1) % GALLERY_IMAGES.length)}
+        onPrev={() => setLightboxIndex(prev => (prev - 1 + galleryList.length) % galleryList.length)}
+        onNext={() => setLightboxIndex(prev => (prev + 1) % galleryList.length)}
       />
 
     </div>

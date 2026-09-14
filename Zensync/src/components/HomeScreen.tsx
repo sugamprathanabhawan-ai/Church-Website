@@ -135,7 +135,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       return;
     }
 
-    setMainErrorMessage('Enter 2244 to access Admin, or click below to start a new presentation.');
+    setMainErrorMessage('Please enter your 4-digit session code, or start a new presentation below.');
   };
 
   const handleProceedToCreateMain = () => {
@@ -568,10 +568,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 <Presentation size={24} />
               </div>
               <h3 className="join-title">
-                Main Presenter &amp; Admin
+                Main Presenter
               </h3>
               <p className="join-subtitle">
-                Enter admin PIN <strong style={{ color: 'var(--primary)', fontWeight: 700 }}>2244</strong> to manage all code sessions, or start a new live presentation
+                Enter your 4-digit session code to resume, or start a new live presentation
               </p>
             </div>
 
@@ -585,7 +585,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   pattern="[0-9]*"
                   maxLength={1}
                   value={digit}
-                  aria-label={`Admin PIN Digit ${idx + 1}`}
+                  aria-label={`Session PIN Digit ${idx + 1}`}
                   onChange={(e) => handleMainPinChange(idx, e.target.value)}
                   onKeyDown={(e) => handleMainPinKeyDown(idx, e)}
                   onPaste={handleMainPaste}
@@ -608,7 +608,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 style={{ width: '100%', padding: '0.8rem', fontSize: '1rem' }}
                 id="btn-main-pin-submit"
               >
-                {mainPin.join('') === '2244' ? 'UNLOCK ADMIN (2244)' : 'ENTER PIN (2244)'}
+                Resume Session
               </button>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', margin: '0.2rem 0' }}>

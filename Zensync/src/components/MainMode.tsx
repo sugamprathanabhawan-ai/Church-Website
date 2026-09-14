@@ -49,6 +49,7 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
   const [isUploading, setIsUploading] = useState(false);
   const [deviceInfo, setDeviceInfo] = useState<DeviceAuditInfo | undefined>(initialDeviceInfo);
   const [showAuditModal, setShowAuditModal] = useState(false);
+  const [sessionEnded, setSessionEnded] = useState(false);
 
   // Section editing state
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
@@ -95,6 +96,9 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
       },
       onStatusChange: (newStatus) => {
         setStatus(newStatus);
+      },
+      onSessionDeleted: () => {
+        setSessionEnded(true);
       },
     });
 
@@ -328,6 +332,22 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  if (sessionEnded) {
+    return (
+      <div className="fullscreen-container" style={{ backgroundColor: 'var(--bg-secondary)', flexDirection: 'column' }}>
+        <div className="join-card" style={{ textAlign: 'center' }}>
+          <h3 className="join-title" style={{ marginBottom: '0.5rem' }}>Session Ended</h3>
+          <p className="join-subtitle" style={{ marginBottom: '1.5rem' }}>
+            This session was terminated and deleted by the administrator. All associated files have been cleared.
+          </p>
+          <button onClick={onExit} className="btn-primary" style={{ width: '100%' }}>
+            Return to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>

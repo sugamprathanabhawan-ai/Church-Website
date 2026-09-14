@@ -24,16 +24,11 @@ const USER_IMAGES = {
   "sarapoudel": "/images/you1.jpg",
   "sara": "/images/you1.jpg",
   "patrus": "/images/you1.jpg",
-  "mams": "/images/you1.jpg",
-  "mamatarai": "/images/you1.jpg",
-  "mamta rai": "/images/you1.jpg",
 
   "suraj pokhrel": "/images/you2.jpg",
   "surajpokhrel": "/images/you2.jpg",
   "suraj": "/images/you2.jpg",
   "yakub": "/images/you2.jpg",
-  "naren rai": "/images/you2.jpg",
-  "narenrai": "/images/you2.jpg",
 
   "urmila chaudhary": "/images/you4.jpg",
   "urmilachaudhary": "/images/you4.jpg",

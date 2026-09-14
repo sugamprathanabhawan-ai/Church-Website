@@ -86,17 +86,20 @@ const MINISTRIES = [
 ];
 
 const DEFAULT_LEADERS = [
-  { name: "किरण थापा", role: "पास्टर", image: "/images/ag1.webp" },
-  { name: "दीपक थापा", role: "सह पास्टर", image: "/images/ag2.webp" },
-  { name: "नरेश राई", role: "एल्डर", image: "/images/ag3.webp" },
-  { name: "खड्क चौधरी", role: "डिकन", image: "/images/ag4.webp" },
-  { name: "बिलास पोख्रेल", role: "डिकन", image: "/images/ag5.webp" },
-  { name: "नरेन राई", role: "डिकन", image: "/images/ag6.webp" },
-  { name: "मान बहादुर श्रेष्ठ", role: "डिकन", image: "/images/ag7.webp" },
-  { name: "स्टीफन तामाङ", role: "डिकन", image: "/images/ag8.webp" },
-  { name: "आर्यन राई", role: "आराधक / Youth Leader", image: "/images/you3.png" },
-  { name: "ममता राई", role: "आराधक / Youth Captain", image: "/images/you1.jpg" },
-  { name: "सृष्टि खड्का", role: "आराधक", image: "/images/you4.jpg" },
+  { id: 'l1', name: "किरण थापा", role: "पास्टर (Senior Pastor)", image: "/images/ag1.webp", category: "pastoral" },
+  { id: 'l2', name: "दीपक थापा", role: "सह पास्टर (Co-Pastor)", image: "/images/ag2.webp", category: "pastoral" },
+  { id: 'l3', name: "नरेश राई", role: "एल्डर (Elder)", image: "/images/ag3.webp", category: "pastoral" },
+  { id: 'l4', name: "खड्क चौधरी", role: "डिकन (Deacon)", image: "/images/ag4.webp", category: "deacon" },
+  { id: 'l5', name: "बिलास पोख्रेल", role: "डिकन (Deacon)", image: "/images/ag5.webp", category: "deacon" },
+  { id: 'l6', name: "नरेन राई", role: "डिकन (Deacon)", image: "/images/ag6.webp", category: "deacon" },
+  { id: 'l7', name: "मान बहादुर श्रेष्ठ", role: "डिकन (Deacon)", image: "/images/ag7.webp", category: "deacon" },
+  { id: 'l8', name: "स्टीफन तामाङ", role: "डिकन (Deacon)", image: "/images/ag8.webp", category: "deacon" },
+  { id: 'l9', name: "आर्यन राई", role: "युवा अगुवा तथा आराधक (Youth Leader & Worship)", image: "/images/you3.png", category: "youth_worship" },
+  { id: 'l10', name: "सारा पौडेल", role: "आराधना अगुवा / युवा क्याप्टेन (Worship & Patrus Captain)", image: "/images/you1.jpg", category: "youth_worship" },
+  { id: 'l11', name: "सुरज पोख्रेल", role: "युवा क्याप्टेन (Youth Captain - Yakub)", image: "/images/you2.jpg", category: "youth_worship" },
+  { id: 'l12', name: "उर्मिला चौधरी", role: "युवा क्याप्टेन (Youth Captain - Yahunna)", image: "/images/you4.jpg", category: "youth_worship" },
+  { id: 'l13', name: "ममता राई", role: "आराधक (Worship Ministry)", image: "/images/logos.webp", category: "worship" },
+  { id: 'l14', name: "सृष्टि खड्का", role: "आराधक (Worship Ministry)", image: "/images/logos.webp", category: "worship" },
 ];
 
 const DEFAULT_GALLERY = [
@@ -125,6 +128,20 @@ export default function HomePage() {
   const [stats, setStats] = useState({ years: 0, members: 0, youth: 0 });
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [leaderFilter, setLeaderFilter] = useState('all');
+
+  const filteredLeaders = leadersList.filter(leader => {
+    if (leaderFilter === 'all') return true;
+    const cat = leader.category || '';
+    const roleLower = (leader.role || '').toLowerCase();
+    if (leaderFilter === 'pastoral_deacons') {
+      return cat === 'pastoral' || cat === 'deacon' || roleLower.includes('पास्टर') || roleLower.includes('एल्डर') || roleLower.includes('डिकन') || roleLower.includes('pastor') || roleLower.includes('elder') || roleLower.includes('deacon');
+    }
+    if (leaderFilter === 'youth_worship') {
+      return cat === 'youth_worship' || cat === 'worship' || roleLower.includes('युवा') || roleLower.includes('आराधक') || roleLower.includes('आराधना') || roleLower.includes('youth') || roleLower.includes('worship') || roleLower.includes('captain');
+    }
+    return true;
+  });
 
   // Animated counters on mount
   useEffect(() => {
@@ -293,10 +310,35 @@ export default function HomePage() {
       <section id="leadership" className="py-24 bg-slate-50/60 px-6">
         <div className="max-w-7xl mx-auto text-center">
           <span className="text-sky-600 font-semibold tracking-widest uppercase text-xs sm:text-sm">Our Servant Leaders</span>
-          <h2 className="text-3xl sm:text-5xl font-serif font-bold text-slate-900 mt-2 mb-16">Church Leadership</h2>
+          <h2 className="text-3xl sm:text-5xl font-serif font-bold text-slate-900 mt-2 mb-3">Church Leadership</h2>
+          <p className="text-slate-600 max-w-2xl mx-auto text-xs sm:text-sm mb-8">
+            Pastoral elders, deacons, worship leaders (आराधक), and youth fellowship leaders dedicated to serving Christ and our congregation.
+          </p>
+
+          {/* Ministry Category Filter Pills */}
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-12">
+            {[
+              { id: 'all', label: 'All Leadership' },
+              { id: 'pastoral_deacons', label: 'Pastoral & Deacons (पास्टर तथा डिकन)' },
+              { id: 'youth_worship', label: 'Youth & Worship (युवा अगुवा तथा आराधक)' }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setLeaderFilter(tab.id)}
+                className={`px-4 py-2 rounded-full text-xs font-bold transition-all shadow-2xs ${
+                  leaderFilter === tab.id
+                    ? 'bg-sky-600 text-white shadow-md shadow-sky-600/20 scale-105'
+                    : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
           
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-            {leadersList.map((leader, index) => (
+            {filteredLeaders.map((leader, index) => (
               <div key={leader.id || index} className="group flex flex-col items-center">
                 <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden mb-4 border-4 border-white shadow-md group-hover:border-sky-400 group-hover:shadow-lg transition-all duration-300">
                   <img 
@@ -308,7 +350,9 @@ export default function HomePage() {
                   />
                 </div>
                 <h4 className="font-bold text-slate-900 text-sm sm:text-base">{leader.name}</h4>
-                <p className="text-sky-600 text-xs font-semibold mt-0.5">{leader.role}</p>
+                <p className="text-sky-600 text-xs font-semibold mt-0.5 max-w-[160px] mx-auto text-center leading-tight">
+                  {leader.role}
+                </p>
               </div>
             ))}
           </div>

@@ -804,17 +804,20 @@ export const DEFAULT_WEBSITE_PICTURES = {
     { id: 'g11', src: "/images/img11.webp", caption: "Church Family Gathering" },
   ],
   leaders: [
-    { id: 'l1', name: "किरण थापा", role: "पास्टर", image: "/images/ag1.webp" },
-    { id: 'l2', name: "दीपक थापा", role: "सह पास्टर", image: "/images/ag2.webp" },
-    { id: 'l3', name: "नरेश राई", role: "एल्डर", image: "/images/ag3.webp" },
-    { id: 'l4', name: "खड्क चौधरी", role: "डिकन", image: "/images/ag4.webp" },
-    { id: 'l5', name: "बिलास पोख्रेल", role: "डिकन", image: "/images/ag5.webp" },
-    { id: 'l6', name: "नरेन राई", role: "डिकन", image: "/images/ag6.webp" },
-    { id: 'l7', name: "मान बहादुर श्रेष्ठ", role: "डिकन", image: "/images/ag7.webp" },
-    { id: 'l8', name: "स्टीफन तामाङ", role: "डिकन", image: "/images/ag8.webp" },
-    { id: 'l9', name: "आर्यन राई", role: "आराधक / Youth Leader", image: "/images/you3.png" },
-    { id: 'l10', name: "ममता राई", role: "आराधक / Youth Captain", image: "/images/you1.jpg" },
-    { id: 'l11', name: "सृष्टि खड्का", role: "आराधक", image: "/images/you4.jpg" },
+    { id: 'l1', name: "किरण थापा", role: "पास्टर (Senior Pastor)", image: "/images/ag1.webp", category: "pastoral" },
+    { id: 'l2', name: "दीपक थापा", role: "सह पास्टर (Co-Pastor)", image: "/images/ag2.webp", category: "pastoral" },
+    { id: 'l3', name: "नरेश राई", role: "एल्डर (Elder)", image: "/images/ag3.webp", category: "pastoral" },
+    { id: 'l4', name: "खड्क चौधरी", role: "डिकन (Deacon)", image: "/images/ag4.webp", category: "deacon" },
+    { id: 'l5', name: "बिलास पोख्रेल", role: "डिकन (Deacon)", image: "/images/ag5.webp", category: "deacon" },
+    { id: 'l6', name: "नरेन राई", role: "डिकन (Deacon)", image: "/images/ag6.webp", category: "deacon" },
+    { id: 'l7', name: "मान बहादुर श्रेष्ठ", role: "डिकन (Deacon)", image: "/images/ag7.webp", category: "deacon" },
+    { id: 'l8', name: "स्टीफन तामाङ", role: "डिकन (Deacon)", image: "/images/ag8.webp", category: "deacon" },
+    { id: 'l9', name: "आर्यन राई", role: "युवा अगुवा तथा आराधक (Youth Leader & Worship)", image: "/images/you3.png", category: "youth_worship" },
+    { id: 'l10', name: "सारा पौडेल", role: "आराधना अगुवा / युवा क्याप्टेन (Worship & Patrus Captain)", image: "/images/you1.jpg", category: "youth_worship" },
+    { id: 'l11', name: "सुरज पोख्रेल", role: "युवा क्याप्टेन (Youth Captain - Yakub)", image: "/images/you2.jpg", category: "youth_worship" },
+    { id: 'l12', name: "उर्मिला चौधरी", role: "युवा क्याप्टेन (Youth Captain - Yahunna)", image: "/images/you4.jpg", category: "youth_worship" },
+    { id: 'l13', name: "ममता राई", role: "आराधक (Worship Ministry)", image: "/images/logos.webp", category: "worship" },
+    { id: 'l14', name: "सृष्टि खड्का", role: "आराधक (Worship Ministry)", image: "/images/logos.webp", category: "worship" },
   ]
 };
 
@@ -899,11 +902,42 @@ export async function uploadWebsiteImage(file) {
     console.warn('[supabaseService] Storage upload error, using Data URL fallback:', err);
   }
 
-  // Fallback to Data URL
-  return new Promise((resolve, reject) => {
+  // Graceful fallback with client-side canvas optimization to prevent massive JSON payload
+  return new Promise((resolve) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 1600;
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', 0.85));
+            return;
+          }
+        } catch {
+          // fallback to raw
+        }
+        resolve(e.target?.result);
+      };
+      img.onerror = () => resolve(e.target?.result);
+      img.src = e.target?.result;
+    };
+    reader.onerror = () => resolve('');
     reader.readAsDataURL(file);
   });
 }

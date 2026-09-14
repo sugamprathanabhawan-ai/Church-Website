@@ -318,21 +318,71 @@ export async function deleteSession(code: string): Promise<void> {
   const client = getSupabase();
   if (client) {
     try {
-      const channel = client.channel(`session:${code}`);
-      await channel.send({
-        type: 'broadcast',
-        event: 'session_deleted',
-        payload: { code },
-      });
+      const storagePathsToDelete: string[] = [];
 
-      // Delete from PostgreSQL sessions table
-      await client.from('sessions').delete().eq('code', code);
+      // Query session content to extract any slide image paths
+      try {
+        const { data: sessionRow } = await client
+          .from('sessions')
+          .select('content')
+          .eq('code', code)
+          .maybeSingle();
+
+        if (sessionRow?.content?.sections && Array.isArray(sessionRow.content.sections)) {
+          for (const sec of sessionRow.content.sections) {
+            if (Array.isArray(sec.slides)) {
+              for (const sl of sec.slides) {
+                if (sl?.url && sl.url.includes('zen_sync_images/')) {
+                  const match = sl.url.match(/zen_sync_images\/(.+)$/);
+                  if (match && match[1]) {
+                    const cleaned = decodeURIComponent(match[1].split('?')[0]);
+                    if (!storagePathsToDelete.includes(cleaned)) {
+                      storagePathsToDelete.push(cleaned);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      } catch {
+        // ignore
+      }
 
       // Clean up uploaded files in storage folder
-      const { data: files } = await client.storage.from('zen_sync_images').list(code);
-      if (files && files.length > 0) {
-        const filePaths = files.map((f) => `${code}/${f.name}`);
-        await client.storage.from('zen_sync_images').remove(filePaths);
+      try {
+        const { data: files } = await client.storage
+          .from('zen_sync_images')
+          .list(code, { limit: 1000 });
+        if (files && files.length > 0) {
+          files.forEach((f) => {
+            if (f.name) storagePathsToDelete.push(`${code}/${f.name}`);
+          });
+        }
+      } catch {
+        // ignore
+      }
+
+      if (storagePathsToDelete.length > 0) {
+        await client.storage.from('zen_sync_images').remove(storagePathsToDelete);
+      }
+
+      // Broadcast termination event
+      try {
+        const channel = client.channel(`session:${code}`);
+        await channel.send({
+          type: 'broadcast',
+          event: 'session_deleted',
+          payload: { code },
+        });
+      } catch {
+        // ignore
+      }
+
+      // Delete from PostgreSQL sessions table
+      const { error: delError } = await client.from('sessions').delete().eq('code', code);
+      if (delError) {
+        console.warn('Supabase deleteSession database warning:', delError.message);
       }
     } catch (err) {
       console.warn('Error deleting session from Supabase:', err);
@@ -416,20 +466,56 @@ export async function deleteAllSessions(): Promise<void> {
     try {
       // Query all session codes first to clean up their storage
       const { data: allSessions } = await client.from('sessions').select('code');
+      const allPaths: string[] = [];
+
       if (allSessions && allSessions.length > 0) {
         for (const s of allSessions) {
           try {
-            const { data: files } = await client.storage.from('zen_sync_images').list(s.code);
+            const { data: files } = await client.storage
+              .from('zen_sync_images')
+              .list(s.code, { limit: 1000 });
             if (files && files.length > 0) {
-              const filePaths = files.map((f) => `${s.code}/${f.name}`);
-              await client.storage.from('zen_sync_images').remove(filePaths);
+              files.forEach((f) => allPaths.push(`${s.code}/${f.name}`));
             }
+          } catch {
+            // ignore
+          }
+
+          // Broadcast to listening clients
+          try {
+            const channel = client.channel(`session:${s.code}`);
+            channel.send({
+              type: 'broadcast',
+              event: 'session_deleted',
+              payload: { code: s.code },
+            }).then();
           } catch {
             // ignore
           }
         }
       }
-      await client.from('sessions').delete().neq('code', '');
+
+      // Also clean any root files in zen_sync_images
+      try {
+        const { data: rootItems } = await client.storage
+          .from('zen_sync_images')
+          .list('', { limit: 1000 });
+        if (rootItems && rootItems.length > 0) {
+          rootItems.forEach((item) => {
+            if (item.name && item.id && !item.id.includes('/')) {
+              allPaths.push(item.name);
+            }
+          });
+        }
+      } catch {
+        // ignore
+      }
+
+      if (allPaths.length > 0) {
+        await client.storage.from('zen_sync_images').remove(allPaths);
+      }
+
+      await client.from('sessions').delete().not('code', 'is', null);
     } catch (err) {
       console.warn('Error deleting all sessions in Supabase:', err);
     }

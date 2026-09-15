@@ -57,6 +57,8 @@ export async function createSession(
   const client = getSupabase();
   if (client) {
     try {
+      // Standard payload guaranteed to succeed with zero schema mismatch errors
+      // Device audit info is safely stored in JSONB content.device_info
       const upsertPayload: Record<string, unknown> = {
         code,
         content: {
@@ -66,11 +68,6 @@ export async function createSession(
         current_slide: initialData.current_slide,
         updated_at: new Date().toISOString(),
       };
-
-      if (deviceInfo) {
-        upsertPayload.device_info = deviceInfo;
-        upsertPayload.device_name = deviceInfo.deviceName;
-      }
 
       const { error } = await client.from('sessions').upsert(upsertPayload);
       if (error) {
@@ -113,12 +110,18 @@ export async function getSession(code: string): Promise<SessionData | null> {
         localStorage.setItem(`zensync_session_${code}`, JSON.stringify(session));
         return session;
       }
+
+      // If Supabase confirms the session was deleted / does not exist, clean up local cache
+      if (error && error.code === 'PGRST116') {
+        localStorage.removeItem(`zensync_session_${code}`);
+        return null;
+      }
     } catch (err) {
       console.warn('Supabase fetch failed, checking local storage:', err);
     }
   }
 
-  // Fallback to local storage
+  // Fallback to local storage only if offline/network error (not 404 row deletion)
   const localCached = localStorage.getItem(`zensync_session_${code}`);
   if (localCached) {
     try {
@@ -390,11 +393,32 @@ export async function deleteSession(code: string): Promise<void> {
   }
 }
 
+export function pruneLocalSessionCache(knownValidCodes?: string[]): void {
+  if (typeof window === 'undefined' || !window.localStorage) return;
+  const validSet = knownValidCodes ? new Set(knownValidCodes) : null;
+  const keysToRemove: string[] = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('zensync_session_')) {
+      if (!validSet) {
+        keysToRemove.push(key);
+      } else {
+        const code = key.replace('zensync_session_', '');
+        if (!validSet.has(code)) {
+          keysToRemove.push(key);
+        }
+      }
+    }
+  }
+  keysToRemove.forEach((k) => localStorage.removeItem(k));
+}
+
 /**
  * Fetches all presentation sessions from Supabase and local storage (for Admin mode)
  */
 export async function fetchAllSessions(): Promise<SessionData[]> {
   const sessionMap = new Map<string, SessionData>();
+  let remoteFetchSucceeded = false;
 
   // 1. Fetch from Supabase Remote Database
   const client = getSupabase();
@@ -406,7 +430,11 @@ export async function fetchAllSessions(): Promise<SessionData[]> {
         .order('created_at', { ascending: false });
 
       if (!error && Array.isArray(data)) {
+        remoteFetchSucceeded = true;
+        const activeRemoteCodes: string[] = [];
+
         for (const row of data) {
+          activeRemoteCodes.push(row.code);
           sessionMap.set(row.code, {
             code: row.code,
             created_at: row.created_at,
@@ -419,6 +447,9 @@ export async function fetchAllSessions(): Promise<SessionData[]> {
             current_slide: row.current_slide || { sectionId: '', slideIndex: 0, globalIndex: 0 },
           });
         }
+
+        // Auto-prune sessions that no longer exist in the remote database from local cache
+        pruneLocalSessionCache(activeRemoteCodes);
       } else if (error) {
         console.warn('Supabase fetchAllSessions error:', error.message);
       }
@@ -427,8 +458,8 @@ export async function fetchAllSessions(): Promise<SessionData[]> {
     }
   }
 
-  // 2. Fetch and merge from Local Storage
-  if (typeof window !== 'undefined' && window.localStorage) {
+  // 2. ONLY fallback to Local Storage if Supabase remote fetch failed or offline
+  if (!remoteFetchSucceeded && typeof window !== 'undefined' && window.localStorage) {
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && key.startsWith('zensync_session_')) {
@@ -574,6 +605,7 @@ export function subscribeToSession(
           }
         })
         .on('broadcast', { event: 'session_deleted' }, () => {
+          localStorage.removeItem(`zensync_session_${code}`);
           handlers.onSessionDeleted?.();
         })
         // Also listen to Postgres table changes as backup
@@ -605,6 +637,7 @@ export function subscribeToSession(
             filter: `code=eq.${code}`,
           },
           () => {
+            localStorage.removeItem(`zensync_session_${code}`);
             handlers.onSessionDeleted?.();
           }
         )
@@ -636,6 +669,7 @@ export function subscribeToSession(
         } else if (event.data?.type === 'content_change' && event.data.sections) {
           handlers.onContentChange(event.data.sections);
         } else if (event.data?.type === 'session_deleted') {
+          localStorage.removeItem(`zensync_session_${code}`);
           handlers.onSessionDeleted?.();
         }
       };
@@ -644,18 +678,25 @@ export function subscribeToSession(
     }
   }
 
-  // Periodic safety check: fetch fresh slide from DB every 6s in case websocket dropped an event
+  // Periodic safety check: fetch fresh slide & content every 4s and detect remote deletion
   if (client) {
     pollInterval = setInterval(async () => {
       try {
         const latest = await getSession(code);
         if (latest) {
           handlers.onSlideChange(latest.current_slide);
+          if (latest.content?.sections) {
+            handlers.onContentChange(latest.content.sections);
+          }
+        } else {
+          // Session was deleted remotely!
+          localStorage.removeItem(`zensync_session_${code}`);
+          handlers.onSessionDeleted?.();
         }
       } catch {
         // ignore
       }
-    }, 6000);
+    }, 4000);
   }
 
   return () => {

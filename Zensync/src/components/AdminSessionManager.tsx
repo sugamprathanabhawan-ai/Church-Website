@@ -17,7 +17,7 @@ import {
   Search,
 } from 'lucide-react';
 import type { SessionData, UserRole } from '../types';
-import { fetchAllSessions, deleteSession, deleteAllSessions } from '../lib/supabaseClient';
+import { fetchAllSessions, deleteSession, deleteAllSessions, pruneLocalSessionCache } from '../lib/supabaseClient';
 
 interface AdminSessionManagerProps {
   onClose: () => void;
@@ -79,6 +79,11 @@ export const AdminSessionManager: React.FC<AdminSessionManagerProps> = ({
     } finally {
       setIsDeletingAll(false);
     }
+  };
+
+  const handleCleanLocalCache = () => {
+    pruneLocalSessionCache();
+    loadSessions();
   };
 
   const handleCopy = (code: string) => {
@@ -191,11 +196,21 @@ export const AdminSessionManager: React.FC<AdminSessionManagerProps> = ({
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+            <button
+              onClick={handleCleanLocalCache}
+              className="btn-outline"
+              style={{ fontSize: '0.8rem', padding: '0.45rem 0.75rem', gap: '0.35rem' }}
+              title="Clean up old or stale local storage sessions on this device"
+            >
+              <RotateCw size={14} />
+              <span>Clean Local Cache</span>
+            </button>
+
             {sessions.length > 0 && (
               <button
                 onClick={() => setShowConfirmDeleteAll(true)}
                 className="admin-btn-delete-all"
-                title="Delete all sessions"
+                title="Delete all sessions from Supabase and clear connected devices"
               >
                 <Trash2 size={16} />
                 <span>Delete All ({sessions.length})</span>

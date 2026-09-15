@@ -27,7 +27,11 @@ import {
   Camera,
   Layers,
   Link as LinkIcon,
-  RotateCcw
+  RotateCcw,
+  Copy,
+  Check,
+  X,
+  ShieldCheck
 } from 'lucide-react';
 import { 
   fetchQuizLeaderboard, 
@@ -107,6 +111,81 @@ export default function AdminPage() {
   const [photoUploadMode, setPhotoUploadMode] = useState('file'); // 'file' or 'url'
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [editingPhoto, setEditingPhoto] = useState(null);
+  const [showSqlModal, setShowSqlModal] = useState(false);
+  const [copiedSql, setCopiedSql] = useState(false);
+
+  const SQL_FIX_SCRIPT = `-- SUGAM PRATHANA BHAWAN & ZEN SYNC - DATABASE RLS & STORAGE FIX
+-- 1. Upgrade sessions table for Zen Sync
+ALTER TABLE public.sessions ADD COLUMN IF NOT EXISTS device_name TEXT DEFAULT '';
+ALTER TABLE public.sessions ADD COLUMN IF NOT EXISTS device_info JSONB DEFAULT '{}'::jsonb;
+
+ALTER TABLE public.sessions ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public can read sessions" ON public.sessions;
+DROP POLICY IF EXISTS "Public can insert sessions" ON public.sessions;
+DROP POLICY IF EXISTS "Public can update sessions" ON public.sessions;
+DROP POLICY IF EXISTS "Public can delete sessions" ON public.sessions;
+CREATE POLICY "Public can read sessions" ON public.sessions FOR SELECT USING (true);
+CREATE POLICY "Public can insert sessions" ON public.sessions FOR INSERT WITH CHECK (true);
+CREATE POLICY "Public can update sessions" ON public.sessions FOR UPDATE USING (true);
+CREATE POLICY "Public can delete sessions" ON public.sessions FOR DELETE USING (true);
+
+-- 2. Unlock all content tables for Admin updates
+DO $$ 
+DECLARE
+    tbl text;
+    content_tables text[] := ARRAY[
+        'church_settings',
+        'youth_notices', 
+        'youth_schedules', 
+        'youth_groups', 
+        'choir_notices', 
+        'choir_schedules', 
+        'choir_layouts', 
+        'youtube_songs', 
+        'church_documents',
+        'quiz_questions', 
+        'quiz_leaderboard',
+        'faq_items'
+    ];
+BEGIN
+    FOREACH tbl IN ARRAY content_tables LOOP
+        IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = tbl) THEN
+            EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY;', tbl);
+            EXECUTE format('DROP POLICY IF EXISTS "Public Read Access" ON public.%I;', tbl);
+            EXECUTE format('DROP POLICY IF EXISTS "Public Insert Access" ON public.%I;', tbl);
+            EXECUTE format('DROP POLICY IF EXISTS "Public Update Access" ON public.%I;', tbl);
+            EXECUTE format('DROP POLICY IF EXISTS "Public Delete Access" ON public.%I;', tbl);
+            EXECUTE format('DROP POLICY IF EXISTS "Authenticated Insert Access" ON public.%I;', tbl);
+            EXECUTE format('DROP POLICY IF EXISTS "Authenticated Update Access" ON public.%I;', tbl);
+            EXECUTE format('DROP POLICY IF EXISTS "Authenticated Delete Access" ON public.%I;', tbl);
+            EXECUTE format('DROP POLICY IF EXISTS "Allow all for authenticated" ON public.%I;', tbl);
+            EXECUTE format('DROP POLICY IF EXISTS "Allow all for anon" ON public.%I;', tbl);
+            EXECUTE format('CREATE POLICY "Allow public read on %I" ON public.%I FOR SELECT USING (true);', tbl, tbl);
+            EXECUTE format('CREATE POLICY "Allow public insert on %I" ON public.%I FOR INSERT WITH CHECK (true);', tbl, tbl);
+            EXECUTE format('CREATE POLICY "Allow public update on %I" ON public.%I FOR UPDATE USING (true);', tbl, tbl);
+            EXECUTE format('CREATE POLICY "Allow public delete on %I" ON public.%I FOR DELETE USING (true);', tbl, tbl);
+        END IF;
+    END LOOP;
+END $$;
+
+-- 3. Storage Buckets (church_documents and zen_sync_images)
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES 
+    ('church_documents', 'church_documents', true, 26214400, ARRAY['application/pdf', 'application/x-pdf', 'image/png', 'image/jpeg', 'image/webp', 'image/gif']),
+    ('zen_sync_images', 'zen_sync_images', true, 26214400, ARRAY['image/png', 'image/jpeg', 'image/webp', 'image/gif'])
+ON CONFLICT (id) DO UPDATE SET public = true, file_size_limit = 26214400;
+
+DROP POLICY IF EXISTS "Public Read Documents" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated Upload Documents" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated Delete Documents" ON storage.objects;
+DROP POLICY IF EXISTS "Public Upload Documents" ON storage.objects;
+DROP POLICY IF EXISTS "Public Delete Documents" ON storage.objects;
+CREATE POLICY "Public Read Documents" ON storage.objects FOR SELECT USING (bucket_id IN ('church_documents', 'zen_sync_images'));
+CREATE POLICY "Public Upload Documents" ON storage.objects FOR INSERT WITH CHECK (bucket_id IN ('church_documents', 'zen_sync_images'));
+CREATE POLICY "Public Update Documents" ON storage.objects FOR UPDATE USING (bucket_id IN ('church_documents', 'zen_sync_images'));
+CREATE POLICY "Public Delete Documents" ON storage.objects FOR DELETE USING (bucket_id IN ('church_documents', 'zen_sync_images'));
+
+NOTIFY pgrst, 'reload schema';`;
 
   // Synchronize local states when context updates from Supabase
   useEffect(() => {
@@ -180,6 +259,9 @@ export default function AdminPage() {
       showToast('All changes saved directly to Supabase database! Live across all devices.');
     } catch (err) {
       showToast(err.message || 'Failed to save changes to Supabase', 'error');
+      if (err?.message && (err.message.includes('RLS') || err.message.includes('Permission') || err.message.includes('policy'))) {
+        setShowSqlModal(true);
+      }
     } finally {
       setSaving(false);
     }
@@ -237,6 +319,9 @@ export default function AdminPage() {
     } catch (err) {
       console.error('Error adding photo:', err);
       showToast(err.message || 'Failed to add photo', 'error');
+      if (err?.message && (err.message.includes('RLS') || err.message.includes('Permission') || err.message.includes('policy'))) {
+        setShowSqlModal(true);
+      }
     } finally {
       setUploadingPhoto(false);
     }
@@ -292,6 +377,9 @@ export default function AdminPage() {
       setEditingPhoto(null);
     } catch (err) {
       showToast(err.message || 'Failed to update picture', 'error');
+      if (err?.message && (err.message.includes('RLS') || err.message.includes('Permission') || err.message.includes('policy'))) {
+        setShowSqlModal(true);
+      }
     } finally {
       setUploadingPhoto(false);
     }
@@ -810,6 +898,17 @@ export default function AdminPage() {
               All CRUD operations sync directly with your PostgreSQL database in the cloud and reflect on all devices worldwide instantly.
             </p>
           </div>
+        </div>
+
+        <div className="flex items-center gap-2.5 shrink-0">
+          <button
+            onClick={() => setShowSqlModal(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-sky-500/20 hover:bg-sky-500/30 text-sky-200 hover:text-white rounded-xl text-xs font-semibold border border-sky-400/30 transition shadow-sm"
+            title="View Supabase SQL database sync script"
+          >
+            <ShieldCheck className="w-4 h-4 text-sky-400" />
+            <span>Database SQL Script</span>
+          </button>
         </div>
       </div>
 
@@ -2039,6 +2138,94 @@ export default function AdminPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Supabase Database SQL Setup Modal */}
+      {showSqlModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-2xl w-full border border-slate-200 shadow-2xl max-h-[90vh] flex flex-col animate-scale-in">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-sky-100 text-sky-700 flex items-center justify-center">
+                  <Database className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-serif font-bold text-slate-900">
+                    Supabase Database &amp; Storage Fix
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Run this SQL script in Supabase to enable Admin editing &amp; ZenSync
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowSqlModal(false)}
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+                aria-label="Close modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="text-xs text-slate-600 space-y-2 mb-4 bg-sky-50/70 p-4 rounded-2xl border border-sky-100">
+              <p className="font-semibold text-sky-900">Why is this required?</p>
+              <p>
+                By default, Supabase Row-Level Security (RLS) blocks anonymous client keys from inserting/updating church photos, routines, and documents. Running this script creates permissive policies so your admin console changes and ZenSync presentation sessions save directly to PostgreSQL in real time.
+              </p>
+            </div>
+
+            <div className="relative flex-1 overflow-hidden flex flex-col mb-4">
+              <div className="flex items-center justify-between bg-slate-900 text-slate-300 px-4 py-2 rounded-t-2xl text-xs font-mono">
+                <span>fix_database_rls.sql</span>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(SQL_FIX_SCRIPT);
+                    setCopiedSql(true);
+                    setTimeout(() => setCopiedSql(false), 2500);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded-lg transition text-xs font-sans font-semibold"
+                >
+                  {copiedSql ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy SQL</span>
+                    </>
+                  )}
+                </button>
+              </div>
+              <pre className="flex-1 overflow-y-auto bg-slate-950 text-sky-300 font-mono text-[11px] p-4 rounded-b-2xl border border-slate-900 max-h-60 selection:bg-sky-700">
+                {SQL_FIX_SCRIPT}
+              </pre>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
+              <a
+                href="https://supabase.com/dashboard/project/aiufpdabglxhojmmkedp/sql/new"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-slate-100 hover:bg-sky-50 text-slate-700 hover:text-sky-700 rounded-xl text-xs font-semibold transition"
+              >
+                <ExternalLink className="w-4 h-4" />
+                <span>Open Supabase SQL Editor</span>
+              </a>
+
+              <div className="flex items-center gap-2 ml-auto">
+                <button
+                  type="button"
+                  onClick={() => setShowSqlModal(false)}
+                  className="px-5 py-2.5 bg-sky-600 hover:bg-sky-500 text-white text-xs sm:text-sm font-bold rounded-xl shadow-md transition"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

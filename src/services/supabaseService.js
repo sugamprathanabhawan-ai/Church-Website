@@ -1,6 +1,20 @@
 import { supabase } from '../lib/supabase';
 import { extractYouTubeId } from '../utils/dataSyncEngine';
 
+export function formatSupabaseError(error, context = 'Database operation') {
+  if (!error) return new Error(`${context} failed`);
+  if (
+    error.code === '42501' || 
+    error.message?.includes('row-level security') || 
+    error.message?.includes('violates row-level security')
+  ) {
+    return new Error(
+      `Supabase Database Permission Error (RLS): The database policy blocked this write. Please run 'scripts/fix_database_rls.sql' in your Supabase SQL editor to enable live Admin sync.`
+    );
+  }
+  return new Error(error.message || `${context} failed`);
+}
+
 // ============================================================================
 // 1. YOUTH ROUTINE SERVICES
 // ============================================================================
@@ -142,7 +156,7 @@ export async function saveYouthData(data) {
     return true;
   } catch (error) {
     console.error('[supabaseService] Failed to save youth data:', error);
-    throw error;
+    throw formatSupabaseError(error, 'Saving youth data');
   }
 }
 
@@ -303,7 +317,7 @@ export async function saveChoirData(data) {
     return true;
   } catch (error) {
     console.error('[supabaseService] Failed to save choir data:', error);
-    throw error;
+    throw formatSupabaseError(error, 'Saving choir data');
   }
 }
 
@@ -363,7 +377,7 @@ export async function saveYouTubeSongs(songsArray) {
     return true;
   } catch (error) {
     console.error('[supabaseService] Failed to save youtube songs:', error);
-    throw error;
+    throw formatSupabaseError(error, 'Saving worship songs');
   }
 }
 
@@ -875,10 +889,10 @@ export async function saveWebsitePictures(data) {
       key: 'website_pictures',
       value: payload
     });
-    if (error) throw error;
+    if (error) throw formatSupabaseError(error, 'Saving website pictures');
   } catch (err) {
     console.error('[supabaseService] Error saving website_pictures to church_settings:', err);
-    throw err;
+    throw formatSupabaseError(err, 'Saving website pictures');
   }
 }
 
@@ -887,22 +901,44 @@ export async function uploadWebsiteImage(file) {
   const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
   const filePath = `website_media/${Date.now()}_${cleanName}`;
 
+  // 1. First try church_documents bucket
   try {
-    const { error } = await supabase.storage
+    const { data, error } = await supabase.storage
       .from('church_documents')
       .upload(filePath, file, { cacheControl: '3600', upsert: true });
 
-    if (!error) {
+    if (!error && data) {
       const { data: publicUrlData } = supabase.storage
         .from('church_documents')
         .getPublicUrl(filePath);
-      return publicUrlData.publicUrl;
+      if (publicUrlData?.publicUrl) {
+        return publicUrlData.publicUrl;
+      }
     }
   } catch (err) {
-    console.warn('[supabaseService] Storage upload error, using Data URL fallback:', err);
+    console.warn('[supabaseService] Storage upload to church_documents failed, trying fallback bucket:', err);
   }
 
-  // Graceful fallback with client-side canvas optimization to prevent massive JSON payload
+  // 2. Secondary working bucket fallback: zen_sync_images
+  try {
+    const zenPath = `church_website/${Date.now()}_${cleanName}`;
+    const { data, error } = await supabase.storage
+      .from('zen_sync_images')
+      .upload(zenPath, file, { cacheControl: '3600', upsert: true });
+
+    if (!error && data) {
+      const { data: publicUrlData } = supabase.storage
+        .from('zen_sync_images')
+        .getPublicUrl(zenPath);
+      if (publicUrlData?.publicUrl) {
+        return publicUrlData.publicUrl;
+      }
+    }
+  } catch (err) {
+    console.warn('[supabaseService] Storage upload to zen_sync_images failed:', err);
+  }
+
+  // 3. Graceful fallback with client-side canvas optimization to prevent massive JSON payload
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => {

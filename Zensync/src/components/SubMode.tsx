@@ -165,6 +165,23 @@ export const SubMode: React.FC<SubModeProps> = ({ sessionCode, onExit }) => {
         </div>
       </div>
 
+      {/* Discreet restore button if header is dismissed on mobile */}
+      {!headerVisible && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setHeaderVisible(true);
+          }}
+          className="sub-header-restore-btn"
+          title="Show Header & Exit"
+          aria-label="Show menu and exit button"
+        >
+          <Home size={14} />
+          <span>Menu</span>
+        </button>
+      )}
+
       {/* Maximized Image Display (No Prev/Next buttons, read-only) */}
       <ImageViewer
         activeSlide={activeFlatSlide}

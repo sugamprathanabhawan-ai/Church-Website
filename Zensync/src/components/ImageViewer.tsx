@@ -183,17 +183,50 @@ export const ImageViewer: React.FC<ImageViewerProps> = ({
               color: 'var(--primary)',
               boxShadow: 'var(--shadow-sm)',
               pointerEvents: 'none',
+              zIndex: 12,
             }}
           >
             {activeSlide.sectionTitle}
           </div>
+        )}
+
+        {/* On-canvas Touch Navigation Arrows (Always visible, thumb-friendly on mobile & touch screens) */}
+        {canNavigate && totalSlides > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (currentIndex > 0 && onPrevious) onPrevious();
+              }}
+              disabled={currentIndex <= 0}
+              className="canvas-nav-arrow canvas-nav-prev"
+              aria-label="Previous Slide"
+              title="Previous Slide"
+            >
+              <ChevronLeft size={28} />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (currentIndex < totalSlides - 1 && onNext) onNext();
+              }}
+              disabled={currentIndex >= totalSlides - 1}
+              className="canvas-nav-arrow canvas-nav-next"
+              aria-label="Next Slide"
+              title="Next Slide"
+            >
+              <ChevronRight size={28} />
+            </button>
+          </>
         )}
       </div>
 
       {/* Control Bar (shown for Main/Helper or when controls are active) */}
       {canNavigate && !isFullscreen && (
         <div className="viewer-control-bar">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div className="viewer-section-title-wrap">
             <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
               {activeSlide ? activeSlide.sectionTitle : 'Zen Sync'}
             </div>
@@ -203,13 +236,12 @@ export const ImageViewer: React.FC<ImageViewerProps> = ({
             <button
               onClick={onPrevious}
               disabled={currentIndex <= 0 || totalSlides === 0}
-              className="btn-outline"
-              style={{ padding: '0.65rem 1.25rem', fontWeight: 600 }}
+              className="btn-outline nav-btn-prev"
               title="Previous Slide (Left Arrow)"
               id="btn-previous-slide"
             >
               <ChevronLeft size={20} />
-              Previous
+              <span className="nav-btn-text">Previous</span>
             </button>
 
             <div className="slide-counter-badge" title="Current Slide / Total Slides">
@@ -219,17 +251,16 @@ export const ImageViewer: React.FC<ImageViewerProps> = ({
             <button
               onClick={onNext}
               disabled={currentIndex >= totalSlides - 1 || totalSlides === 0}
-              className="btn-primary"
-              style={{ padding: '0.65rem 1.4rem' }}
+              className="btn-primary nav-btn-next"
               title="Next Slide (Right Arrow or Space)"
               id="btn-next-slide"
             >
-              Next
+              <span className="nav-btn-text">Next</span>
               <ChevronRight size={20} />
             </button>
           </div>
 
-          <div>
+          <div className="viewer-fullscreen-btn-wrap">
             {showFullscreenBtn && (
               <button
                 onClick={toggleFullscreen}
@@ -244,21 +275,22 @@ export const ImageViewer: React.FC<ImageViewerProps> = ({
         </div>
       )}
 
-      {/* Fullscreen Overlay Controls (subtle, fade-in on hover) */}
+      {/* Fullscreen Overlay Controls (always visible on mobile, high contrast) */}
       {isFullscreen && (
         <div className="fullscreen-overlay-controls">
           {canNavigate && (
             <button
               onClick={onPrevious}
               disabled={currentIndex <= 0}
-              className="btn-outline"
-              style={{ padding: '0.4rem 0.8rem' }}
+              className="btn-outline fs-nav-btn"
+              title="Previous Slide"
             >
               <ChevronLeft size={18} />
+              <span className="fs-btn-text">Prev</span>
             </button>
           )}
 
-          <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-main)' }}>
+          <div className="fs-counter-badge">
             {totalSlides > 0 ? `${currentIndex + 1} / ${totalSlides}` : '0 / 0'}
           </div>
 
@@ -266,14 +298,15 @@ export const ImageViewer: React.FC<ImageViewerProps> = ({
             <button
               onClick={onNext}
               disabled={currentIndex >= totalSlides - 1}
-              className="btn-primary"
-              style={{ padding: '0.4rem 0.8rem' }}
+              className="btn-primary fs-nav-btn"
+              title="Next Slide"
             >
+              <span className="fs-btn-text">Next</span>
               <ChevronRight size={18} />
             </button>
           )}
 
-          <button onClick={toggleFullscreen} className="btn-icon" style={{ width: '2rem', height: '2rem' }}>
+          <button onClick={toggleFullscreen} className="btn-icon fs-exit-btn" title="Exit Fullscreen Mode">
             <Minimize2 size={16} />
           </button>
         </div>

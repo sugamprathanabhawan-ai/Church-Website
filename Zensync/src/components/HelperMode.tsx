@@ -100,7 +100,7 @@ export const HelperMode: React.FC<HelperModeProps> = ({ sessionCode, onExit }) =
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', minHeight: '100dvh', maxHeight: '100dvh', overflow: 'hidden' }}>
       {/* Top Navbar */}
       <header className="app-navbar helper-navbar">
         <div className="navbar-left">
@@ -251,7 +251,7 @@ export const HelperMode: React.FC<HelperModeProps> = ({ sessionCode, onExit }) =
         </aside>
 
         {/* Center Presentation Stage with Full Control (Previous/Next/Fullscreen) */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100%' }}>
+        <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {/* Horizontal Section Track for Fast Mobile Access */}
           {sections.length > 0 && (
             <div className="mobile-section-bar">

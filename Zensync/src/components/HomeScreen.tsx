@@ -251,7 +251,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
       {/* Top Bar */}
       <header className="app-navbar">
         <div className="app-brand">
@@ -632,7 +632,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 }}
                 id="btn-start-new-main"
               >
-                <Sparkles size={16} className="text-primary" />
+                <Sparkles size={16} color="var(--primary)" />
                 <span>Start New Presentation</span>
                 <ArrowRight size={16} />
               </button>

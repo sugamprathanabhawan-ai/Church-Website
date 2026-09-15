@@ -350,7 +350,7 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', minHeight: '100dvh', maxHeight: '100dvh', overflow: 'hidden' }}>
       {/* Hidden File Input */}
       <input
         type="file"
@@ -677,7 +677,7 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
         </aside>
 
         {/* Center Presentation Stage */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100%' }}>
+        <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {/* Horizontal Section Track for Fast Mobile Access */}
           {sections.length > 0 && (
             <div className="mobile-section-bar">

@@ -4,7 +4,7 @@ import '../../Zensync/src/index.css';
 
 export default function ZenSyncPage() {
   return (
-    <div className="w-full h-[100dvh] min-h-[100dvh] overflow-hidden bg-white zensync-scope">
+    <div className="w-full min-h-[100dvh] overflow-x-hidden bg-white zensync-scope">
       <ZenSyncApp />
     </div>
   );

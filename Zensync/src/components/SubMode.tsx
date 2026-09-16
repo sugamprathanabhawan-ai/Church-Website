@@ -87,7 +87,7 @@ export const SubMode: React.FC<SubModeProps> = ({ sessionCode, onExit }) => {
           <p className="join-subtitle" style={{ marginBottom: '1.5rem' }}>
             This presentation has been ended and deleted by the presenter.
           </p>
-          <button onClick={onExit} className="btn-primary" style={{ width: '100%' }}>
+          <button onClick={onExit} className="btn-primary" style={{ width: '100%', padding: '0.85rem', backgroundColor: '#0284c7', color: '#ffffff', border: '1.5px solid #0369a1', boxShadow: '0 4px 12px rgba(2, 132, 199, 0.35)' }}>
             Return to Home
           </button>
         </div>
@@ -114,21 +114,30 @@ export const SubMode: React.FC<SubModeProps> = ({ sessionCode, onExit }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <button
             onClick={onExit}
-            className="btn-outline"
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0.94)', backdropFilter: 'blur(6px)', padding: '0.4rem 0.75rem' }}
+            className="btn-outline btn-sub-exit"
+            style={{
+              backgroundColor: '#ffffff',
+              color: 'var(--primary)',
+              border: '1.5px solid var(--primary)',
+              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)',
+              padding: '0.45rem 0.85rem',
+              fontWeight: 700,
+            }}
             title="Leave Session"
+            id="btn-sub-exit"
           >
-            <Home size={15} />
-            <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Exit</span>
+            <Home size={16} />
+            <span style={{ fontSize: '0.85rem' }}>Exit</span>
           </button>
 
           <div
             className="code-badge"
             style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.94)',
-              backdropFilter: 'blur(6px)',
-              padding: '0.25rem 0.6rem',
+              backgroundColor: 'rgba(255, 255, 255, 0.96)',
+              border: '1.5px solid var(--primary-border)',
+              padding: '0.25rem 0.65rem',
               fontSize: '0.85rem',
+              boxShadow: '0 1px 4px rgba(0, 0, 0, 0.08)',
             }}
           >
             CODE: <span>{sessionCode}</span>
@@ -138,29 +147,37 @@ export const SubMode: React.FC<SubModeProps> = ({ sessionCode, onExit }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           {/* Status Indicator */}
           {status === 'connected' ? (
-            <div className="status-pill connected" style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(6px)' }}>
+            <div className="status-pill connected" style={{ backgroundColor: '#ffffff', border: '1.5px solid #a7f3d0', boxShadow: '0 1px 4px rgba(0, 0, 0, 0.08)' }}>
               <span className="status-dot green" />
-              <span>● LIVE</span>
+              <span style={{ fontWeight: 700 }}>LIVE</span>
             </div>
           ) : status === 'reconnecting' ? (
-            <div className="status-pill reconnecting" style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(6px)' }}>
+            <div className="status-pill reconnecting" style={{ backgroundColor: '#ffffff', border: '1.5px solid #fde68a', boxShadow: '0 1px 4px rgba(0, 0, 0, 0.08)' }}>
               <span className="status-dot amber" />
-              <span>○ Reconnecting...</span>
+              <span>Reconnecting...</span>
             </div>
           ) : (
-            <div className="status-pill demo" style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(6px)' }}>
+            <div className="status-pill demo" style={{ backgroundColor: '#ffffff', border: '1.5px solid var(--primary-border)', boxShadow: '0 1px 4px rgba(0, 0, 0, 0.08)' }}>
               <span className="status-dot blue" />
-              <span>● Synced</span>
+              <span>Synced</span>
             </div>
           )}
 
           <button
             onClick={toggleFullscreen}
-            className="btn-icon"
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0.94)', backdropFilter: 'blur(6px)', width: '2.2rem', height: '2.2rem' }}
+            className="btn-icon btn-sub-fs"
+            style={{
+              backgroundColor: '#ffffff',
+              color: 'var(--text-main)',
+              border: '1.5px solid var(--border-hover)',
+              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
+              width: '2.4rem',
+              height: '2.4rem',
+            }}
             title="Toggle Fullscreen"
+            id="btn-sub-fullscreen"
           >
-            {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+            {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
           </button>
         </div>
       </div>

@@ -37,15 +37,23 @@ export interface FlatSlide {
   slide: SlideItem;
 }
 
+export interface SessionContent {
+  sections: SectionItem[];
+  device_info?: DeviceAuditInfo;
+  main_signature?: string;
+  helper_signature?: string | null;
+  helper_device_info?: DeviceAuditInfo | null;
+}
+
 export interface SessionData {
   code: string;
   created_at: string;
   updated_at: string;
   device_info?: DeviceAuditInfo;
-  content: {
-    sections: SectionItem[];
-    device_info?: DeviceAuditInfo;
-  };
+  main_signature?: string;
+  helper_signature?: string | null;
+  helper_device_info?: DeviceAuditInfo | null;
+  content: SessionContent;
   current_slide: CurrentSlideState;
 }
 

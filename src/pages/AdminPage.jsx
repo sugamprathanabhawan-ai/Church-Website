@@ -118,6 +118,9 @@ export default function AdminPage() {
 -- 1. Upgrade sessions table for Zen Sync
 ALTER TABLE public.sessions ADD COLUMN IF NOT EXISTS device_name TEXT DEFAULT '';
 ALTER TABLE public.sessions ADD COLUMN IF NOT EXISTS device_info JSONB DEFAULT '{}'::jsonb;
+ALTER TABLE public.sessions ADD COLUMN IF NOT EXISTS main_signature TEXT DEFAULT '';
+ALTER TABLE public.sessions ADD COLUMN IF NOT EXISTS helper_signature TEXT DEFAULT '';
+ALTER TABLE public.sessions ADD COLUMN IF NOT EXISTS helper_device_info JSONB DEFAULT '{}'::jsonb;
 
 ALTER TABLE public.sessions ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Public can read sessions" ON public.sessions;

@@ -15,6 +15,8 @@ import {
   Square,
   Smartphone,
   ShieldCheck,
+  ShieldAlert,
+  Users,
 } from 'lucide-react';
 import type { SectionItem, SlideItem, ConnectionStatus, DeviceAuditInfo } from '../types';
 import { ImageViewer } from './ImageViewer';
@@ -25,6 +27,8 @@ import {
 } from '../lib/presentationUtils';
 import {
   createSession,
+  getSession,
+  forceReleaseHelper,
   updateSessionSlide,
   updateSessionContent,
   uploadSlideImage,
@@ -32,7 +36,7 @@ import {
   deleteSlideImage,
   deleteSession,
 } from '../lib/supabaseClient';
-import { collectDeviceAuditInfo } from '../lib/deviceUtils';
+import { collectDeviceAuditInfo, getOrCreateDeviceId } from '../lib/deviceUtils';
 
 interface MainModeProps {
   sessionCode: string;
@@ -50,6 +54,9 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
   const [deviceInfo, setDeviceInfo] = useState<DeviceAuditInfo | undefined>(initialDeviceInfo);
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [sessionEnded, setSessionEnded] = useState(false);
+  const [isUnauthorizedMain, setIsUnauthorizedMain] = useState(false);
+  const [claimedHostName, setClaimedHostName] = useState('');
+  const [activeHelperInfo, setActiveHelperInfo] = useState<DeviceAuditInfo | null>(null);
 
   // Section editing state
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
@@ -62,11 +69,44 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
   const fileInputRef = useRef<HTMLInputElement>(null);
   const targetUploadSectionId = useRef<string | null>(null);
 
+  const handleDisconnectHelper = async () => {
+    try {
+      await forceReleaseHelper(sessionCode);
+      setActiveHelperInfo(null);
+    } catch (e) {
+      console.warn('Failed to release helper:', e);
+    }
+  };
+
   // Initialize session in Supabase & subscribe
   useEffect(() => {
     let isMounted = true;
 
     async function init() {
+      // 1. Verify exclusive Main role ownership
+      const existing = await getSession(sessionCode);
+      const myDeviceId = getOrCreateDeviceId();
+
+      if (existing) {
+        const existingMainSig = existing.main_signature || existing.content?.main_signature;
+        if (existingMainSig && existingMainSig !== myDeviceId) {
+          if (isMounted) {
+            setIsUnauthorizedMain(true);
+            setClaimedHostName(
+              existing.device_info?.deviceName ||
+              existing.content?.device_info?.deviceName ||
+              'another device'
+            );
+          }
+          return;
+        }
+
+        const helperInfo = existing.helper_device_info || existing.content?.helper_device_info || null;
+        if (isMounted && helperInfo) {
+          setActiveHelperInfo(helperInfo);
+        }
+      }
+
       let activeDev = initialDeviceInfo;
       if (!activeDev) {
         activeDev = await collectDeviceAuditInfo();
@@ -83,6 +123,10 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
         if (initial.current_slide) {
           setCurrentGlobalIndex(initial.current_slide.globalIndex || 0);
         }
+        const helperInfo = initial.helper_device_info || initial.content?.helper_device_info || null;
+        if (helperInfo) {
+          setActiveHelperInfo(helperInfo);
+        }
       }
     }
     init();
@@ -93,6 +137,12 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
       },
       onContentChange: (newSections) => {
         setSections(newSections);
+        // Refresh helper info
+        getSession(sessionCode).then((s) => {
+          if (isMounted && s) {
+            setActiveHelperInfo(s.helper_device_info || s.content?.helper_device_info || null);
+          }
+        });
       },
       onStatusChange: (newStatus) => {
         setStatus(newStatus);
@@ -102,9 +152,22 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
       },
     });
 
+    // Helper heartbeat check every 5s
+    const helperCheckInterval = setInterval(async () => {
+      try {
+        const s = await getSession(sessionCode);
+        if (isMounted && s) {
+          setActiveHelperInfo(s.helper_device_info || s.content?.helper_device_info || null);
+        }
+      } catch {
+        // ignore
+      }
+    }, 5000);
+
     return () => {
       isMounted = false;
       unsubscribe();
+      clearInterval(helperCheckInterval);
     };
   }, [sessionCode]);
 
@@ -333,6 +396,29 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
     setTimeout(() => setCopied(false), 2000);
   };
 
+  if (isUnauthorizedMain) {
+    return (
+      <div className="fullscreen-container" style={{ backgroundColor: 'var(--bg-secondary)', flexDirection: 'column', padding: '1.25rem' }}>
+        <div className="join-card" style={{ textAlign: 'center', maxWidth: '440px' }}>
+          <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#fee2e2', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem' }}>
+            <ShieldAlert size={28} />
+          </div>
+          <h3 className="join-title" style={{ marginBottom: '0.5rem', fontSize: '1.35rem' }}>
+            Access Denied: Session Claimed
+          </h3>
+          <p className="join-subtitle" style={{ marginBottom: '1.5rem', lineHeight: 1.5 }}>
+            This presentation session (<strong>{sessionCode}</strong>) is locked to the original presenter device ({claimedHostName || 'Host Presenter'}).
+            <br /><br />
+            Only <strong>1 Main presenter</strong> is allowed per presentation session.
+          </p>
+          <button onClick={onExit} className="btn-primary" style={{ width: '100%', padding: '0.85rem', backgroundColor: '#0284c7', color: '#ffffff', border: '1.5px solid #0369a1', boxShadow: '0 4px 12px rgba(2, 132, 199, 0.35)' }}>
+            Return to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (sessionEnded) {
     return (
       <div className="fullscreen-container" style={{ backgroundColor: 'var(--bg-secondary)', flexDirection: 'column' }}>
@@ -341,7 +427,7 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
           <p className="join-subtitle" style={{ marginBottom: '1.5rem' }}>
             This session was terminated and deleted by the administrator. All associated files have been cleared.
           </p>
-          <button onClick={onExit} className="btn-primary" style={{ width: '100%' }}>
+          <button onClick={onExit} className="btn-primary" style={{ width: '100%', padding: '0.85rem', backgroundColor: '#0284c7', color: '#ffffff', border: '1.5px solid #0369a1', boxShadow: '0 4px 12px rgba(2, 132, 199, 0.35)' }}>
             Return to Home
           </button>
         </div>
@@ -357,12 +443,12 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
         ref={fileInputRef}
         onChange={handleFileChange}
         multiple
-        accept="image/*"
+        accept="image/png,image/jpeg,image/webp,image/jpg"
         style={{ display: 'none' }}
       />
 
       {/* Top Navbar */}
-      <header className="app-navbar main-navbar">
+      <header className="app-navbar">
         <div className="navbar-left">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -393,6 +479,22 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
         </div>
 
         <div className="navbar-actions">
+          {/* Active Helper Badge with Kick/Release button */}
+          {activeHelperInfo && (
+            <div className="helper-active-badge" title={`Active Helper: ${activeHelperInfo.deviceName}`}>
+              <Users size={13} />
+              <span className="helper-badge-name">Helper: {activeHelperInfo.deviceName}</span>
+              <button
+                onClick={handleDisconnectHelper}
+                className="btn-icon helper-kick-btn"
+                title="Disconnect Helper from session"
+                aria-label="Disconnect Helper"
+              >
+                <X size={11} />
+              </button>
+            </div>
+          )}
+
           {/* Host Device Audit Badge */}
           {deviceInfo && (
             <button
@@ -771,6 +873,40 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
               <div className="audit-detail-item">
                 <span className="audit-label">Session Started:</span>
                 <span className="audit-value">{new Date(deviceInfo.timestamp).toLocaleTimeString()}</span>
+              </div>
+
+              {/* Active Helper Slot Status */}
+              <div
+                style={{
+                  marginTop: '0.25rem',
+                  padding: '0.65rem 0.75rem',
+                  backgroundColor: activeHelperInfo ? '#f0fdf4' : 'var(--bg-tertiary)',
+                  border: `1px solid ${activeHelperInfo ? '#bbf7d0' : 'var(--border-color)'}`,
+                  borderRadius: 'var(--radius-sm)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '0.5rem',
+                }}
+              >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-light)' }}>
+                    Helper Controller (Max 1):
+                  </span>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: activeHelperInfo ? '#166534' : 'var(--text-muted)' }}>
+                    {activeHelperInfo ? `Active: ${activeHelperInfo.deviceName} (${activeHelperInfo.deviceModel})` : 'No helper connected (1 slot open)'}
+                  </span>
+                </div>
+                {activeHelperInfo && (
+                  <button
+                    onClick={handleDisconnectHelper}
+                    className="btn-danger-outline"
+                    style={{ fontSize: '0.75rem', padding: '0.3rem 0.55rem' }}
+                    title="Disconnect this helper to free up the slot"
+                  >
+                    Disconnect
+                  </button>
+                )}
               </div>
 
               <div style={{ marginTop: '0.4rem', padding: '0.65rem', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 'var(--radius-sm)', fontSize: '0.78rem', color: '#166534', lineHeight: 1.4 }}>

@@ -17,6 +17,9 @@ CREATE TABLE IF NOT EXISTS public.sessions (
 -- Upgrade existing tables if already created
 ALTER TABLE public.sessions ADD COLUMN IF NOT EXISTS device_name TEXT DEFAULT '';
 ALTER TABLE public.sessions ADD COLUMN IF NOT EXISTS device_info JSONB DEFAULT '{}'::jsonb;
+ALTER TABLE public.sessions ADD COLUMN IF NOT EXISTS main_signature TEXT DEFAULT '';
+ALTER TABLE public.sessions ADD COLUMN IF NOT EXISTS helper_signature TEXT DEFAULT '';
+ALTER TABLE public.sessions ADD COLUMN IF NOT EXISTS helper_device_info JSONB DEFAULT '{}'::jsonb;
 
 
 -- 2. Enable Row Level Security (RLS)

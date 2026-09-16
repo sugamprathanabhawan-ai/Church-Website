@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Home, Menu, X } from 'lucide-react';
+import { Home, Menu, X, ShieldAlert } from 'lucide-react';
 import type { SectionItem, ConnectionStatus } from '../types';
 import { ImageViewer } from './ImageViewer';
 import {
@@ -10,7 +10,10 @@ import {
   getSession,
   updateSessionSlide,
   subscribeToSession,
+  claimHelperRole,
+  releaseHelperRole,
 } from '../lib/supabaseClient';
+import { getOrCreateDeviceId, collectDeviceAuditInfo } from '../lib/deviceUtils';
 
 interface HelperModeProps {
   sessionCode: string;
@@ -23,13 +26,45 @@ export const HelperMode: React.FC<HelperModeProps> = ({ sessionCode, onExit }) =
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [status, setStatus] = useState<ConnectionStatus>('reconnecting');
   const [sessionEnded, setSessionEnded] = useState(false);
+  const [isUnauthorizedHelper, setIsUnauthorizedHelper] = useState(false);
+  const [claimedHelperDevice, setClaimedHelperDevice] = useState('');
+
+  const handleSafeExit = async () => {
+    try {
+      await releaseHelperRole(sessionCode, getOrCreateDeviceId());
+    } catch (e) {
+      console.warn('Error releasing helper role:', e);
+    }
+    onExit();
+  };
 
   useEffect(() => {
     let isMounted = true;
+    const myDeviceId = getOrCreateDeviceId();
 
     async function load() {
       const data = await getSession(sessionCode);
       if (isMounted && data) {
+        // Verify exclusivity: only 1 helper can claim the role
+        const existingHelperSig = data.helper_signature || data.content?.helper_signature;
+        if (existingHelperSig && existingHelperSig !== myDeviceId) {
+          setIsUnauthorizedHelper(true);
+          setClaimedHelperDevice(
+            data.helper_device_info?.deviceName ||
+            data.content?.helper_device_info?.deviceName ||
+            'another device'
+          );
+          return;
+        }
+
+        // Claim role if not claimed yet
+        try {
+          const myInfo = await collectDeviceAuditInfo();
+          await claimHelperRole(sessionCode, myDeviceId, myInfo);
+        } catch (err) {
+          console.warn('Could not auto-claim helper role on mount:', err);
+        }
+
         setSections(data.content?.sections || []);
         setCurrentGlobalIndex(data.current_slide?.globalIndex || 0);
         setStatus('connected');
@@ -54,9 +89,15 @@ export const HelperMode: React.FC<HelperModeProps> = ({ sessionCode, onExit }) =
       },
     });
 
+    const handleBeforeUnload = () => {
+      releaseHelperRole(sessionCode, myDeviceId);
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
     return () => {
       isMounted = false;
       unsubscribe();
+      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [sessionCode]);
 
@@ -83,6 +124,29 @@ export const HelperMode: React.FC<HelperModeProps> = ({ sessionCode, onExit }) =
     }
   };
 
+  if (isUnauthorizedHelper) {
+    return (
+      <div className="fullscreen-container" style={{ backgroundColor: 'var(--bg-secondary)', flexDirection: 'column', padding: '1.25rem' }}>
+        <div className="join-card" style={{ textAlign: 'center', maxWidth: '440px' }}>
+          <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#fee2e2', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem' }}>
+            <ShieldAlert size={28} />
+          </div>
+          <h3 className="join-title" style={{ marginBottom: '0.5rem', fontSize: '1.35rem' }}>
+            Access Denied: Helper Occupied
+          </h3>
+          <p className="join-subtitle" style={{ marginBottom: '1.5rem', lineHeight: 1.5 }}>
+            A Helper has already joined presentation session <strong>{sessionCode}</strong> on <strong>{claimedHelperDevice || 'another device'}</strong>.
+            <br /><br />
+            Only <strong>1 Helper</strong> can control the presentation at a time.
+          </p>
+          <button onClick={onExit} className="btn-primary" style={{ width: '100%', padding: '0.85rem', backgroundColor: '#0284c7', color: '#ffffff', border: '1.5px solid #0369a1', boxShadow: '0 4px 12px rgba(2, 132, 199, 0.35)' }}>
+            Return to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (sessionEnded) {
     return (
       <div className="fullscreen-container" style={{ backgroundColor: 'var(--bg-secondary)', flexDirection: 'column' }}>
@@ -91,7 +155,7 @@ export const HelperMode: React.FC<HelperModeProps> = ({ sessionCode, onExit }) =
           <p className="join-subtitle" style={{ marginBottom: '1.5rem' }}>
             This presentation has been ended and deleted by the presenter.
           </p>
-          <button onClick={onExit} className="btn-primary" style={{ width: '100%' }}>
+          <button onClick={handleSafeExit} className="btn-primary" style={{ width: '100%', padding: '0.85rem', backgroundColor: '#0284c7', color: '#ffffff', border: '1.5px solid #0369a1', boxShadow: '0 4px 12px rgba(2, 132, 199, 0.35)' }}>
             Return to Home
           </button>
         </div>
@@ -114,7 +178,7 @@ export const HelperMode: React.FC<HelperModeProps> = ({ sessionCode, onExit }) =
             {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
 
-          <div className="app-brand" onClick={onExit} title="Return to Home">
+          <div className="app-brand" onClick={handleSafeExit} title="Return to Home">
             <span className="app-brand-title">ZEN SYNC</span>
           </div>
 
@@ -147,7 +211,7 @@ export const HelperMode: React.FC<HelperModeProps> = ({ sessionCode, onExit }) =
           )}
 
           <button
-            onClick={onExit}
+            onClick={handleSafeExit}
             className="btn-outline btn-exit"
             title="Exit Presentation"
             id="btn-helper-exit"
@@ -238,7 +302,7 @@ export const HelperMode: React.FC<HelperModeProps> = ({ sessionCode, onExit }) =
           {/* Sidebar Bottom Action - Always accessible Exit button */}
           <div className="sidebar-footer">
             <button
-              onClick={onExit}
+              onClick={handleSafeExit}
               className="btn-outline btn-sidebar-exit"
               style={{ width: '100%', justifyContent: 'center', gap: '0.5rem', padding: '0.65rem' }}
               title="Exit Presentation"

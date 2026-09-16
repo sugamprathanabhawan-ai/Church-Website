@@ -76,7 +76,7 @@ function ScrollToTop() {
 
 function MainLayout() {
   const { pathname } = useLocation();
-  const isZenSync = pathname === '/zensync' || pathname === '/sync';
+  const isZenSync = pathname.startsWith('/zensync') || pathname.startsWith('/sync');
 
   return (
     <div className="flex flex-col min-h-screen relative selection:bg-sky-200 selection:text-sky-950">
@@ -93,8 +93,8 @@ function MainLayout() {
             <Route path="/quiz" element={<BibleQuizPage />} />
             <Route path="/laws" element={<LawsPage />} />
             <Route path="/admin" element={<AdminPage />} />
-            <Route path="/zensync" element={<ZenSyncPage />} />
-            <Route path="/sync" element={<ZenSyncPage />} />
+            <Route path="/zensync/*" element={<ZenSyncPage />} />
+            <Route path="/sync/*" element={<ZenSyncPage />} />
             <Route path="/contact" element={<Navigate to="/#contact" replace />} />
             <Route path="/history" element={<Navigate to="/#leadership" replace />} />
             <Route path="/beliefs" element={<Navigate to="/laws" replace />} />

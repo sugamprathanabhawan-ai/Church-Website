@@ -15,7 +15,9 @@ import {
   getInitialDeviceNameSuggestion,
   detectDeviceModel,
   collectDeviceAuditInfo,
+  getOrCreateDeviceId,
 } from '../lib/deviceUtils';
+import { getSession, claimHelperRole } from '../lib/supabaseClient';
 import { AdminSessionManager } from './AdminSessionManager';
 
 interface HomeScreenProps {
@@ -32,6 +34,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   const [deviceName, setDeviceName] = useState('');
   const [detectedModel, setDetectedModel] = useState({ model: '', platform: '' });
   const [isStartingMain, setIsStartingMain] = useState(false);
+  const [isVerifyingMain, setIsVerifyingMain] = useState(false);
+  const [isVerifyingJoin, setIsVerifyingJoin] = useState(false);
 
   // Sub & Helper PIN state
   const [pin, setPin] = useState(['', '', '', '']);
@@ -120,7 +124,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     mainInputRefs[nextIndex].current?.focus();
   };
 
-  const handleMainPinSubmit = () => {
+  const handleMainPinSubmit = async () => {
     const code = mainPin.join('');
     if (code === '2244') {
       setShowMainAccessModal(false);
@@ -129,9 +133,41 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     }
 
     if (code.length === 4) {
-      // Resume existing session as Main
-      setShowMainAccessModal(false);
-      onSelectRole('main', code);
+      setIsVerifyingMain(true);
+      setMainErrorMessage('');
+      try {
+        const session = await getSession(code);
+        if (!session) {
+          setMainErrorMessage(`Session "${code}" was not found. Please verify the code or start a new presentation below.`);
+          setIsVerifyingMain(false);
+          return;
+        }
+
+        const existingMainSig = session.main_signature || session.content?.main_signature;
+        const myDeviceId = getOrCreateDeviceId();
+
+        if (existingMainSig && existingMainSig !== myDeviceId) {
+          const presenterDevice =
+            session.device_info?.deviceName ||
+            session.content?.device_info?.deviceName ||
+            'another device';
+          setMainErrorMessage(
+            `A Main presenter has already claimed session "${code}" on ${presenterDevice}. Only 1 Main presenter is allowed per presentation.`
+          );
+          setIsVerifyingMain(false);
+          return;
+        }
+
+        // Authorized
+        setShowMainAccessModal(false);
+        onSelectRole('main', code, session.device_info);
+      } catch (err) {
+        console.warn('Main verification fallback:', err);
+        setShowMainAccessModal(false);
+        onSelectRole('main', code);
+      } finally {
+        setIsVerifyingMain(false);
+      }
       return;
     }
 
@@ -231,7 +267,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     inputRefs[nextIndex].current?.focus();
   };
 
-  const handleJoinSession = () => {
+  const handleJoinSession = async () => {
     const code = pin.join('');
     if (code === '2244') {
       setModalRole(null);
@@ -244,9 +280,41 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       return;
     }
 
-    if (modalRole) {
-      onSelectRole(modalRole, code);
-      setModalRole(null);
+    if (!modalRole) return;
+
+    setIsVerifyingJoin(true);
+    setErrorMessage('');
+
+    try {
+      if (modalRole === 'helper') {
+        const myDevInfo = await collectDeviceAuditInfo();
+        const myDeviceId = getOrCreateDeviceId();
+        const claimRes = await claimHelperRole(code, myDeviceId, myDevInfo);
+        if (!claimRes.success) {
+          setErrorMessage(claimRes.error || 'Only 1 Helper is allowed per presentation session.');
+          setIsVerifyingJoin(false);
+          return;
+        }
+
+        onSelectRole('helper', code, myDevInfo);
+        setModalRole(null);
+      } else if (modalRole === 'sub') {
+        // Check if presentation exists
+        const session = await getSession(code);
+        if (!session) {
+          setErrorMessage(`Session "${code}" was not found. Please verify the code with the Main presenter.`);
+          setIsVerifyingJoin(false);
+          return;
+        }
+
+        onSelectRole('sub', code);
+        setModalRole(null);
+      }
+    } catch (err) {
+      console.error('Error joining session:', err);
+      setErrorMessage('Connection error. Please check your network and try again.');
+    } finally {
+      setIsVerifyingJoin(false);
     }
   };
 
@@ -300,7 +368,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             <p className="role-card-desc">
               Create and control a presentation. Manage sections, upload hymn slides, and drive the live presentation.
             </p>
-            <div className="role-card-action">
+            <div className="role-card-btn role-card-btn-main">
               <span>Start Presentation</span>
               <ArrowRight size={18} />
             </div>
@@ -322,7 +390,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             <p className="role-card-desc">
               Follow the presentation in real-time. Clean, maximized view area for singers, congregation, and choir members.
             </p>
-            <div className="role-card-action">
+            <div className="role-card-btn role-card-btn-sub">
               <span>Join to Follow</span>
               <ArrowRight size={18} />
             </div>
@@ -344,7 +412,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             <p className="role-card-desc">
               Control the presentation. Navigate slides and sections with synchronized permissions without altering content.
             </p>
-            <div className="role-card-action">
+            <div className="role-card-btn role-card-btn-helper">
               <span>Join as Controller</span>
               <ArrowRight size={18} />
             </div>
@@ -356,14 +424,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       {modalRole && (
         <div className="join-modal-overlay">
           <div className="join-card">
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-0.5rem' }}>
               <button
                 onClick={() => setModalRole(null)}
-                className="btn-icon"
-                style={{ width: '2rem', height: '2rem' }}
+                className="btn-icon modal-close-btn"
                 aria-label="Close"
               >
-                <X size={16} />
+                <X size={18} />
               </button>
             </div>
 
@@ -408,11 +475,34 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
             <button
               onClick={handleJoinSession}
+              disabled={isVerifyingJoin}
               className="btn-primary"
-              style={{ width: '100%', padding: '0.85rem', fontSize: '1.05rem', letterSpacing: '0.02em' }}
+              style={{
+                width: '100%',
+                padding: '0.9rem',
+                fontSize: '1.05rem',
+                fontWeight: 700,
+                letterSpacing: '0.03em',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                backgroundColor: '#0284c7',
+                color: '#ffffff',
+                border: '1.5px solid #0369a1',
+                boxShadow: '0 4px 12px rgba(2, 132, 199, 0.35)',
+                cursor: isVerifyingJoin ? 'not-allowed' : 'pointer',
+              }}
               id="btn-join-session"
             >
-              JOIN SESSION
+              {isVerifyingJoin ? (
+                <>
+                  <Loader2 size={19} className="spin" />
+                  <span>Connecting...</span>
+                </>
+              ) : (
+                <span>JOIN SESSION</span>
+              )}
             </button>
           </div>
         </div>
@@ -425,11 +515,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-0.5rem' }}>
               <button
                 onClick={() => setShowMainDeviceModal(false)}
-                className="btn-icon"
-                style={{ width: '2rem', height: '2rem' }}
+                className="btn-icon modal-close-btn"
                 aria-label="Close"
               >
-                <X size={16} />
+                <X size={18} />
               </button>
             </div>
 
@@ -528,6 +617,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   fontSize: '1rem',
                   letterSpacing: '0.02em',
                   marginTop: '0.25rem',
+                  backgroundColor: '#0284c7',
+                  color: '#ffffff',
+                  border: '1.5px solid #0369a1',
+                  boxShadow: '0 4px 12px rgba(2, 132, 199, 0.35)',
+                  cursor: (isStartingMain || !deviceName.trim()) ? 'not-allowed' : 'pointer',
                 }}
                 id="btn-confirm-main-device"
               >
@@ -552,11 +646,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-1rem' }}>
               <button
                 onClick={() => setShowMainAccessModal(false)}
-                className="btn-icon"
-                style={{ width: '2rem', height: '2rem' }}
+                className="btn-icon modal-close-btn"
                 aria-label="Close"
               >
-                <X size={16} />
+                <X size={18} />
               </button>
             </div>
 
@@ -604,11 +697,33 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%' }}>
               <button
                 onClick={handleMainPinSubmit}
+                disabled={isVerifyingMain}
                 className="btn-primary"
-                style={{ width: '100%', padding: '0.8rem', fontSize: '1rem' }}
+                style={{
+                  width: '100%',
+                  padding: '0.85rem',
+                  fontSize: '1rem',
+                  fontWeight: 700,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  backgroundColor: '#0284c7',
+                  color: '#ffffff',
+                  border: '1.5px solid #0369a1',
+                  boxShadow: '0 4px 12px rgba(2, 132, 199, 0.35)',
+                  cursor: isVerifyingMain ? 'not-allowed' : 'pointer',
+                }}
                 id="btn-main-pin-submit"
               >
-                Resume Session
+                {isVerifyingMain ? (
+                  <>
+                    <Loader2 size={18} className="spin" />
+                    <span>Verifying Session...</span>
+                  </>
+                ) : (
+                  <span>Resume Session</span>
+                )}
               </button>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', margin: '0.2rem 0' }}>
@@ -629,6 +744,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   justifyContent: 'center',
                   gap: '0.5rem',
                   fontWeight: 600,
+                  backgroundColor: '#f0f9ff',
+                  color: '#0284c7',
+                  border: '1.5px solid #0284c7',
                 }}
                 id="btn-start-new-main"
               >

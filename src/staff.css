@@ -1,0 +1,38 @@
+.staff-section{padding:90px 7% 45px;background:#f5fafb;border-top:1px solid #d4e8ee;overflow:hidden}
+.staff-heading{display:flex;justify-content:space-between;gap:40px;align-items:center;max-width:1250px;margin:0 auto}
+.staff-heading h2{font-family:'Playfair Display',serif;font-size:52px;font-weight:400;letter-spacing:-1.5px;line-height:1.2;margin:20px 0 35px}
+.staff-heading h2 em{color:#6a9daf}
+.staff-intro{max-width:340px}
+.staff-intro p{font-size:13px;color:#71818a;line-height:1.9}
+.staff-seal{width:75px;color:#699aaf;margin-bottom:15px;animation:staff-sun 25s linear infinite}
+.staff-toolbar{display:flex;justify-content:space-between;align-items:center;padding:20px 0 28px;border-top:1px solid #d5e5eb;max-width:1250px;margin:auto;gap:15px}
+.staff-filters{display:flex;gap:7px;flex-wrap:wrap}
+.staff-filters button{background:transparent;border:1px solid transparent;padding:10px 17px;font-size:12px;border-radius:30px;transition:background .2s,border-color .2s}
+.staff-filters button:hover{background:#e8f2f6}
+.staff-filters button[aria-pressed=true]{background:#dceef5;border-color:#bfdce8}
+.staff-filters button span{font-size:9px;margin-left:9px;opacity:.6}
+.staff-count{font-size:9px;letter-spacing:1.7px;white-space:nowrap;color:#60899b}
+.staff-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:30px 22px;max-width:1250px;margin:0 auto}
+.staff-card{min-width:0;border-radius:100px 100px 0 0}
+.staff-visible .staff-card{animation:staff-arrive .65s both cubic-bezier(.2,.7,.3,1)}
+.staff-portrait{position:relative;aspect-ratio:4/5;overflow:hidden;border-radius:100px 100px 5px 5px;background:#dfedf2;box-shadow:0 5px 18px #214b6008}
+.staff-portrait img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .7s,filter .7s;filter:saturate(.75)}
+.staff-department{position:absolute;bottom:12px;left:12px;font-size:8px;letter-spacing:1px;text-transform:uppercase;background:#f5fafbdd;backdrop-filter:blur(10px);padding:7px 10px;border:1px solid #ffffff88;border-radius:20px;transition:opacity .3s}
+.staff-quote{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(0deg,#153f59eb,transparent 85%);padding:20px;color:#fff;opacity:0;transform:translateY(12px);transition:opacity .35s,transform .35s}
+.staff-quote>span{font-size:8px;letter-spacing:1.8px;color:#c5e4f2}
+.staff-quote p{font-family:'Playfair Display',serif;font-size:18px;line-height:1.5;margin:10px 0 0}
+.staff-card:hover img,.staff-card:focus img{transform:scale(1.07);filter:saturate(1)}
+.staff-card:hover .staff-quote,.staff-card:focus .staff-quote{opacity:1;transform:translateY(0)}
+.staff-card:hover .staff-department,.staff-card:focus .staff-department{opacity:0}
+.staff-card-caption{display:flex;justify-content:space-between;align-items:center;padding:15px 2px}
+.staff-card-caption h3{font-family:'Playfair Display',serif;font-size:18px;font-weight:400;margin:0}
+.staff-card-caption p{font-size:10px;color:#71818a;margin:5px 0 0}
+.staff-card-caption>span{color:#89adbd;font-size:19px;transition:transform .3s}
+.staff-card:hover .staff-card-caption>span{transform:translate(2px,-2px)}
+.staff-bottom{max-width:1250px;margin:35px auto 0;padding-top:24px;border-top:1px solid #d5e5eb;display:flex;justify-content:space-between;gap:20px;align-items:center}
+.staff-bottom>span{font-size:9px;letter-spacing:1.5px;color:#60899b}
+.staff-bottom p{font-size:10px;color:#81969f;margin:0}
+@keyframes staff-arrive{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes staff-sun{to{transform:rotate(360deg)}}
+@media(max-width:1100px){.staff-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.staff-quote p{font-size:21px}}
+@media(max-width:640px){.staff-section{padding:60px 6% 35px}.staff-heading{display:block}.staff-heading h2{font-size:40px;margin-bottom:22px}.staff-intro{display:flex;align-items:center;gap:20px;max-width:none;margin-bottom:25px}.staff-seal{width:55px;flex-shrink:0;margin:0}.staff-intro p{font-size:12px}.staff-toolbar{padding-bottom:20px}.staff-count{display:none}.staff-filters button{padding:9px 12px;font-size:11px}.staff-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 15px}.staff-card-caption h3{font-size:16px}.staff-card-caption>span{display:none}.staff-quote{padding:15px}.staff-quote p{font-size:16px}.staff-bottom{align-items:flex-start;flex-direction:column;gap:10px}}

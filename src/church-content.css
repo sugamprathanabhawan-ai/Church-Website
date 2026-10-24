@@ -1,0 +1,123 @@
+.church-section{padding:85px 7%;scroll-margin-top:25px}
+.church-section h2{font-family:'Playfair Display',serif;font-size:52px;line-height:1.2;font-weight:400;letter-spacing:-1.5px;margin:20px 0}
+.church-section h2 em{color:#6a9daf}
+.church-section p{font-size:13px;line-height:1.9;color:#71818a}
+.church-section h3{font-family:'Playfair Display',serif;font-weight:400;font-size:23px;line-height:1.4;margin:0}
+.church-section-heading{text-align:center;margin:0 auto 45px;max-width:680px}
+.church-split-heading{display:flex;justify-content:space-between;align-items:center;gap:60px;margin-bottom:35px}
+.church-split-heading>p{max-width:365px}
+.church-content-link{display:flex;align-items:center;justify-content:space-between;gap:22px;border-bottom:1px solid #c4dbe4;padding:13px 0;font-size:12px;transition:color .2s}
+.church-content-link:hover{color:#4b92ae}
+.church-content-link>span{font-size:19px}
+.church-action{display:inline-flex;align-items:center;justify-content:space-between;gap:30px;background:#285c73;color:#fff;padding:16px 22px;border-radius:4px;font-size:12px;transition:background .2s}
+.church-action:hover{background:#1c4960}
+.church-icon{width:50px;height:50px;border-radius:50%;background:#e4f2f7;color:#598da5;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.church-number{font-size:10px;letter-spacing:1.4px;color:#83a2af}
+.ministry-section{background:#eef7fa}
+.ministry-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;max-width:1250px;margin:auto}
+.ministry-card{padding:30px;background:#f8fbfc;border:1px solid #dcebf0;border-radius:5px;display:flex;flex-direction:column;transition:transform .3s,box-shadow .3s}
+.ministry-card:hover{transform:translateY(-5px);box-shadow:0 15px 35px #315e730f}
+.ministry-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:25px}
+.ministry-time{font-size:10px;letter-spacing:.4px;color:#6491a5;margin:12px 0 0}
+.ministry-card p{margin:15px 0 22px}
+.ministry-card .church-content-link{margin-top:auto}
+.fellowship-section{background:#f8faf7}
+.youth-overview{display:flex;align-items:center;gap:22px;padding:25px 30px;border:1px solid #dbe8ee;background:#edf6fa;border-radius:5px}
+.youth-overview h3{font-size:21px}
+.youth-overview p{margin:5px 0 0;font-size:12px}
+.youth-leader{margin-left:auto;display:flex;flex-direction:column;gap:8px}
+.youth-leader>span{font-size:8px;letter-spacing:1.5px;color:#60899b}
+.youth-leader>strong{font-weight:400;font-size:17px}
+.youth-overview .church-content-link{margin-left:15px}
+.youth-groups{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:25px;margin-top:25px}
+.youth-groups article{display:flex;align-items:center;gap:20px;padding:25px;border:1px solid #dce8e9;border-radius:5px}
+.youth-group-mark{font-family:'Playfair Display',serif;font-size:45px;color:#b5d4df}
+.youth-groups .section-label{font-size:8px}
+.youth-groups h3{font-size:25px;margin:8px 0}
+.youth-groups p{margin:0;color:#456879}
+.youth-groups small{font-size:10px;color:#81969f}
+.church-section .church-source-note{font-size:10px;margin-top:22px;color:#81969f}
+.choir-section{background:#e7f3f8;display:grid;grid-template-columns:1fr 1fr;gap:9%;align-items:center}
+.choir-practice{display:flex;align-items:center;gap:18px;margin:27px 0;color:#699aaf}
+.choir-practice>div{display:flex;flex-direction:column;gap:8px}
+.choir-practice span{font-size:8px;letter-spacing:1.5px}
+.choir-practice strong{font-weight:400;font-size:13px;color:#285269}
+.choir-resources{padding:35px;border:1px solid #ffffffa6;background:#f6fbfd99;border-radius:100px 5px 5px 5px;box-shadow:0 12px 30px #2d617008}
+.choir-resources>.section-label{padding-top:14px;display:block}
+.choir-resources h3{margin-top:15px;font-size:30px}
+.choir-resources .church-content-link{font-size:12px;padding:15px 0}
+.choir-resources small{font-size:8px;color:#83a2af;letter-spacing:1px;margin-left:auto}
+.calendar-section{background:#f5fafb}
+.calendar-feature{display:flex;align-items:center;gap:30px;padding:35px;background:#eaf5f9;border:1px solid #d6e8f0;border-radius:6px}
+.calendar-symbol{background:#d5ebf4;border-radius:100px 100px 8px 8px;width:100px;height:115px;display:grid;place-items:center;flex-shrink:0;color:#6695aa}
+.calendar-symbol svg{width:40px;height:40px}
+.calendar-feature h3{margin-top:10px;font-size:27px}
+.calendar-feature p{margin-bottom:0}
+.calendar-feature>.church-action{margin-left:auto;white-space:nowrap}
+.calendar-preview{margin-top:20px;border:1px solid #d6e8f0;border-radius:5px}
+.calendar-preview>summary{padding:20px 25px;cursor:pointer;font-size:13px;list-style:none;display:flex;align-items:center;justify-content:space-between}
+.calendar-preview>summary::-webkit-details-marker{display:none}
+.calendar-preview>summary span{font-size:23px}
+.calendar-preview[open]>summary span{transform:rotate(45deg)}
+.church-document-frame{background:#e8f2f6;border:1px solid #d5e5ed;border-radius:5px;padding:15px;margin-top:25px}
+.calendar-preview .church-document-frame{margin:0;border:0;border-top:1px solid #d5e5ed}
+.church-document-frame iframe{border:0;width:100%;height:610px;border-radius:3px;background:#fff}
+.church-document-frame>p{font-size:11px;margin:12px 0 0}
+.church-document-frame>p a{text-decoration:underline}
+.laws-section{background:#f8faf7}
+.church-document-toolbar{display:flex;justify-content:space-between;align-items:center;gap:25px;border-bottom:1px solid #d5e5eb;padding-bottom:25px}
+.church-document-toolbar h3{font-size:21px;display:flex;align-items:center;gap:14px}
+.church-document-toolbar h3 span{font-family:'DM Sans',sans-serif;font-size:10px;border-radius:20px;background:#e6f1f6;padding:7px 10px;color:#6993a6}
+.church-document-toolbar label{display:flex;align-items:center;gap:10px;padding:12px 16px;border:1px solid #d1e3ea;border-radius:30px;background:#f2f8fa;color:#7395a5}
+.church-document-toolbar input{border:0;outline:0;background:none;font:inherit;font-size:12px;color:#214b60;width:180px}
+.church-document-toolbar label:focus-within{outline:2px solid #87c8e1}
+.church-document-list article{display:flex;align-items:center;gap:22px;padding:23px 0;border-bottom:1px solid #d5e5eb}
+.church-document-list article>svg{color:#719aac}
+.church-document-list h3{font-size:20px}
+.document-type{margin-left:auto;color:#83a2af;font-size:9px;letter-spacing:1.5px}
+.church-document-list button{display:flex;align-items:center;gap:23px;font-size:11px;background:#e5f1f6;border-radius:25px;padding:10px 17px;color:#285269}
+.church-document-list button[aria-expanded=true]{background:#285c73;color:#fff}
+.document-preview-heading{display:flex;justify-content:space-between;align-items:center;padding:0 0 15px}
+.document-preview-heading h3{font-size:20px}
+.document-preview-heading button{background:none;font-size:26px;padding:0 8px}
+.church-empty{text-align:center;padding:35px}
+.church-empty button{background:none;text-decoration:underline;color:#285c73}
+.quiz-section{display:grid;grid-template-columns:1.2fr 1fr;align-items:center;gap:50px;background:#e5f2f8}
+.quiz-section .church-action{margin-top:15px}
+.quiz-visual{position:relative;display:grid;place-items:center;min-height:360px}
+.quiz-emblem{width:270px;height:270px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f5fafba8;border:1px solid #ffffff;box-shadow:0 10px 50px #598ea112;z-index:1}
+.quiz-emblem>svg{color:#699aaf;margin-bottom:15px}
+.quiz-emblem>span{font-size:8px;letter-spacing:2px;color:#6a91a3}
+.quiz-emblem strong{font-family:'Playfair Display',serif;font-size:75px;font-weight:400;line-height:1.2}
+.quiz-emblem p{font-size:11px;margin:0 0 15px}
+.quiz-emblem .quiz-streak{font-size:7px;letter-spacing:1.2px;padding:9px 12px;background:#dceef5;border-radius:20px}
+.quiz-orbit{position:absolute;width:330px;height:330px;border:1px dashed #abcbd9;border-radius:50%;animation:quiz-orbit 30s linear infinite}
+.quiz-orbit::before,.quiz-orbit::after{content:'';position:absolute;border-radius:50%;width:10px;height:10px;background:#9ebfcc;left:50%;top:-5px}
+.quiz-orbit::after{top:auto;bottom:-5px;background:#c2dce7}
+@keyframes quiz-orbit{to{transform:rotate(360deg)}}
+.zen-section{background:#f5fafb}
+.zen-modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:25px}
+.zen-modes article{padding:30px;border:1px solid #d7e8ef;border-radius:5px;background:#f9fcfd}
+.zen-modes .church-icon{margin-bottom:22px}
+.zen-modes .section-label{font-size:8px}
+.zen-modes h3{margin-top:12px}
+.zen-modes p{margin-bottom:0}
+.zen-join{display:flex;align-items:center;justify-content:space-between;gap:30px;background:#e5f2f8;padding:22px 30px;margin-top:25px;border-radius:5px}
+.zen-join>span{font-size:12px;color:#6d8a98;line-height:1.7}
+.zen-join .church-action{flex-shrink:0}
+.quick-resources{display:flex;align-items:center;justify-content:space-between;gap:70px;background:#edf6fa;border-block:1px solid #d9e9f0;padding-block:60px}
+.quick-resources h2{font-size:38px}
+.quick-resource-links{min-width:300px;flex:1;max-width:450px}
+.contact-section{display:grid;grid-template-columns:1fr 1fr;gap:8%;align-items:center;background:#f8faf7}
+.contact-copy>p{max-width:380px}
+.contact-detail{display:flex;flex-direction:column;gap:8px;margin:22px 0}
+.contact-detail>span{font-size:8px;letter-spacing:1.6px;color:#7595a5}
+.contact-detail>strong,.contact-detail>a{font-size:13px;font-weight:400;overflow-wrap:anywhere}
+.contact-links{display:flex;gap:25px}
+.contact-copy>.church-content-link{max-width:280px}
+.contact-map{border:1px solid #d6e6eb;border-radius:100px 5px 5px 5px;overflow:hidden;background:#e5f1f5}
+.contact-map iframe{height:430px;width:100%;border:0;display:block}
+.contact-map>.church-content-link{padding:18px 22px;border-bottom:0;font-size:11px}
+@media(max-width:1000px){.ministry-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.youth-overview{flex-wrap:wrap}.youth-overview>.church-content-link{width:100%;margin:0}.youth-groups{gap:15px}.youth-groups article{padding:20px 15px;gap:12px}.youth-group-mark{font-size:30px}.calendar-feature{flex-wrap:wrap}.calendar-feature>.church-action{margin:0}.choir-section{gap:5%}.quick-resources{gap:35px}.church-section h2{font-size:44px}}
+@media(max-width:640px){.church-section{padding:60px 6%}.church-section h2{font-size:38px;letter-spacing:-1px}.church-section-heading{margin-bottom:30px}.church-section-heading p br{display:none}.church-split-heading{display:block;margin-bottom:25px}.church-split-heading>p{max-width:none}.ministry-grid{grid-template-columns:1fr;gap:15px}.ministry-card{padding:25px}.ministry-card-top{margin-bottom:20px}.ministry-card h3{font-size:23px}.youth-overview{padding:22px;gap:15px}.youth-overview h3{font-size:18px}.youth-overview .church-icon{width:40px;height:40px}.youth-leader{width:100%;margin:5px 0}.youth-groups{grid-template-columns:1fr}.youth-groups article{padding:22px;gap:25px}.youth-group-mark{font-size:42px}.choir-section,.quiz-section,.contact-section{grid-template-columns:1fr;gap:35px}.choir-resources{padding:30px 25px}.calendar-feature{padding:25px;gap:20px}.calendar-symbol{width:70px;height:85px}.calendar-feature h3{font-size:24px}.calendar-feature .church-action{width:100%}.church-document-toolbar{flex-direction:column;align-items:stretch;gap:20px}.church-document-toolbar h3{font-size:20px}.church-document-toolbar input{width:100%}.church-document-list article{gap:12px;padding:20px 0}.church-document-list h3{font-size:16px;flex:1}.church-document-list .church-number,.document-type{display:none}.church-document-list article>svg{width:20px;flex-shrink:0}.church-document-list button{font-size:10px;padding:9px 12px;gap:8px;flex-shrink:0}.church-document-frame iframe{height:450px}.quiz-visual{min-height:310px}.quiz-emblem{width:235px;height:235px}.quiz-orbit{width:285px;height:285px}.quiz-emblem strong{font-size:65px}.zen-modes{grid-template-columns:1fr;gap:15px}.zen-join{flex-direction:column;align-items:stretch;padding:25px;gap:20px}.quick-resources{flex-direction:column;align-items:stretch;gap:20px}.quick-resource-links{min-width:0;max-width:none}.contact-map iframe{height:350px}.contact-links{gap:20px}}
+@media(prefers-reduced-motion:reduce){.quiz-orbit{animation:none}.ministry-card:hover{transform:none}}

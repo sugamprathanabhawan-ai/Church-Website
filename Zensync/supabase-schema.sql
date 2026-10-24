@@ -1,0 +1,24 @@
+-- ==============================================================================
+-- DEPRECATED: Do not use this file for database setup.
+-- ==============================================================================
+-- This file contains legacy unauthenticated policies and has been deprecated.
+-- The authoritative schema and secure RPCs are defined in:
+--   1. /supabase_schema.sql
+--   2. /supabase/migrations/20261014000002_harden_zensync_auth_and_storage.sql
+--
+-- Direct public INSERT/UPDATE/DELETE on public.sessions is blocked.
+-- All mutations and storage uploads must use cryptographically verified RPC functions:
+--   - public.create_zen_session
+--   - public.update_zen_current_slide
+--   - public.update_zen_slide_position
+--   - public.update_zen_session_content
+--   - public.claim_zen_helper
+--   - public.release_zen_helper
+--   - public.force_release_zen_helper
+--   - public.delete_zen_session
+--   - public.authorize_zen_upload
+--   - public.delete_zen_image
+--   - public.admin_delete_all_zen_sessions
+--   - public.admin_list_zen_sessions
+--   - public.cleanup_expired_sessions
+-- ==============================================================================

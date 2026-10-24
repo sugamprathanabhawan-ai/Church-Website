@@ -1,0 +1,30 @@
+main > .header{gap:20px}
+main > .header .church-nav-links{display:flex;align-items:center;gap:19px;font-size:12px;white-space:nowrap}
+.church-navigation{min-width:0}
+.church-nav-toggle{display:none}
+.church-nav-dropdown{position:relative}
+.church-nav-dropdown summary{display:flex;align-items:center;gap:6px;cursor:pointer;list-style:none;padding:14px 0}
+.church-nav-dropdown summary::-webkit-details-marker{display:none}
+.church-nav-dropdown summary:focus-visible{outline:3px solid #87c8e1;outline-offset:5px;border-radius:3px}
+.church-nav-dropdown summary svg{transition:transform .2s}
+.church-nav-dropdown[open] summary svg{transform:rotate(180deg)}
+.church-nav-panel{position:absolute;top:calc(100% + 10px);right:0;min-width:235px;padding:15px;background:linear-gradient(135deg,rgb(31 72 91 / 94%),rgb(34 80 101 / 88%));border:1px solid rgb(226 246 255 / 25%);border-radius:12px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 16px 40px #102f4330;animation:nav-panel-in .18s ease-out;z-index:50}
+.church-nav-label{display:block;font-size:8px;letter-spacing:1.6px;color:#b6d8e8;padding:8px 10px 12px}
+.church-nav-panel a,.church-nav-panel button{display:flex;align-items:center;justify-content:space-between;gap:15px;width:100%;padding:11px 10px;background:transparent;border-radius:6px;text-align:left;font-size:12px;color:#f5fbff;transition:background .2s}
+.church-nav-panel a:hover,.church-nav-panel button:hover{background:#e4f5ff15;color:#d9f3ff}
+@keyframes nav-panel-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+@media(min-width:1201px) and (max-width:1400px){main > .header{padding:0 3%;gap:16px}main > .header .church-nav-links{gap:14px;font-size:11px}main > .header .reserve-nav{gap:15px;padding:13px 15px;font-size:11px}}
+@media(max-width:1200px){
+  main > .header{justify-content:flex-start}
+  .church-navigation{margin-left:auto}
+  .church-nav-toggle{display:flex;align-items:center;gap:9px;color:#f5fbff;background:#e8f7ff12;border:1px solid #ffffff35;border-radius:6px;padding:12px 14px;font-size:12px}
+  .church-nav-links{display:none;position:absolute;top:calc(100% + 12px);right:5.2%;width:320px;max-width:calc(100vw - 40px);max-height:calc(100dvh - 115px);overflow-y:auto;flex-direction:column;align-items:stretch;gap:0;padding:16px;background:linear-gradient(135deg,rgb(31 72 91 / 95%),rgb(34 80 101 / 91%));border:1px solid #e2f6ff40;border-radius:14px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 16px 40px #102f4330}
+  .church-nav-links.is-open{display:flex;animation:nav-panel-in .18s ease-out}
+  .church-nav-links>a{display:block;padding:12px;border-radius:6px;font-size:13px}
+  .church-nav-links>a:hover{background:#e4f5ff15}
+  .church-nav-dropdown{border-top:1px solid #ffffff20;margin-top:5px}
+  .church-nav-dropdown summary{justify-content:space-between;padding:14px 12px;font-size:13px}
+  .church-nav-panel{position:static;background:#0f354530;box-shadow:none;backdrop-filter:none;border:0;border-radius:8px;min-width:0;padding:7px;margin-bottom:8px}
+}
+@media(max-width:760px){main > .header{gap:12px}.church-nav-links{right:6%}.church-nav-toggle{padding:10px}.church-nav-toggle span{display:none}main > .header .reserve-nav{font-size:10px;max-width:165px;text-align:left}}
+@media(prefers-reduced-motion:reduce){.church-nav-panel,.church-nav-links.is-open{animation:none}}

@@ -562,20 +562,37 @@ export default function LyricsBookViewer({
             </div>
           ) : (
             <div className="bg-white rounded-3xl border border-dashed border-[#d4e8ee] p-12 text-center">
-              <Music className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-              <h4 className="font-serif text-lg font-bold text-[#214b60] mb-1">
-                No matching worship songs found
-              </h4>
-              <p className="text-xs text-[#52788d] max-w-sm mx-auto mb-4">
-                Try searching for another title, lyric line, or clear the category filter.
-              </p>
-              {(searchQuery || selectedCategory !== 'All' || selectedLanguage !== 'All') && (
-                <button
-                  onClick={() => { setSearchQuery(''); setSelectedCategory('All'); setSelectedLanguage('All'); }}
-                  className="px-4 py-2 bg-[#e4f3f8] hover:bg-[#dceef5] text-[#285c73] rounded-xl text-xs font-semibold transition"
-                >
-                  Clear Filters
-                </button>
+              <Music className="w-12 h-12 text-[#9bbcc9] mx-auto mb-3" />
+              {publishedSongs.length === 0 ? (
+                <>
+                  <h4 className="font-serif text-xl font-bold text-[#214b60] mb-2">
+                    गीत संग्रह खाली छ (No Songs in Songbook Yet)
+                  </h4>
+                  <p className="text-xs sm:text-sm text-[#52788d] max-w-md mx-auto mb-5 leading-relaxed">
+                    सुगम मण्डलीको गीत संग्रह अहिले खाली छ। मण्डलीका एडमिनले एडमिन प्यानलबाट नयाँ भजन र गीतहरू थपेपछि यहाँ तुरुन्तै देखिनेछ।
+                  </p>
+                  <a
+                    href="/admin?tab=lyrics"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#285c73] hover:bg-[#214b60] text-white text-xs font-bold rounded-xl shadow-xs transition hover:scale-105"
+                  >
+                    <span>एडमिन प्यानल खोल्नुहोस् (Open Admin Panel)</span>
+                  </a>
+                </>
+              ) : (
+                <>
+                  <h4 className="font-serif text-lg font-bold text-[#214b60] mb-1">
+                    कुनै मिल्दो गीत भेटिएन (No Matching Songs Found)
+                  </h4>
+                  <p className="text-xs text-[#52788d] max-w-sm mx-auto mb-4">
+                    कृपया शीर्षक, शब्द, वा भाषा फेरेर फेरि खोज्नुहोस् वा फिल्टर हटाउनुहोस्।
+                  </p>
+                  <button
+                    onClick={() => { setSearchQuery(''); setSelectedCategory('All'); setSelectedLanguage('All'); }}
+                    className="px-4 py-2 bg-[#e4f3f8] hover:bg-[#dceef5] text-[#285c73] rounded-xl text-xs font-semibold transition"
+                  >
+                    फिल्टर हटाउनुहोस् (Clear Filters)
+                  </button>
+                </>
               )}
             </div>
           )}

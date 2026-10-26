@@ -1015,9 +1015,26 @@ export default function AdminLyricsBookTab({
               </div>
             ) : (
               <div className="p-12 text-center">
-                <Music className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-                <p className="font-bold text-sm text-[#214b60]">No songs found</p>
-                <p className="text-xs text-[#52788d] mt-1">Upload a photo/PDF or add your first choir song.</p>
+                <Music className="w-12 h-12 text-[#9bbcc9] mx-auto mb-3" />
+                <p className="font-serif font-bold text-base text-[#214b60]">अहिलेसम्म कुनै गीत थपिएको छैन (No Songs Yet)</p>
+                <p className="text-xs text-[#52788d] max-w-md mx-auto mt-1 mb-5">
+                  डेमो गीतहरू हटाइएको छ। तपाईंले नयाँ भजन तथा गीत म्यानुअल रूपमा लेख्न वा फोटो/फाइलबाट AI को मद्दतले तुरुन्तै थप्न सक्नुहुन्छ।
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <button
+                    onClick={handleCreateFromScratch}
+                    className="px-4 py-2.5 bg-white hover:bg-[#e4f3f8] text-[#285c73] border border-[#d4e8ee] rounded-xl text-xs font-bold transition flex items-center gap-1.5"
+                  >
+                    <span>म्यानुअल रूपमा लेख्नुहोस् (Write Manually)</span>
+                  </button>
+                  <button
+                    onClick={handleStartNewSong}
+                    className="px-5 py-2.5 bg-[#285c73] hover:bg-[#214b60] text-white rounded-xl text-xs font-bold shadow-xs transition hover:scale-105 flex items-center gap-1.5"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>गीत थप्नुहोस् (Upload &amp; Add Song)</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>

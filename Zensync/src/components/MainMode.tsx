@@ -24,6 +24,7 @@ import {
   flattenSections,
   resolveSlideState,
   createDefaultSections,
+  optimizeSlideImageForUpload,
 } from '../lib/presentationUtils';
 import {
   createSession,
@@ -301,11 +302,13 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
       const newSlides: SlideItem[] = [];
 
       for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const url = await uploadSlideImage(sessionCode, file);
+        const rawFile = files[i];
+        // Client-side downscaling for faster upload, sync, and crisp presentation display
+        const optimizedFile = await optimizeSlideImageForUpload(rawFile);
+        const url = await uploadSlideImage(sessionCode, optimizedFile);
         newSlides.push({
           id: `slide-${Date.now()}-${i}-${Math.random().toString(36).substring(2, 6)}`,
-          name: file.name.replace(/\.[^/.]+$/, ''),
+          name: rawFile.name.replace(/\.[^/.]+$/, ''),
           url,
           createdAt: Date.now() + i,
           uploadedBy: deviceInfo,

@@ -1,5 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, Maximize2, Minimize2, ImageOff, Plus } from 'lucide-react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Maximize2,
+  Minimize2,
+  ImageOff,
+  Plus,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+} from 'lucide-react';
 import type { FlatSlide } from '../types';
 
 interface ImageViewerProps {
@@ -27,6 +37,36 @@ export const ImageViewer: React.FC<ImageViewerProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
+  // Zoom and Pan State
+  const [zoomLevel, setZoomLevel] = useState<number>(1);
+  const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const dragStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const panStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  // Reset zoom & pan whenever active slide changes
+  useEffect(() => {
+    setZoomLevel(1);
+    setPan({ x: 0, y: 0 });
+  }, [currentIndex, activeSlide?.slide.id]);
+
+  const handleZoomIn = useCallback(() => {
+    setZoomLevel((prev) => Math.min(3.5, Math.round((prev + 0.25) * 100) / 100));
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    setZoomLevel((prev) => {
+      const next = Math.max(0.5, Math.round((prev - 0.25) * 100) / 100);
+      if (next <= 1) setPan({ x: 0, y: 0 });
+      return next;
+    });
+  }, []);
+
+  const handleResetZoom = useCallback(() => {
+    setZoomLevel(1);
+    setPan({ x: 0, y: 0 });
+  }, []);
+
   // Fullscreen toggle
   const toggleFullscreen = () => {
     if (!containerRef.current) return;
@@ -51,7 +91,29 @@ export const ImageViewer: React.FC<ImageViewerProps> = ({
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
-  // Keyboard navigation
+  // Mouse drag panning when zoomed in
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoomLevel <= 1) return;
+    setIsDragging(true);
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    panStartRef.current = { ...pan };
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || zoomLevel <= 1) return;
+    const deltaX = e.clientX - dragStartRef.current.x;
+    const deltaY = e.clientY - dragStartRef.current.y;
+    setPan({
+      x: panStartRef.current.x + deltaX,
+      y: panStartRef.current.y + deltaY,
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // Keyboard navigation & zoom shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
@@ -72,20 +134,52 @@ export const ImageViewer: React.FC<ImageViewerProps> = ({
           e.preventDefault();
           toggleFullscreen();
         }
+      } else if (e.key === '+' || e.key === '=') {
+        e.preventDefault();
+        handleZoomIn();
+      } else if (e.key === '-' || e.key === '_') {
+        e.preventDefault();
+        handleZoomOut();
+      } else if (e.key === '0') {
+        e.preventDefault();
+        handleResetZoom();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [canNavigate, onPrevious, onNext, showFullscreenBtn]);
+  }, [canNavigate, onPrevious, onNext, showFullscreenBtn, handleZoomIn, handleZoomOut, handleResetZoom]);
 
-  // Touch swipe handling for mobile
+  // Touch swipe handling for mobile slide navigation (only when not zoomed in)
   const handleTouchStart = (e: React.TouchEvent) => {
+    if (zoomLevel > 1) {
+      if (e.touches.length === 1) {
+        setIsDragging(true);
+        dragStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        panStartRef.current = { ...pan };
+      }
+      return;
+    }
     if (!canNavigate) return;
     setTouchStartX(e.touches[0].clientX);
   };
 
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (zoomLevel > 1 && isDragging && e.touches.length === 1) {
+      const deltaX = e.touches[0].clientX - dragStartRef.current.x;
+      const deltaY = e.touches[0].clientY - dragStartRef.current.y;
+      setPan({
+        x: panStartRef.current.x + deltaX,
+        y: panStartRef.current.y + deltaY,
+      });
+    }
+  };
+
   const handleTouchEnd = (e: React.TouchEvent) => {
+    if (zoomLevel > 1) {
+      setIsDragging(false);
+      return;
+    }
     if (!canNavigate || touchStartX === null) return;
     const touchEndX = e.changedTouches[0].clientX;
     const deltaX = touchEndX - touchStartX;
@@ -106,18 +200,54 @@ export const ImageViewer: React.FC<ImageViewerProps> = ({
       ref={containerRef}
       className={`viewer-stage ${isFullscreen ? 'fullscreen-container' : ''}`}
       onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
       {/* Canvas Area */}
       <div className="viewer-canvas-area">
         {activeSlide ? (
-          <div className="viewer-image-wrapper">
+          <div
+            className="viewer-image-wrapper"
+            style={{
+              overflow: 'hidden',
+              position: 'relative',
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: zoomLevel > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default',
+              userSelect: 'none',
+              touchAction: zoomLevel > 1 ? 'none' : 'auto',
+            }}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onDoubleClick={() => {
+              if (zoomLevel > 1) {
+                handleResetZoom();
+              } else {
+                setZoomLevel(2);
+              }
+            }}
+          >
             <img
               key={activeSlide.slide.id}
               src={activeSlide.slide.url}
               alt={activeSlide.slide.name || 'Presentation Slide'}
               className="presentation-image"
               loading="eager"
+              draggable={false}
+              style={{
+                transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoomLevel})`,
+                transformOrigin: 'center center',
+                transition: isDragging ? 'none' : 'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                maxHeight: '100%',
+                maxWidth: '100%',
+                objectFit: 'contain',
+                pointerEvents: 'none',
+              }}
             />
           </div>
         ) : (
@@ -173,7 +303,7 @@ export const ImageViewer: React.FC<ImageViewerProps> = ({
               position: 'absolute',
               top: '1.25rem',
               left: '1.5rem',
-              backgroundColor: 'rgba(255, 255, 255, 0.92)',
+              backgroundColor: 'rgba(255, 255, 255, 0.94)',
               backdropFilter: 'blur(6px)',
               border: '1px solid var(--border-color)',
               padding: '0.35rem 0.85rem',
@@ -190,7 +320,56 @@ export const ImageViewer: React.FC<ImageViewerProps> = ({
           </div>
         )}
 
-        {/* On-canvas Touch Navigation Arrows (Always visible, thumb-friendly on mobile & touch screens) */}
+        {/* Floating Zoom Controls (+ / - / Reset) */}
+        {activeSlide && (
+          <div className="viewer-zoom-controls" role="toolbar" aria-label="Zoom Controls">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleZoomOut();
+              }}
+              disabled={zoomLevel <= 0.5}
+              className="btn-zoom-action"
+              title="Zoom Out (-)"
+              aria-label="Zoom Out"
+              id="btn-zoom-out"
+            >
+              <ZoomOut size={16} />
+            </button>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleResetZoom();
+              }}
+              className="btn-zoom-reset"
+              title="Reset Zoom to 100% (Click to Reset)"
+              aria-label="Reset Zoom"
+              id="btn-zoom-reset"
+            >
+              <span>{Math.round(zoomLevel * 100)}%</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleZoomIn();
+              }}
+              disabled={zoomLevel >= 3.5}
+              className="btn-zoom-action"
+              title="Zoom In (+)"
+              aria-label="Zoom In"
+              id="btn-zoom-in"
+            >
+              <ZoomIn size={16} />
+            </button>
+          </div>
+        )}
+
+        {/* On-canvas Slide Navigation Arrows (< and > to slide between images) */}
         {canNavigate && totalSlides > 1 && (
           <>
             <button
@@ -202,7 +381,8 @@ export const ImageViewer: React.FC<ImageViewerProps> = ({
               disabled={currentIndex <= 0}
               className="canvas-nav-arrow canvas-nav-prev"
               aria-label="Previous Slide"
-              title="Previous Slide"
+              title="Previous Slide (Left Arrow)"
+              id="btn-canvas-prev-slide"
             >
               <ChevronLeft size={28} />
             </button>
@@ -215,7 +395,8 @@ export const ImageViewer: React.FC<ImageViewerProps> = ({
               disabled={currentIndex >= totalSlides - 1}
               className="canvas-nav-arrow canvas-nav-next"
               aria-label="Next Slide"
-              title="Next Slide"
+              title="Next Slide (Right Arrow)"
+              id="btn-canvas-next-slide"
             >
               <ChevronRight size={28} />
             </button>

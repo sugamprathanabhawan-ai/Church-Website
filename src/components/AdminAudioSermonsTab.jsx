@@ -303,6 +303,26 @@ export default function AdminAudioSermonsTab({
         </div>
       </div>
 
+      {/* Internet Archive Integration Notice */}
+      <div className="bg-[#edf6fa] border border-[#dcebf0] rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+          <div>
+            <span className="text-xs font-bold text-[#214b60]">Connected Internet Archive Collection:</span>
+            <span className="text-xs text-[#285c73] ml-1.5 font-mono">sugam_202610</span>
+          </div>
+        </div>
+        <a
+          href="https://archive.org/details/sugam_202610/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#dceef5] text-[#285c73] text-xs font-bold rounded-xl border border-[#dcebf0] transition self-start sm:self-auto hover:scale-105"
+        >
+          <span>Open on Internet Archive</span>
+          <ExternalLink className="w-3.5 h-3.5" />
+        </a>
+      </div>
+
       {/* CREATE / EDIT FORM */}
       {activeView === 'create' && (
         <form onSubmit={handleSubmit} className="bg-white rounded-3xl p-6 sm:p-8 border border-[#d4e8ee] shadow-sm space-y-6">

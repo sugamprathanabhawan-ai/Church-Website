@@ -9,9 +9,6 @@ import {
   Smartphone,
   ShieldAlert,
   ShieldCheck,
-  Loader2,
-  Lock,
-  LogOut,
 } from 'lucide-react';
 import type { UserRole, DeviceAuditInfo } from '../types';
 import {
@@ -20,7 +17,7 @@ import {
   collectDeviceAuditInfo,
   getOrCreateDeviceId,
 } from '../lib/deviceUtils';
-import { getSession, claimHelperRole, getStoredHostToken, getSupabase } from '../lib/supabaseClient';
+import { getSession, claimHelperRole, getStoredHostToken } from '../lib/supabaseClient';
 import { AdminSessionManager } from './AdminSessionManager';
 
 interface HomeScreenProps {
@@ -34,12 +31,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   const [showMainAccessModal, setShowMainAccessModal] = useState(false);
   const [showMainDeviceModal, setShowMainDeviceModal] = useState(false);
   const [showAdminManager, setShowAdminManager] = useState(false);
-  const [showAdminLoginModal, setShowAdminLoginModal] = useState(false);
-  const [isAdminUser, setIsAdminUser] = useState(false);
-  const [adminEmail, setAdminEmail] = useState('');
-  const [adminPassword, setAdminPassword] = useState('');
-  const [adminLoginLoading, setAdminLoginLoading] = useState(false);
-  const [adminLoginError, setAdminLoginError] = useState('');
   const [deviceName, setDeviceName] = useState('');
   const [detectedModel, setDetectedModel] = useState({ model: '', platform: '' });
   const [isStartingMain, setIsStartingMain] = useState(false);
@@ -74,96 +65,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     const suggested = getInitialDeviceNameSuggestion();
     setDeviceName(suggested);
 
-    // Verify if caller holds authenticated church admin credentials
-    const client = getSupabase();
-    if (client) {
-      client.auth.getSession().then(({ data: { session } }) => {
-        if (session?.user) {
-          client.rpc('is_admin').then(({ data, error }) => {
-            if (!error && data === true) {
-              setIsAdminUser(true);
-              // Only open manager if already verified as church admin
-              if (typeof window !== 'undefined') {
-                const searchParams = new URLSearchParams(window.location.search);
-                if (searchParams.get('manage') === 'true' || searchParams.get('admin') === 'true') {
-                  setShowAdminManager(true);
-                }
-              }
-            } else {
-              setIsAdminUser(false);
-            }
-          });
-        } else {
-          setIsAdminUser(false);
-          // If URL requests admin management but user is not authenticated, prompt for credentials
-          if (typeof window !== 'undefined') {
-            const searchParams = new URLSearchParams(window.location.search);
-            if (searchParams.get('manage') === 'true' || searchParams.get('admin') === 'true') {
-              setShowAdminLoginModal(true);
-            }
-          }
-        }
-      });
+    // Open session manager if URL specifies manage=true
+    if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search);
+      if (searchParams.get('manage') === 'true' || searchParams.get('admin') === 'true') {
+        setShowAdminManager(true);
+      }
     }
   }, []);
-
-  const handleAdminLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!adminEmail.trim() || !adminPassword.trim()) {
-      setAdminLoginError('Please enter both email and password.');
-      return;
-    }
-
-    setAdminLoginLoading(true);
-    setAdminLoginError('');
-
-    const client = getSupabase();
-    if (!client) {
-      setAdminLoginError('Supabase client is not connected.');
-      setAdminLoginLoading(false);
-      return;
-    }
-
-    try {
-      const { data, error } = await client.auth.signInWithPassword({
-        email: adminEmail.trim().toLowerCase(),
-        password: adminPassword.trim()
-      });
-
-      if (error) throw error;
-      if (!data.user) throw new Error('Authentication returned no user record.');
-
-      const { data: isAdmin, error: rpcErr } = await client.rpc('is_admin');
-      if (rpcErr || isAdmin !== true) {
-        await client.auth.signOut();
-        throw new Error('Access Denied: Account is not registered in the administrator directory.');
-      }
-
-      setIsAdminUser(true);
-      setShowAdminLoginModal(false);
-      setAdminPassword('');
-      setShowAdminManager(true);
-    } catch (err: any) {
-      console.warn('[ZenSync] Admin login failure:', err);
-      setAdminLoginError(err.message || 'Administrator authentication failed.');
-      setIsAdminUser(false);
-    } finally {
-      setAdminLoginLoading(false);
-    }
-  };
-
-  const handleAdminLogout = async () => {
-    const client = getSupabase();
-    if (client) {
-      try {
-        await client.auth.signOut();
-      } catch (err) {
-        console.warn('Sign out notice:', err);
-      }
-    }
-    setIsAdminUser(false);
-    setShowAdminManager(false);
-  };
 
   // When clicking MAIN card on home screen
   const handleOpenMainModal = () => {
@@ -378,76 +287,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
 
         <div className="navbar-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          {isAdminUser ? (
-            <>
-              <button
-                onClick={() => setShowAdminManager(true)}
-                className="btn-outline"
-                style={{
-                  fontSize: '0.85rem',
-                  padding: '0.4rem 0.85rem',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  borderColor: '#0284c7',
-                  color: '#0284c7',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  backgroundColor: '#f0f9ff'
-                }}
-                title="Manage Active Presentation Sessions (Admin)"
-                id="btn-admin-manage-sessions"
-              >
-                <ShieldCheck size={16} />
-                <span>Admin Sessions</span>
-              </button>
-              <button
-                onClick={handleAdminLogout}
-                className="btn-outline"
-                style={{
-                  fontSize: '0.85rem',
-                  padding: '0.4rem 0.65rem',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                  borderColor: '#cbd5e1',
-                  color: '#64748b',
-                  fontWeight: 500,
-                  cursor: 'pointer'
-                }}
-                title="Sign out of Administrator Mode"
-                id="btn-admin-logout"
-              >
-                <LogOut size={15} />
-                <span>Exit Admin</span>
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={() => {
-                setShowAdminLoginModal(true);
-                setAdminLoginError('');
-              }}
-              className="btn-outline"
-              style={{
-                fontSize: '0.85rem',
-                padding: '0.4rem 0.85rem',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                borderColor: '#cbd5e1',
-                color: '#475569',
-                fontWeight: 500,
-                cursor: 'pointer'
-              }}
-              title="Church Administrator Sign In"
-              id="btn-open-admin-login"
-            >
-              <Lock size={15} />
-              <span>Admin Login</span>
-            </button>
-          )}
-
           <a
             href="/"
             className="btn-outline"
@@ -895,139 +734,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 }}
                 id="btn-modal-manage-sessions"
               >
-                {isAdminUser ? 'Manage active presentation sessions (Admin)' : 'Admin Session Manager (Sign In)'}
+                Manage active presentation sessions
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Admin Authentication Modal */}
-      {showAdminLoginModal && (
-        <div className="join-modal-overlay">
-          <div className="join-card" style={{ maxWidth: '420px', width: '92%' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <div style={{ width: '36px', height: '36px', borderRadius: '10px', backgroundColor: '#e0f2fe', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <ShieldCheck size={20} />
-                </div>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#0f172a' }}>Admin Sign In</h3>
-                  <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>Church Administrator Access</p>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  setShowAdminLoginModal(false);
-                  setAdminLoginError('');
-                }}
-                className="btn-icon modal-close-btn"
-                aria-label="Close"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <form onSubmit={handleAdminLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
-                  Admin Email
-                </label>
-                <input
-                  type="email"
-                  value={adminEmail}
-                  onChange={(e) => setAdminEmail(e.target.value)}
-                  placeholder="admin@sugamprathana.org"
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '0.65rem 0.85rem',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.9rem',
-                    boxSizing: 'border-box'
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
-                  Password
-                </label>
-                <input
-                  type="password"
-                  value={adminPassword}
-                  onChange={(e) => setAdminPassword(e.target.value)}
-                  placeholder="••••••••••••"
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '0.65rem 0.85rem',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.9rem',
-                    boxSizing: 'border-box'
-                  }}
-                />
-              </div>
-
-              {adminLoginError && (
-                <div style={{
-                  padding: '0.6rem 0.8rem',
-                  borderRadius: '8px',
-                  backgroundColor: '#fef2f2',
-                  border: '1px solid #fecaca',
-                  color: '#991b1b',
-                  fontSize: '0.8rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.4rem'
-                }}>
-                  <ShieldAlert size={16} />
-                  <span>{adminLoginError}</span>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={adminLoginLoading}
-                className="btn-primary"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  borderRadius: '8px',
-                  fontSize: '0.95rem',
-                  fontWeight: 600,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem',
-                  backgroundColor: '#0284c7',
-                  color: '#ffffff',
-                  border: 'none',
-                  cursor: adminLoginLoading ? 'not-allowed' : 'pointer',
-                  marginTop: '0.5rem'
-                }}
-              >
-                {adminLoginLoading ? (
-                  <>
-                    <Loader2 size={16} className="spin" />
-                    <span>Verifying Credentials...</span>
-                  </>
-                ) : (
-                  <>
-                    <Lock size={16} />
-                    <span>Authenticate &amp; Open Sessions</span>
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Admin Session Manager Modal (Authorized Church Admins Only) */}
-      {showAdminManager && isAdminUser && (
+      {/* Session Manager Modal */}
+      {showAdminManager && (
         <AdminSessionManager
           onClose={() => setShowAdminManager(false)}
           onJoinSession={(role, code) => onSelectRole(role, code)}

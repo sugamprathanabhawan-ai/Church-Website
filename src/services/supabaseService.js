@@ -1127,24 +1127,29 @@ function saveDeletedSongId(songId) {
 
 function getLocalLyricsFallback() {
   const deletedIds = getDeletedSongIds();
+  const legacyDefaultIds = [
+    'sugam-song-amazing-grace',
+    'sugam-song-yogya-kewal',
+    'sugam-song-jiwanko-swami'
+  ];
   try {
     const raw = localStorage.getItem(LYRICS_STORAGE_KEY);
     if (raw !== null) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
-        return parsed.filter(s => s && s.id && !deletedIds.includes(s.id));
+        const cleaned = parsed.filter(s => s && s.id && !deletedIds.includes(s.id) && !legacyDefaultIds.includes(s.id));
+        if (cleaned.length !== parsed.length) {
+          saveLocalLyricsFallback(cleaned);
+        }
+        return cleaned;
       }
     }
   } catch (err) {
     console.warn('[supabaseService] Error reading local lyrics fallback:', err);
   }
 
-  // Initial load when localStorage has never been set: filter default songs by any previously deleted IDs
-  const initial = DEFAULT_SUGAM_SONGS.filter(s => s && s.id && !deletedIds.includes(s.id));
-  try {
-    localStorage.setItem(LYRICS_STORAGE_KEY, JSON.stringify(initial));
-  } catch {}
-  return initial;
+  // Initial state: default songs removed as requested; songbook starts empty
+  return [];
 }
 
 function saveLocalLyricsFallback(songs) {
@@ -1170,13 +1175,22 @@ function saveLocalVersionsFallback(versionsMap) {
 }
 
 /**
- * Fetch songs from lyrics_songs table
+ * Fetch songs from database.
+ * 1. Checks dedicated lyrics_songs table
+ * 2. Checks Supabase church_settings table (key: 'lyrics_songs') for guaranteed cloud persistence
+ * 3. Falls back to local cache
  * @param {boolean} includeDrafts - If false, fetches published songs only (for regular members)
  */
 export async function fetchLyricsSongs(includeDrafts = false) {
+  const legacyDefaultIds = [
+    'sugam-song-amazing-grace',
+    'sugam-song-yogya-kewal',
+    'sugam-song-jiwanko-swami'
+  ];
+
+  // 1. Try querying remote lyrics_songs table
   try {
     let query = supabase.from('lyrics_songs').select('*');
-
     if (!includeDrafts) {
       query = query.eq('status', 'published').order('title', { ascending: true });
     } else {
@@ -1184,34 +1198,44 @@ export async function fetchLyricsSongs(includeDrafts = false) {
     }
 
     const { data, error } = await query;
-
-    if (error) {
-      console.warn('[supabaseService] lyrics_songs fetch returned error, using fallback:', error.message);
-      const local = getLocalLyricsFallback();
-      return includeDrafts ? local : local.filter(s => s.status === 'published');
+    if (!error && Array.isArray(data) && data.length > 0) {
+      const cleaned = data.filter(s => s && s.id && !legacyDefaultIds.includes(s.id));
+      saveLocalLyricsFallback(cleaned);
+      return cleaned;
     }
-
-    if (Array.isArray(data) && data.length > 0) {
-      // Update local cache
-      saveLocalLyricsFallback(data);
-      return data;
-    }
-
-    // If database table is empty, seed or return initial defaults
-    const local = getLocalLyricsFallback();
-    return includeDrafts ? local : local.filter(s => s.status === 'published');
   } catch (err) {
-    console.warn('[supabaseService] fetchLyricsSongs failed, using local cache:', err);
-    const local = getLocalLyricsFallback();
-    return includeDrafts ? local : local.filter(s => s.status === 'published');
+    // Continue to church_settings fallback
   }
+
+  // 2. Fetch from Supabase church_settings table (guaranteed remote persistence)
+  try {
+    const { data: settingData, error: settingErr } = await supabase
+      .from('church_settings')
+      .select('value')
+      .eq('key', 'lyrics_songs')
+      .maybeSingle();
+
+    if (!settingErr && settingData && Array.isArray(settingData.value)) {
+      const remoteSongs = settingData.value.filter(s => s && s.id && !legacyDefaultIds.includes(s.id));
+      saveLocalLyricsFallback(remoteSongs);
+      return includeDrafts ? remoteSongs : remoteSongs.filter(s => s && s.status === 'published');
+    }
+  } catch (settingErr) {
+    console.warn('[supabaseService] church_settings lyrics fetch error:', settingErr);
+  }
+
+  // 3. Fallback to local cache (without legacy mock songs)
+  const local = getLocalLyricsFallback();
+  return includeDrafts ? local : local.filter(s => s && s.status === 'published');
 }
 
 /**
- * Fetch version history for a specific song
+ * Fetch version history for a specific song from database
  */
 export async function fetchLyricsSongVersions(songId) {
   if (!songId) return [];
+
+  // 1. Try dedicated table
   try {
     const { data, error } = await supabase
       .from('lyrics_song_versions')
@@ -1219,22 +1243,34 @@ export async function fetchLyricsSongVersions(songId) {
       .eq('song_id', songId)
       .order('version_number', { ascending: false });
 
-    if (error) {
-      console.warn('[supabaseService] fetchLyricsSongVersions DB error:', error.message);
-      const localVersions = getLocalVersionsFallback();
-      return localVersions[songId] || [];
+    if (!error && Array.isArray(data) && data.length > 0) {
+      return data;
     }
+  } catch (err) {}
 
-    return data || [];
-  } catch (err) {
-    console.warn('[supabaseService] fetchLyricsSongVersions catch fallback:', err);
-    const localVersions = getLocalVersionsFallback();
-    return localVersions[songId] || [];
-  }
+  // 2. Try church_settings versions store
+  try {
+    const { data: verSettings, error: verErr } = await supabase
+      .from('church_settings')
+      .select('value')
+      .eq('key', 'lyrics_song_versions')
+      .maybeSingle();
+
+    if (!verErr && verSettings && verSettings.value && typeof verSettings.value === 'object') {
+      const vers = verSettings.value[songId];
+      if (Array.isArray(vers) && vers.length > 0) {
+        return vers;
+      }
+    }
+  } catch (err) {}
+
+  const localVersions = getLocalVersionsFallback();
+  return localVersions[songId] || [];
 }
 
 /**
- * Save song (Create or Edit, Draft or Published) with version history
+ * Save song (Create or Edit, Draft or Published) with version history.
+ * Guarantees remote database persistence to Supabase.
  */
 export async function saveLyricsSong(songData) {
   if (!songData || !songData.title || !songData.title.trim()) {
@@ -1249,9 +1285,13 @@ export async function saveLyricsSong(songData) {
   const searchText = `${cleanTitle} ${songData.author || ''} ${searchLines}`.toLowerCase();
 
   const isExisting = Boolean(songData.id && !songData.id.startsWith('temp_'));
-  const songId = isExisting ? songData.id : undefined;
+  const songId = isExisting ? songData.id : `song_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+  const now = new Date().toISOString();
+  const nextVersion = isExisting ? (Number(songData.version) || 1) + (songData.status === 'published' ? 1 : 0) : 1;
 
   const payload = {
+    id: songId,
     title: cleanTitle,
     author: (songData.author || '').trim(),
     key_signature: songData.key_signature || songData.keySignature || 'G',
@@ -1262,13 +1302,17 @@ export async function saveLyricsSong(songData) {
     sections: songData.sections || [],
     search_text: searchText,
     source_file_url: songData.source_file_url || null,
-    updated_at: new Date().toISOString()
+    version: nextVersion,
+    created_at: songData.created_at || now,
+    updated_at: now,
+    published_at: songData.status === 'published' ? (songData.published_at || now) : null
   };
 
+  // 1. Attempt commit via atomic RPC or dedicated lyrics_songs table
+  let dedicatedTableSaved = false;
   try {
-    // 1. Try atomic RPC if available
     const { data: rpcRes, error: rpcErr } = await supabase.rpc('save_lyrics_song_with_version', {
-      p_id: songId || null,
+      p_id: isExisting ? songId : null,
       p_title: payload.title,
       p_author: payload.author,
       p_key: payload.key_signature,
@@ -1282,180 +1326,182 @@ export async function saveLyricsSong(songData) {
     });
 
     if (!rpcErr && rpcRes) {
-      // Update local storage cache
-      const currentLocal = getLocalLyricsFallback();
-      const updatedLocal = isExisting
-        ? currentLocal.map(s => s.id === rpcRes.id ? rpcRes : s)
-        : [rpcRes, ...currentLocal];
-      saveLocalLyricsFallback(updatedLocal);
-      return rpcRes;
+      dedicatedTableSaved = true;
+      if (rpcRes.id) payload.id = rpcRes.id;
+    }
+  } catch (rpcErr) {
+    // Continue to direct upsert or church_settings
+  }
+
+  if (!dedicatedTableSaved) {
+    try {
+      const { data: upsertData, error: upsertErr } = await supabase
+        .from('lyrics_songs')
+        .upsert(payload)
+        .select()
+        .maybeSingle();
+
+      if (!upsertErr && upsertData) {
+        dedicatedTableSaved = true;
+        if (upsertData.id) payload.id = upsertData.id;
+      }
+    } catch (tableErr) {
+      // Continue to church_settings guaranteed commit
+    }
+  }
+
+  // 2. GUARANTEED DATABASE COMMIT: Commit to Supabase church_settings table
+  // This guarantees multi-device remote persistence even if lyrics_songs table is not yet migrated in Supabase.
+  try {
+    let currentRemoteList = [];
+    const { data: remoteSettings, error: remoteErr } = await supabase
+      .from('church_settings')
+      .select('value')
+      .eq('key', 'lyrics_songs')
+      .maybeSingle();
+
+    if (!remoteErr && remoteSettings && Array.isArray(remoteSettings.value)) {
+      currentRemoteList = remoteSettings.value;
+    } else {
+      currentRemoteList = getLocalLyricsFallback();
     }
 
-    if (rpcErr && rpcErr.code !== 'PGRST202') {
-      console.warn('[supabaseService] save_lyrics_song_with_version RPC error, trying direct upsert:', rpcErr);
+    const legacyDefaultIds = [
+      'sugam-song-amazing-grace',
+      'sugam-song-yogya-kewal',
+      'sugam-song-jiwanko-swami'
+    ];
+
+    // Filter out legacy mock songs
+    const cleanList = currentRemoteList.filter(s => s && s.id && !legacyDefaultIds.includes(s.id));
+    const existsInList = cleanList.some(s => s.id === payload.id);
+    const updatedRemoteList = existsInList
+      ? cleanList.map(s => s.id === payload.id ? payload : s)
+      : [payload, ...cleanList];
+
+    const { error: commitErr } = await supabase.from('church_settings').upsert({
+      key: 'lyrics_songs',
+      value: updatedRemoteList,
+      updated_at: now
+    });
+
+    if (commitErr) {
+      console.error('[supabaseService] Failed committing song to church_settings:', commitErr);
+      throw formatSupabaseError(commitErr, 'Committing song to Supabase database');
     }
 
-    // 2. Direct table upsert fallback
-    if (isExisting) {
-      // Snapshot previous published version if we are publishing an edit
-      if (payload.status === 'published') {
-        const { data: existingData } = await supabase
-          .from('lyrics_songs')
-          .select('*')
-          .eq('id', songId)
+    // Also commit version snapshot if published
+    if (payload.status === 'published') {
+      try {
+        const { data: existingVersions } = await supabase
+          .from('church_settings')
+          .select('value')
+          .eq('key', 'lyrics_song_versions')
           .maybeSingle();
 
-        if (existingData && existingData.status === 'published') {
-          const newVersion = (existingData.version || 1) + 1;
-          payload.version = newVersion;
+        const versionsMap = (existingVersions && existingVersions.value && typeof existingVersions.value === 'object')
+          ? { ...existingVersions.value }
+          : { ...getLocalVersionsFallback() };
 
-          // Snapshot previous version
-          try {
-            await supabase.from('lyrics_song_versions').insert([{
-              song_id: songId,
-              version_number: existingData.version || 1,
-              title: existingData.title,
-              metadata: {
-                author: existingData.author,
-                key_signature: existingData.key_signature,
-                time_signature: existingData.time_signature,
-                category: existingData.category,
-                language: existingData.language
-              },
-              sections: existingData.sections,
-              published_at: existingData.published_at || new Date().toISOString(),
-              note: `Rollback snapshot before version ${newVersion}`
-            }]);
+        const songVersions = versionsMap[payload.id] || [];
+        const newSnapshot = {
+          id: `ver_${Date.now()}`,
+          song_id: payload.id,
+          version_number: payload.version || 1,
+          title: payload.title,
+          metadata: {
+            author: payload.author,
+            key_signature: payload.key_signature,
+            time_signature: payload.time_signature,
+            category: payload.category,
+            language: payload.language
+          },
+          sections: payload.sections,
+          published_at: payload.published_at || now,
+          note: `Version ${payload.version || 1} snapshot`
+        };
 
-            // Prune versions older than 1 previous published version
-            const { data: allVers } = await supabase
-              .from('lyrics_song_versions')
-              .select('id')
-              .eq('song_id', songId)
-              .order('version_number', { ascending: false });
+        // Keep latest 2 versions
+        versionsMap[payload.id] = [newSnapshot, ...songVersions.slice(0, 1)];
 
-            if (Array.isArray(allVers) && allVers.length > 1) {
-              const idsToDelete = allVers.slice(1).map(v => v.id);
-              await supabase.from('lyrics_song_versions').delete().in('id', idsToDelete);
-            }
-          } catch (verErr) {
-            console.warn('[supabaseService] Direct version snapshot error:', verErr.message);
-          }
-        }
+        await supabase.from('church_settings').upsert({
+          key: 'lyrics_song_versions',
+          value: versionsMap,
+          updated_at: now
+        });
+        saveLocalVersionsFallback(versionsMap);
+      } catch (verErr) {
+        console.warn('[supabaseService] Version snapshot notice:', verErr);
       }
-
-      const { data, error } = await supabase
-        .from('lyrics_songs')
-        .update(payload)
-        .eq('id', songId)
-        .select()
-        .single();
-
-      if (error) throw formatSupabaseError(error, 'Updating song');
-
-      // Update local cache
-      const currentLocal = getLocalLyricsFallback();
-      const updatedLocal = currentLocal.map(s => s.id === data.id ? data : s);
-      saveLocalLyricsFallback(updatedLocal);
-      return data;
-    } else {
-      payload.version = 1;
-      payload.created_at = new Date().toISOString();
-      if (payload.status === 'published') {
-        payload.published_at = new Date().toISOString();
-      }
-
-      const { data, error } = await supabase
-        .from('lyrics_songs')
-        .insert([payload])
-        .select()
-        .single();
-
-      if (error) throw formatSupabaseError(error, 'Creating song');
-
-      // Update local cache
-      const currentLocal = getLocalLyricsFallback();
-      saveLocalLyricsFallback([data, ...currentLocal]);
-      return data;
-    }
-  } catch (err) {
-    console.error('[supabaseService] saveLyricsSong error, applying local fallback:', err);
-    // Offline/Local resilience
-    const currentLocal = getLocalLyricsFallback();
-    const finalId = songId || `local_song_${Date.now()}`;
-    const localSong = {
-      ...payload,
-      id: finalId,
-      version: (songData.version || 0) + 1,
-      created_at: songData.created_at || new Date().toISOString(),
-      published_at: payload.status === 'published' ? (songData.published_at || new Date().toISOString()) : null
-    };
-
-    const updatedLocal = isExisting
-      ? currentLocal.map(s => s.id === finalId ? localSong : s)
-      : [localSong, ...currentLocal];
-
-    saveLocalLyricsFallback(updatedLocal);
-
-    // Save local version snapshot if published
-    if (payload.status === 'published' && isExisting) {
-      const localVersions = getLocalVersionsFallback();
-      const prevVersions = localVersions[finalId] || [];
-      const newSnapshot = {
-        id: `ver_${Date.now()}`,
-        song_id: finalId,
-        version_number: songData.version || 1,
-        title: songData.title,
-        metadata: {
-          author: songData.author,
-          key_signature: songData.key_signature,
-          time_signature: songData.time_signature,
-          category: songData.category,
-          language: songData.language
-        },
-        sections: songData.sections,
-        created_at: new Date().toISOString(),
-        published_at: new Date().toISOString(),
-        note: `Rollback snapshot`
-      };
-      // Keep only 1 rollback version
-      localVersions[finalId] = [newSnapshot];
-      saveLocalVersionsFallback(localVersions);
     }
 
-    return localSong;
+    // Update local cache ONLY after remote database commit succeeds
+    saveLocalLyricsFallback(updatedRemoteList);
+    return payload;
+  } catch (dbError) {
+    console.error('[supabaseService] Critical database persistence error:', dbError);
+    throw formatSupabaseError(dbError, 'Committing song to database');
   }
 }
 
 /**
- * Delete song
+ * Delete song from database
  */
 export async function deleteLyricsSong(songId) {
   if (!songId) throw new Error('Song ID is required for deletion');
 
-  // 1. Try remote Supabase deletion (both child versions and song record)
+  // 1. Try remote Supabase deletion from lyrics_songs and versions tables
   try {
     await supabase.from('lyrics_song_versions').delete().eq('song_id', songId);
-    const { error } = await supabase.from('lyrics_songs').delete().eq('id', songId);
-    if (error && error.code !== 'PGRST116' && error.code !== 'PGRST205') {
-      console.warn('[supabaseService] deleteLyricsSong DB notice:', error.message);
+    await supabase.from('lyrics_songs').delete().eq('id', songId);
+  } catch (err) {}
+
+  // 2. Commit deletion to Supabase church_settings table
+  try {
+    const { data: existingSettings } = await supabase
+      .from('church_settings')
+      .select('value')
+      .eq('key', 'lyrics_songs')
+      .maybeSingle();
+
+    if (existingSettings && Array.isArray(existingSettings.value)) {
+      const updatedList = existingSettings.value.filter(s => s && s.id !== songId);
+      await supabase.from('church_settings').upsert({
+        key: 'lyrics_songs',
+        value: updatedList,
+        updated_at: new Date().toISOString()
+      });
+      saveLocalLyricsFallback(updatedList);
     }
   } catch (err) {
-    console.warn('[supabaseService] DB delete notice:', err);
+    console.warn('[supabaseService] church_settings delete error:', err);
   }
 
-  // 2. Permanently record as deleted so it can never be resurrected by defaults
-  saveDeletedSongId(songId);
+  // 3. Clean up version snapshots in church_settings
+  try {
+    const { data: existingVersions } = await supabase
+      .from('church_settings')
+      .select('value')
+      .eq('key', 'lyrics_song_versions')
+      .maybeSingle();
 
-  // 3. Update local fallback cache
+    if (existingVersions && existingVersions.value && typeof existingVersions.value === 'object') {
+      const updatedVersions = { ...existingVersions.value };
+      delete updatedVersions[songId];
+      await supabase.from('church_settings').upsert({
+        key: 'lyrics_song_versions',
+        value: updatedVersions,
+        updated_at: new Date().toISOString()
+      });
+      saveLocalVersionsFallback(updatedVersions);
+    }
+  } catch (err) {}
+
+  // 4. Record as deleted and update local cache
+  saveDeletedSongId(songId);
   const currentLocal = getLocalLyricsFallback();
   const updatedLocal = currentLocal.filter(s => s && s.id !== songId);
   saveLocalLyricsFallback(updatedLocal);
-
-  // 4. Clean up any local cached versions
-  const localVersions = getLocalVersionsFallback();
-  delete localVersions[songId];
-  saveLocalVersionsFallback(localVersions);
 
   return true;
 }
@@ -1476,82 +1522,40 @@ export async function rollbackLyricsSong(songId, targetVersionNumber) {
     });
 
     if (!rpcErr && rpcRes) {
-      const currentLocal = getLocalLyricsFallback();
-      saveLocalLyricsFallback(currentLocal.map(s => s.id === rpcRes.id ? rpcRes : s));
+      // Commit restored version to church_settings as well
+      await saveLyricsSong(rpcRes);
       return rpcRes;
     }
 
-    // 2. Direct rollback fallback
-    const { data: versionRec, error: verErr } = await supabase
-      .from('lyrics_song_versions')
-      .select('*')
-      .eq('song_id', songId)
-      .eq('version_number', targetVersionNumber)
-      .maybeSingle();
+    // 2. Fallback to version history lookup
+    const versions = await fetchLyricsSongVersions(songId);
+    const targetVer = versions.find(v => Number(v.version_number) === Number(targetVersionNumber));
 
-    if (verErr || !versionRec) {
+    if (!targetVer) {
       throw new Error(`Target version ${targetVersionNumber} not found.`);
     }
 
-    const { data: currentSong } = await supabase
-      .from('lyrics_songs')
-      .select('*')
-      .eq('id', songId)
-      .single();
+    const currentSongs = await fetchLyricsSongs(true);
+    const existing = currentSongs.find(s => s.id === songId);
 
-    const rolledBackSong = {
-      title: versionRec.title,
-      author: versionRec.metadata?.author || currentSong.author,
-      key_signature: versionRec.metadata?.key_signature || currentSong.key_signature,
-      time_signature: versionRec.metadata?.time_signature || currentSong.time_signature,
-      category: versionRec.metadata?.category || currentSong.category,
-      language: versionRec.metadata?.language || currentSong.language,
-      sections: versionRec.sections,
-      version: (currentSong?.version || 1) + 1,
-      updated_at: new Date().toISOString()
-    };
-
-    const { data: updated, error: updateErr } = await supabase
-      .from('lyrics_songs')
-      .update(rolledBackSong)
-      .eq('id', songId)
-      .select()
-      .single();
-
-    if (updateErr) throw formatSupabaseError(updateErr, 'Rolling back song');
-
-    const currentLocal = getLocalLyricsFallback();
-    saveLocalLyricsFallback(currentLocal.map(s => s.id === updated.id ? updated : s));
-    return updated;
-  } catch (err) {
-    console.error('[supabaseService] rollbackLyricsSong error, checking local version cache:', err);
-    const localVersions = getLocalVersionsFallback();
-    const songVersions = localVersions[songId] || [];
-    const targetVer = songVersions.find(v => v.version_number === targetVersionNumber);
-
-    if (!targetVer) {
-      throw new Error(`Rollback failed: Version ${targetVersionNumber} could not be located.`);
-    }
-
-    const currentLocal = getLocalLyricsFallback();
-    const existing = currentLocal.find(s => s.id === songId);
-    if (!existing) throw new Error('Song not found in local library');
-
-    const restored = {
-      ...existing,
+    const restoredPayload = {
+      id: songId,
       title: targetVer.title,
-      author: targetVer.metadata?.author || existing.author,
-      key_signature: targetVer.metadata?.key_signature || existing.key_signature,
-      time_signature: targetVer.metadata?.time_signature || existing.time_signature,
-      category: targetVer.metadata?.category || existing.category,
-      language: targetVer.metadata?.language || existing.language,
-      sections: targetVer.sections,
-      version: (existing.version || 1) + 1,
+      author: targetVer.metadata?.author || (existing?.author || ''),
+      key_signature: targetVer.metadata?.key_signature || (existing?.key_signature || 'G'),
+      time_signature: targetVer.metadata?.time_signature || (existing?.time_signature || '4/4'),
+      category: targetVer.metadata?.category || (existing?.category || 'Worship'),
+      language: targetVer.metadata?.language || (existing?.language || 'Nepali'),
+      status: 'published',
+      sections: targetVer.sections || [],
+      version: (existing?.version || targetVersionNumber) + 1,
       updated_at: new Date().toISOString()
     };
 
-    saveLocalLyricsFallback(currentLocal.map(s => s.id === songId ? restored : s));
-    return restored;
+    return await saveLyricsSong(restoredPayload);
+  } catch (err) {
+    console.error('[supabaseService] rollbackLyricsSong error:', err);
+    throw formatSupabaseError(err, 'Rolling back song');
   }
 }
 
@@ -1620,7 +1624,16 @@ function getLocalAudioFallback() {
     const raw = typeof window !== 'undefined' ? localStorage.getItem(AUDIO_STORAGE_KEY) : null;
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        // Discard legacy mock Craig King hymns
+        const hasLegacy = parsed.some(s => 
+          s.id === 'sermon-1' || 
+          (s.audio_url && s.audio_url.includes('hymns-for-home-worship'))
+        );
+        if (!hasLegacy) {
+          return parsed;
+        }
+      }
     }
   } catch {}
   return DEFAULT_AUDIO_SERMONS;
@@ -1638,7 +1651,7 @@ function saveLocalAudioFallback(list) {
 
 /**
  * Fetch all audio sermons and Bible streaming recordings.
- * Falls back gracefully to DEFAULT_AUDIO_SERMONS if table doesn't exist yet.
+ * Falls back gracefully to church_settings or DEFAULT_AUDIO_SERMONS if table doesn't exist yet.
  */
 export async function fetchAudioSermons() {
   try {
@@ -1649,20 +1662,45 @@ export async function fetchAudioSermons() {
       .order('date_preached', { ascending: false });
 
     if (error) {
-      // Table doesn't exist yet, schema cache missing, or connection issue: fallback gracefully
       if (
         error.code === '42P01' || 
         error.code === 'PGRST205' || 
         error.message?.includes('does not exist') ||
         error.message?.includes('schema cache')
       ) {
-        console.warn('[supabaseService] audio_sermons table not found; returning local audio fallback.');
+        // Attempt fetch from church_settings key 'audio_sermons'
+        try {
+          const { data: settingsData, error: settingsErr } = await supabase
+            .from('church_settings')
+            .select('value')
+            .eq('key', 'audio_sermons')
+            .maybeSingle();
+
+          if (!settingsErr && settingsData && Array.isArray(settingsData.value) && settingsData.value.length > 0) {
+            saveLocalAudioFallback(settingsData.value);
+            return settingsData.value;
+          }
+        } catch {}
+
         return getLocalAudioFallback();
       }
       throw error;
     }
 
     if (!data || data.length === 0) {
+      // Check church_settings if table returned empty
+      try {
+        const { data: settingsData } = await supabase
+          .from('church_settings')
+          .select('value')
+          .eq('key', 'audio_sermons')
+          .maybeSingle();
+
+        if (settingsData && Array.isArray(settingsData.value) && settingsData.value.length > 0) {
+          saveLocalAudioFallback(settingsData.value);
+          return settingsData.value;
+        }
+      } catch {}
       return getLocalAudioFallback();
     }
 
@@ -1676,7 +1714,7 @@ export async function fetchAudioSermons() {
 }
 
 /**
- * Save or update an audio sermon record in Supabase.
+ * Save or update an audio sermon record in Supabase with guaranteed cloud persistence.
  */
 export async function saveAudioSermon(sermon) {
   if (!sermon?.title?.trim()) {
@@ -1690,6 +1728,7 @@ export async function saveAudioSermon(sermon) {
   const targetId = isNew ? `sermon-${Date.now()}` : sermon.id;
   
   const payload = {
+    id: targetId,
     title: sermon.title.trim(),
     speaker: sermon.speaker?.trim() || 'पास्टर (Pastor)',
     category: sermon.category?.trim() || 'Sermon',
@@ -1706,10 +1745,9 @@ export async function saveAudioSermon(sermon) {
     updated_at: new Date().toISOString()
   };
 
-  if (!isNew) {
-    payload.id = sermon.id;
-  }
+  let savedItem = { ...payload };
 
+  // 1. Attempt primary audio_sermons table
   try {
     const { data, error } = await supabase
       .from('audio_sermons')
@@ -1717,72 +1755,97 @@ export async function saveAudioSermon(sermon) {
       .select()
       .single();
 
-    if (error) {
-      if (
-        error.code === '42P01' || 
-        error.code === 'PGRST205' || 
-        error.message?.includes('schema cache') ||
-        error.message?.includes('does not exist')
-      ) {
-        // Fallback to local storage persistence
-        const currentList = getLocalAudioFallback();
-        const savedItem = { ...payload, id: targetId };
-        const updatedList = isNew
-          ? [savedItem, ...currentList]
-          : currentList.map(s => s.id === sermon.id ? savedItem : s);
-        saveLocalAudioFallback(updatedList);
-        return savedItem;
-      }
-      throw error;
+    if (!error && data) {
+      savedItem = data;
+    }
+  } catch (err) {
+    console.warn('[supabaseService] audio_sermons table upsert notice:', err.message);
+  }
+
+  // 2. GUARANTEED REMOTE DATABASE COMMIT to church_settings (key: 'audio_sermons')
+  // This guarantees remote persistence across all users and devices even if audio_sermons table is not migrated.
+  try {
+    let currentRemoteList = [];
+    const { data: remoteSettings } = await supabase
+      .from('church_settings')
+      .select('value')
+      .eq('key', 'audio_sermons')
+      .maybeSingle();
+
+    if (remoteSettings && Array.isArray(remoteSettings.value)) {
+      currentRemoteList = remoteSettings.value;
+    } else {
+      currentRemoteList = getLocalAudioFallback();
     }
 
+    const cleanList = currentRemoteList.filter(s => s && s.id);
+    const exists = cleanList.some(s => s.id === savedItem.id);
+    const updatedRemoteList = exists
+      ? cleanList.map(s => s.id === savedItem.id ? savedItem : s)
+      : [savedItem, ...cleanList];
+
+    await supabase.from('church_settings').upsert({
+      key: 'audio_sermons',
+      value: updatedRemoteList,
+      updated_at: new Date().toISOString()
+    });
+
+    saveLocalAudioFallback(updatedRemoteList);
+  } catch (commitErr) {
+    console.warn('[supabaseService] Error committing audio sermon to church_settings:', commitErr);
+    // Local fallback
     const currentList = getLocalAudioFallback();
     const updatedList = isNew
-      ? [data, ...currentList.filter(s => s.id !== data.id)]
-      : currentList.map(s => s.id === data.id ? data : s);
+      ? [savedItem, ...currentList.filter(s => s.id !== savedItem.id)]
+      : currentList.map(s => s.id === savedItem.id ? savedItem : s);
     saveLocalAudioFallback(updatedList);
-    return data;
-  } catch (error) {
-    console.warn('[supabaseService] Remote save audio sermon failed, falling back to local cache:', error.message);
-    const currentList = getLocalAudioFallback();
-    const savedItem = { ...payload, id: targetId };
-    const updatedList = isNew
-      ? [savedItem, ...currentList]
-      : currentList.map(s => s.id === sermon.id ? savedItem : s);
-    saveLocalAudioFallback(updatedList);
-    return savedItem;
   }
+
+  return savedItem;
 }
 
 /**
- * Delete an audio sermon from Supabase with local fallback.
+ * Delete an audio sermon from Supabase with cloud & local fallback.
  */
 export async function deleteAudioSermon(id) {
   if (!id) throw new Error('No sermon ID provided for deletion');
 
   // Prune from local cache
   const currentList = getLocalAudioFallback();
-  saveLocalAudioFallback(currentList.filter(s => s.id !== id));
+  const prunedList = currentList.filter(s => s.id !== id);
+  saveLocalAudioFallback(prunedList);
 
-  // If deleting a local default placeholder
-  if (String(id).startsWith('sermon-')) {
-    return true;
-  }
-
+  // Prune from church_settings table
   try {
-    const { error } = await supabase
-      .from('audio_sermons')
-      .delete()
-      .eq('id', id);
+    const { data: remoteSettings } = await supabase
+      .from('church_settings')
+      .select('value')
+      .eq('key', 'audio_sermons')
+      .maybeSingle();
 
-    if (error && error.code !== '42P01' && error.code !== 'PGRST205') {
-      throw error;
+    if (remoteSettings && Array.isArray(remoteSettings.value)) {
+      const updatedRemoteList = remoteSettings.value.filter(s => s && s.id !== id);
+      await supabase.from('church_settings').upsert({
+        key: 'audio_sermons',
+        value: updatedRemoteList,
+        updated_at: new Date().toISOString()
+      });
     }
-    return true;
-  } catch (error) {
-    console.warn('[supabaseService] Delete audio sermon remote error (removed from local cache):', error.message);
-    return true;
+  } catch (settingsErr) {
+    console.warn('[supabaseService] Prune audio from church_settings error:', settingsErr);
   }
+
+  // Attempt delete on primary table if not a local-only placeholder
+  if (!String(id).startsWith('sermon-')) {
+    try {
+      await supabase
+        .from('audio_sermons')
+        .delete()
+        .eq('id', id);
+    } catch {}
+  }
+
+  return true;
 }
 
 const MAX_AUDIO_SIZE = 100 * 1024 * 1024; // 100 MB

@@ -6,10 +6,18 @@ import {
   VolumeX, 
   RotateCcw, 
   RotateCw,
+  ExternalLink,
+  Headphones,
+  Radio,
+  Download,
   AlertCircle
 } from 'lucide-react';
+import { 
+  ARCHIVE_COLLECTION_URL, 
+  ARCHIVE_EMBED_URL, 
+  DEFAULT_AUDIO_SERMONS 
+} from '../utils/defaultSermons';
 import { useData } from '../context/DataContext';
-import { DEFAULT_AUDIO_SERMONS } from '../utils/defaultSermons';
 
 function formatTime(seconds) {
   if (isNaN(seconds) || seconds < 0) return '00:00';
@@ -24,13 +32,10 @@ function formatTime(seconds) {
 }
 
 export default function AudioSermonsSection() {
-  const { audioSermons = [] } = useData();
+  const { audioSermons } = useData();
+  const sermons = audioSermons && audioSermons.length > 0 ? audioSermons : DEFAULT_AUDIO_SERMONS;
 
-  // Sermon list with fallback
-  const sermons = (audioSermons && audioSermons.length > 0) 
-    ? audioSermons 
-    : DEFAULT_AUDIO_SERMONS;
-
+  const [activeTab, setActiveTab] = useState('embed'); // 'embed' | 'direct'
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -44,13 +49,7 @@ export default function AudioSermonsSection() {
   const progressBarRef = useRef(null);
 
   const currentSermon = sermons[selectedIndex] || sermons[0];
-
-  // Sync index if sermons array changes
-  useEffect(() => {
-    if (selectedIndex >= sermons.length) {
-      setSelectedIndex(0);
-    }
-  }, [sermons.length, selectedIndex]);
+  const safeAudioUrl = currentSermon?.audio_url ? encodeURI(decodeURI(currentSermon.audio_url)) : '';
 
   // Sync volume and muted state to audio element
   useEffect(() => {
@@ -60,7 +59,7 @@ export default function AudioSermonsSection() {
     }
   }, [volume, isMuted]);
 
-  // Audio stream event listeners
+  // Audio stream event listeners for direct player
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -77,7 +76,6 @@ export default function AudioSermonsSection() {
 
     const handleEnded = () => {
       setIsPlaying(false);
-      // Auto-advance to next sermon in playlist
       if (sermons.length > 1) {
         const nextIndex = (selectedIndex + 1) % sermons.length;
         handleSelectSermon(nextIndex, true);
@@ -93,7 +91,7 @@ export default function AudioSermonsSection() {
     const handleError = () => {
       setIsLoadingAudio(false);
       setIsPlaying(false);
-      setAudioError('Audio stream unavailable. Please check your connection or try another sermon.');
+      setAudioError('Audio stream error. You can also listen directly via the Internet Archive player.');
     };
 
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
@@ -115,20 +113,17 @@ export default function AudioSermonsSection() {
     };
   }, [currentSermon?.audio_url, selectedIndex, sermons.length]);
 
-  // Mobile Lock Screen & Background MediaSession
+  // Lock screen media session
   useEffect(() => {
     if (typeof window !== 'undefined' && 'mediaSession' in navigator && currentSermon) {
       try {
         navigator.mediaSession.metadata = new window.MediaMetadata({
           title: currentSermon.title || 'Audio Sermon',
-          artist: currentSermon.speaker || 'Sugam Prathana Bhawan',
-          album: 'Audio Sermons'
+          artist: 'सुगम प्रार्थना भवन (Sugam Prathana Bhawan)',
+          album: 'Sugam Church Bachan'
         });
-
         navigator.mediaSession.setActionHandler('play', () => {
-          if (audioRef.current) {
-            audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
-          }
+          if (audioRef.current) audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
         });
         navigator.mediaSession.setActionHandler('pause', () => {
           if (audioRef.current) {
@@ -137,12 +132,11 @@ export default function AudioSermonsSection() {
           }
         });
       } catch (err) {
-        console.warn('[AudioSermonsSection] MediaSession setup notice:', err);
+        // mediaSession not supported
       }
     }
   }, [currentSermon]);
 
-  // Play / Pause toggle
   const togglePlay = () => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -160,13 +154,13 @@ export default function AudioSermonsSection() {
         console.error('Audio play error:', err);
         setIsLoadingAudio(false);
         setIsPlaying(false);
-        setAudioError('Unable to stream this audio track. Check your connection.');
+        setAudioError('Unable to stream this audio track. Check your connection or use the Archive.org player.');
       });
     }
   };
 
-  // Select sermon from the list below
   const handleSelectSermon = (index, autoPlay = true) => {
+    setActiveTab('direct');
     if (index === selectedIndex) {
       togglePlay();
       return;
@@ -176,11 +170,14 @@ export default function AudioSermonsSection() {
     setAudioError(null);
     setCurrentTime(0);
 
-    if (autoPlay) {
+    const targetSermon = sermons[index];
+    if (autoPlay && targetSermon?.audio_url) {
       setIsLoadingAudio(true);
+      const targetUrl = encodeURI(decodeURI(targetSermon.audio_url));
       setTimeout(() => {
         const audio = audioRef.current;
         if (audio) {
+          audio.src = targetUrl;
           audio.currentTime = 0;
           audio.volume = isMuted ? 0 : volume;
           audio.muted = isMuted;
@@ -188,7 +185,7 @@ export default function AudioSermonsSection() {
             setIsPlaying(true);
             setIsLoadingAudio(false);
           }).catch((err) => {
-            console.warn('[AudioSermonsSection] Playback notice:', err);
+            console.warn('Playback error:', err);
             setIsLoadingAudio(false);
           });
         }
@@ -196,18 +193,16 @@ export default function AudioSermonsSection() {
     }
   };
 
-  // Skip 15s forward / backward
   const handleSkip = (seconds) => {
     const audio = audioRef.current;
     if (!audio) return;
     const current = typeof audio.currentTime === 'number' && !isNaN(audio.currentTime) ? audio.currentTime : 0;
-    const total = duration || (typeof audio.duration === 'number' && !isNaN(audio.duration) ? audio.duration : 9999);
+    const total = duration || 9999;
     const target = Math.min(Math.max(current + seconds, 0), total);
     audio.currentTime = target;
     setCurrentTime(target);
   };
 
-  // Seek bar scrubber with mouse and touch support
   const handleSeek = (e) => {
     const bar = progressBarRef.current;
     const audio = audioRef.current;
@@ -224,13 +219,10 @@ export default function AudioSermonsSection() {
     setCurrentTime(newTime);
   };
 
-  // Volume & Mute
   const handleVolumeChange = (e) => {
     const newVol = parseFloat(e.target.value);
     setVolume(newVol);
-    if (audioRef.current) {
-      audioRef.current.volume = newVol;
-    }
+    if (audioRef.current) audioRef.current.volume = newVol;
     if (newVol > 0 && isMuted) {
       setIsMuted(false);
       if (audioRef.current) audioRef.current.muted = false;
@@ -250,193 +242,293 @@ export default function AudioSermonsSection() {
   return (
     <section 
       id="audio-sermons" 
-      className="church-section bg-[#edf6fa] border-t border-[#dcebf0]"
+      className="church-section bg-[#edf6fa] border-t border-[#dcebf0] py-16 sm:py-24"
       aria-labelledby="audio-sermons-heading"
     >
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6">
         
-        {/* Section Heading matching landing page */}
-        <div className="church-section-heading">
-          <div className="section-label">AUDIO SERMON</div>
-          <h2 id="audio-sermons-heading">
+        {/* Section Heading */}
+        <div className="church-section-heading text-center mb-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#dceef5] text-[#285c73] text-xs font-bold uppercase tracking-wider mb-3">
+            <Radio className="w-3.5 h-3.5 text-[#4b9fb9] animate-pulse" />
+            <span>DIRECT AUDIO SERMON</span>
+          </div>
+          <h2 id="audio-sermons-heading" className="text-3xl sm:text-5xl font-serif font-bold text-[#214b60]">
             Audio <em>Sermon.</em>
           </h2>
-          <p>
-            Listen to weekly preachings, biblical messages, and spiritual encouragement from Sugam Church.
+          <p className="text-sm sm:text-base text-[#395e70] max-w-2xl mx-auto mt-2">
+            Listen to weekly preachings and spiritual messages directly from Sugam Church's official Internet Archive collection.
           </p>
         </div>
 
-        {/* Persistent Audio Element without destructive key remounting */}
-        <audio
-          ref={audioRef}
-          src={currentSermon?.audio_url || ''}
-          preload="metadata"
-          playsInline
-        />
-
-        {/* Selected Sermon Title and Audio Player Area */}
-        <div className="bg-white rounded-3xl p-6 sm:p-10 border border-[#dcebf0] shadow-sm mb-12 text-center transition-all">
-          
-          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#4b9fb9] mb-3 block">
-            {isPlaying ? 'Now Playing' : 'Selected Sermon'}
-          </span>
-
-          {/* Title that comes up when a person clicks an audio sermon */}
-          <h3 className="font-serif text-2xl sm:text-3xl md:text-4xl text-[#214b60] font-normal mb-8 leading-snug max-w-2xl mx-auto">
-            {currentSermon?.title}
-          </h3>
-
-          {/* Error Message if stream fails */}
-          {audioError && (
-            <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs sm:text-sm flex items-center justify-center gap-2 max-w-lg mx-auto">
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
-              <span>{audioError}</span>
-            </div>
-          )}
-
-          {/* Audio Player Controls */}
-          <div className="max-w-xl mx-auto space-y-4">
-            
-            {/* Scrubber Progress Bar */}
-            <div className="space-y-1.5">
-              <div 
-                ref={progressBarRef}
-                onClick={handleSeek}
-                className="relative h-2 bg-[#dceef5] rounded-full cursor-pointer overflow-hidden border border-[#cde2ec]"
-                role="slider"
-                aria-label="Audio scrubber"
-                aria-valuemin={0}
-                aria-valuemax={duration || 100}
-                aria-valuenow={currentTime}
-              >
-                <div 
-                  className="absolute top-0 left-0 bottom-0 bg-[#285c73] rounded-full transition-all duration-100"
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
-
-              {/* Time Indicators */}
-              <div className="flex justify-between items-center text-xs font-mono text-[#60899b]">
-                <span>{formatTime(currentTime)}</span>
-                <span>{isLoadingAudio ? 'Loading audio...' : formatTime(duration)}</span>
-              </div>
-            </div>
-
-            {/* Transport Controls */}
-            <div className="flex items-center justify-center gap-4 sm:gap-6 pt-2">
-              
-              {/* Skip 15s Backward */}
-              <button
-                type="button"
-                onClick={() => handleSkip(-15)}
-                className="w-10 h-10 rounded-full bg-[#f0f7fa] hover:bg-[#e4f3f8] text-[#285c73] flex items-center justify-center transition-colors border border-[#dcebf0]"
-                title="Skip backward 15 seconds"
-                aria-label="Skip backward 15 seconds"
-              >
-                <RotateCcw className="w-4 h-4" />
-              </button>
-
-              {/* Main Play / Pause Button */}
-              <button
-                type="button"
-                onClick={togglePlay}
-                disabled={isLoadingAudio}
-                className="w-16 h-16 rounded-full bg-[#285c73] hover:bg-[#214b60] text-white flex items-center justify-center shadow-md transition-transform hover:scale-105 active:scale-95 disabled:opacity-70"
-                aria-label={isPlaying ? 'Pause sermon' : 'Play sermon'}
-              >
-                {isLoadingAudio ? (
-                  <span className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : isPlaying ? (
-                  <Pause className="w-6 h-6 fill-current" />
-                ) : (
-                  <Play className="w-6 h-6 fill-current ml-1" />
-                )}
-              </button>
-
-              {/* Skip 15s Forward */}
-              <button
-                type="button"
-                onClick={() => handleSkip(15)}
-                className="w-10 h-10 rounded-full bg-[#f0f7fa] hover:bg-[#e4f3f8] text-[#285c73] flex items-center justify-center transition-colors border border-[#dcebf0]"
-                title="Skip forward 15 seconds"
-                aria-label="Skip forward 15 seconds"
-              >
-                <RotateCw className="w-4 h-4" />
-              </button>
-
-              {/* Volume / Mute Toggle */}
-              <button
-                type="button"
-                onClick={toggleMute}
-                className="w-10 h-10 rounded-full bg-[#f0f7fa] hover:bg-[#e4f3f8] text-[#285c73] flex items-center justify-center transition-colors border border-[#dcebf0]"
-                title={isMuted ? 'Unmute' : 'Mute'}
-                aria-label={isMuted ? 'Unmute audio' : 'Mute audio'}
-              >
-                {isMuted || volume === 0 ? (
-                  <VolumeX className="w-4 h-4 text-rose-500" />
-                ) : (
-                  <Volume2 className="w-4 h-4" />
-                )}
-              </button>
-
-              {/* Volume slider (desktop) */}
-              <div className="hidden sm:flex items-center">
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.05"
-                  value={isMuted ? 0 : volume}
-                  onChange={handleVolumeChange}
-                  className="w-16 h-1 bg-[#dceef5] rounded-lg appearance-none cursor-pointer accent-[#285c73]"
-                  aria-label="Volume controller"
-                />
-              </div>
-
-            </div>
-
+        {/* Player Navigation / Mode Switcher */}
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6 bg-white p-2.5 rounded-2xl border border-[#dcebf0] shadow-xs">
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setActiveTab('embed')}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
+                activeTab === 'embed'
+                  ? 'bg-[#285c73] text-white shadow-xs'
+                  : 'text-[#214b60] hover:bg-[#edf6fa]'
+              }`}
+            >
+              <Radio className="w-4 h-4 text-[#7cc5dc]" />
+              <span>Internet Archive Player</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('direct')}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
+                activeTab === 'direct'
+                  ? 'bg-[#285c73] text-white shadow-xs'
+                  : 'text-[#214b60] hover:bg-[#edf6fa]'
+              }`}
+            >
+              <Headphones className="w-4 h-4 text-[#4b9fb9]" />
+              <span>Track Streamer ({sermons.length})</span>
+            </button>
           </div>
 
+          <a
+            href={ARCHIVE_COLLECTION_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#edf6fa] hover:bg-[#dceef5] text-[#285c73] hover:text-[#214b60] text-xs font-semibold border border-[#dcebf0] transition hover:scale-105"
+            title="Open on Internet Archive (sugam_202610)"
+          >
+            <span>Open on Internet Archive</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
         </div>
 
-        {/* Selection of different audios - ONLY the title of the sermon */}
+        {/* 1. INTERNET ARCHIVE EMBEDDED PLAYER (Direct playback of https://archive.org/details/sugam_202610/) */}
+        {activeTab === 'embed' && (
+          <div className="bg-white rounded-3xl p-4 sm:p-6 border border-[#dcebf0] shadow-sm mb-10 transition-all animate-fade-in">
+            <div className="flex items-center justify-between mb-3 px-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#4b9fb9] flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                Live Internet Archive Stream
+              </span>
+              <span className="text-xs text-[#60899b] font-medium">
+                Collection: sugam_202610
+              </span>
+            </div>
+
+            <div className="w-full overflow-hidden rounded-2xl bg-slate-950 border border-slate-800 shadow-inner">
+              <iframe 
+                src={ARCHIVE_EMBED_URL}
+                width="100%" 
+                height="380" 
+                frameBorder="0" 
+                webkitallowfullscreen="true" 
+                mozallowfullscreen="true" 
+                allowFullScreen
+                allow="autoplay; fullscreen"
+                title="Sugam Church Bachan Audio Sermons - Internet Archive"
+                className="w-full block"
+              />
+            </div>
+            
+            <p className="text-[11px] sm:text-xs text-[#60899b] text-center mt-3">
+              Directly streaming Bachan sermons uploaded by Sugam Prathana Bhawan. Click any track inside the player to play.
+            </p>
+          </div>
+        )}
+
+        {/* 2. DIRECT HIGH-FIDELITY TRACK STREAMER */}
+        {activeTab === 'direct' && (
+          <div className="bg-white rounded-3xl p-6 sm:p-10 border border-[#dcebf0] shadow-sm mb-10 text-center transition-all animate-fade-in">
+            {/* Audio Element */}
+            <audio
+              ref={audioRef}
+              src={safeAudioUrl}
+              preload="metadata"
+              playsInline
+            />
+
+            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#4b9fb9] mb-2 block">
+              {isPlaying ? 'Now Playing Bachan' : 'Selected Audio Sermon'}
+            </span>
+
+            <h3 className="font-serif text-2xl sm:text-3xl text-[#214b60] font-normal mb-2 leading-snug max-w-2xl mx-auto">
+              {currentSermon?.title}
+            </h3>
+
+            <p className="text-xs sm:text-sm text-[#60899b] mb-6">
+              {currentSermon?.description || 'सुगम प्रार्थना भवनको साप्ताहिक बचन सन्देश'}
+            </p>
+
+            {audioError && (
+              <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs sm:text-sm flex items-center justify-center gap-2 max-w-lg mx-auto">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                <span>{audioError}</span>
+              </div>
+            )}
+
+            {/* Scrubber Progress Bar */}
+            <div className="max-w-xl mx-auto space-y-4">
+              <div className="space-y-1.5">
+                <div 
+                  ref={progressBarRef}
+                  onClick={handleSeek}
+                  className="relative h-2.5 bg-[#dceef5] rounded-full cursor-pointer overflow-hidden border border-[#cde2ec]"
+                  role="slider"
+                  aria-label="Audio scrubber"
+                  aria-valuemin={0}
+                  aria-valuemax={duration || 100}
+                  aria-valuenow={currentTime}
+                >
+                  <div 
+                    className="absolute top-0 left-0 bottom-0 bg-[#285c73] rounded-full transition-all duration-100"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
+
+                <div className="flex justify-between items-center text-xs font-mono text-[#60899b]">
+                  <span>{formatTime(currentTime)}</span>
+                  <span>{isLoadingAudio ? 'Buffering...' : formatTime(duration)}</span>
+                </div>
+              </div>
+
+              {/* Controls */}
+              <div className="flex items-center justify-center gap-4 sm:gap-6 pt-2">
+                <button
+                  type="button"
+                  onClick={() => handleSkip(-15)}
+                  className="w-10 h-10 rounded-full bg-[#f0f7fa] hover:bg-[#e4f3f8] text-[#285c73] flex items-center justify-center transition-colors border border-[#dcebf0]"
+                  title="Skip backward 15 seconds"
+                  aria-label="Skip backward 15 seconds"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={togglePlay}
+                  disabled={isLoadingAudio}
+                  className="w-16 h-16 rounded-full bg-[#285c73] hover:bg-[#214b60] text-white flex items-center justify-center shadow-md transition-transform hover:scale-105 active:scale-95 disabled:opacity-70"
+                  aria-label={isPlaying ? 'Pause sermon' : 'Play sermon'}
+                >
+                  {isLoadingAudio ? (
+                    <span className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : isPlaying ? (
+                    <Pause className="w-6 h-6 fill-current" />
+                  ) : (
+                    <Play className="w-6 h-6 fill-current ml-1" />
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleSkip(15)}
+                  className="w-10 h-10 rounded-full bg-[#f0f7fa] hover:bg-[#e4f3f8] text-[#285c73] flex items-center justify-center transition-colors border border-[#dcebf0]"
+                  title="Skip forward 15 seconds"
+                  aria-label="Skip forward 15 seconds"
+                >
+                  <RotateCw className="w-4 h-4" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={toggleMute}
+                  className="w-10 h-10 rounded-full bg-[#f0f7fa] hover:bg-[#e4f3f8] text-[#285c73] flex items-center justify-center transition-colors border border-[#dcebf0]"
+                  title={isMuted ? 'Unmute' : 'Mute'}
+                  aria-label={isMuted ? 'Unmute audio' : 'Mute audio'}
+                >
+                  {isMuted || volume === 0 ? (
+                    <VolumeX className="w-4 h-4 text-rose-500" />
+                  ) : (
+                    <Volume2 className="w-4 h-4" />
+                  )}
+                </button>
+
+                <div className="hidden sm:flex items-center">
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={isMuted ? 0 : volume}
+                    onChange={handleVolumeChange}
+                    className="w-16 h-1 bg-[#dceef5] rounded-lg appearance-none cursor-pointer accent-[#285c73]"
+                    aria-label="Volume controller"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 3. TRACKS LIST (All 7 sermon recordings in sugam_202610) */}
         <div className="max-w-3xl mx-auto">
-          <div className="mb-4 text-left">
-            <span className="text-[10px] font-bold tracking-widest uppercase text-[#60899b]">
-              SELECT A SERMON TO LISTEN
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-[11px] font-bold tracking-widest uppercase text-[#60899b]">
+              SERMON RECORDINGS IN THIS COLLECTION ({sermons.length})
+            </span>
+            <span className="text-xs text-[#285c73] font-semibold">
+              Internet Archive: sugam_202610
             </span>
           </div>
 
           <div className="space-y-2.5">
             {sermons.map((sermon, idx) => {
-              const isSelected = selectedIndex === idx;
+              const isSelected = activeTab === 'direct' && selectedIndex === idx;
               return (
-                <button
+                <div
                   key={sermon.id || idx}
-                  type="button"
-                  onClick={() => handleSelectSermon(idx, true)}
                   className={`w-full text-left px-5 py-4 rounded-2xl transition-all duration-200 border flex items-center justify-between group ${
                     isSelected
                       ? 'bg-[#285c73] text-white border-[#285c73] shadow-sm'
                       : 'bg-white text-[#214b60] border-[#dcebf0] hover:border-[#4b9fb9] hover:bg-[#f0f7fa]'
                   }`}
-                  aria-pressed={isSelected}
                 >
-                  {/* ONLY the title of the sermon */}
-                  <span className="font-medium text-xs sm:text-sm md:text-base pr-3 leading-snug">
-                    {sermon.title}
-                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleSelectSermon(idx, true)}
+                    className="flex-1 text-left flex flex-col sm:flex-row sm:items-center justify-between gap-1 pr-3"
+                    aria-label={`Play ${sermon.title}`}
+                  >
+                    <span className="font-semibold text-xs sm:text-sm md:text-base leading-snug">
+                      {sermon.title}
+                    </span>
+                    <span className={`text-[11px] font-mono ${isSelected ? 'text-[#dceef5]' : 'text-[#60899b]'}`}>
+                      {sermon.duration}
+                    </span>
+                  </button>
 
-                  <span className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-transform ${
-                    isSelected ? 'bg-white text-[#285c73]' : 'bg-[#e4f3f8] text-[#285c73] group-hover:scale-105'
-                  }`}>
-                    {isSelected && isPlaying ? (
-                      <Pause className="w-3.5 h-3.5 fill-current" />
-                    ) : (
-                      <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
-                    )}
-                  </span>
-                </button>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <a
+                      href={sermon.audio_url}
+                      download={sermon.file_name}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                        isSelected 
+                          ? 'bg-white/20 hover:bg-white/30 text-white' 
+                          : 'bg-[#edf6fa] hover:bg-[#dceef5] text-[#285c73]'
+                      }`}
+                      title="Download audio recording (.m4a)"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                    </a>
+
+                    <button
+                      type="button"
+                      onClick={() => handleSelectSermon(idx, true)}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform ${
+                        isSelected ? 'bg-white text-[#285c73]' : 'bg-[#e4f3f8] text-[#285c73] group-hover:scale-105'
+                      }`}
+                      title={isSelected && isPlaying ? 'Pause' : 'Play'}
+                    >
+                      {isSelected && isPlaying ? (
+                        <Pause className="w-3.5 h-3.5 fill-current" />
+                      ) : (
+                        <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
               );
             })}
           </div>

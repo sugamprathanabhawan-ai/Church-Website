@@ -46,7 +46,7 @@ function MinistryLink({ to, children }) {
 export function MinistriesSection({ ministries }) {
   const icons = ['cross', 'people', 'music', 'book', 'people', 'cross'];
   return (
-    <section id="ministries" className="church-section ministry-section" aria-labelledby="ministries-title">
+    <section id="ministries" className="church-section ministry-section cv-auto" aria-labelledby="ministries-title">
       <div className="church-section-heading">
         <div className="section-label">GET INVOLVED</div>
         <h2 id="ministries-title">Faith in action.<br /><em>Our Ministries.</em></h2>
@@ -72,7 +72,7 @@ export function MinistriesSection({ ministries }) {
 
 export default function ChurchContent() {
   return (
-    <section id="contact" className="church-section contact-section" aria-labelledby="contact-title">
+    <section id="contact" className="church-section contact-section cv-auto" aria-labelledby="contact-title">
       <div className="contact-copy">
         <div className="section-label">JOIN US IN PERSON</div>
         <h2 id="contact-title">Get in <em>touch.</em></h2>

@@ -97,9 +97,11 @@ ORIGINAL SONG LYRICS TO TRANSLATE:
 ${text.trim()}`;
 
   const candidateModels = [
-    'gemini-1.5-flash',
+    'gemini-3.1-flash-lite',
+    'gemini-flash-lite-latest',
+    'gemini-2.5-flash-lite',
     'gemini-2.0-flash',
-    'gemini-1.5-pro',
+    'gemini-1.5-flash',
     'gemini-flash-latest'
   ];
 

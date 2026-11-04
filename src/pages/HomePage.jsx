@@ -64,12 +64,32 @@ export default function HomePage() {
   const [galleryPaused, setGalleryPaused] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(null);
 
+  const heroRef = useRef(null);
+  const gallerySectionRef = useRef(null);
+  const isGalleryVisibleRef = useRef(false);
+
   const orbitRef = useRef(null);
   const angleRef = useRef(0);
   const isDraggingRef = useRef(false);
   const dragStartXRef = useRef(0);
   const dragStartAngleRef = useRef(0);
   const isHoveredRef = useRef(false);
+
+  // IntersectionObserver to pause 3D loop when gallery is offscreen
+  useEffect(() => {
+    const el = gallerySectionRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      isGalleryVisibleRef.current = true;
+      return;
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      isGalleryVisibleRef.current = entry.isIntersecting;
+    }, { threshold: 0.05 });
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   // Smooth GPU continuous rotation loop (imperative transform updates with zero React re-render overhead)
   useEffect(() => {
@@ -80,7 +100,16 @@ export default function HomePage() {
       const delta = time - lastTime;
       lastTime = time;
 
-      if (!galleryPaused && lightboxIndex === null && !isDraggingRef.current && !isHoveredRef.current) {
+      // Only animate if gallery is currently intersecting the viewport, on desktop, and not paused/dragged/hovered
+      const isDesktop = typeof window !== 'undefined' && window.innerWidth > 768;
+      if (
+        isGalleryVisibleRef.current &&
+        isDesktop &&
+        !galleryPaused &&
+        lightboxIndex === null &&
+        !isDraggingRef.current &&
+        !isHoveredRef.current
+      ) {
         // Rotates full 360 degrees in ~26 seconds (0.0138 deg/ms)
         angleRef.current = (angleRef.current - delta * 0.0138) % 360;
         if (orbitRef.current) {
@@ -211,13 +240,29 @@ export default function HomePage() {
     const play = () => {
       void element.play().catch(() => {});
     };
+
+    // Pause video playback when offscreen to completely halt GPU frame decoding
+    let observer;
+    if (heroRef.current && typeof IntersectionObserver !== 'undefined') {
+      observer = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting) {
+          if (!document.hidden) play();
+        } else {
+          element.pause();
+        }
+      }, { threshold: 0.05 });
+      observer.observe(heroRef.current);
+    } else {
+      play();
+    }
+
     const resume = () => {
       if (!document.hidden) play();
     };
-    play();
     document.addEventListener('visibilitychange', resume);
     document.addEventListener('pointerdown', play);
     return () => {
+      if (observer) observer.disconnect();
       document.removeEventListener('visibilitychange', resume);
       document.removeEventListener('pointerdown', play);
     };
@@ -226,7 +271,7 @@ export default function HomePage() {
   return (
     <div className="home-newfron-page">
       {/* Video Hero Section */}
-      <section className="hero">
+      <section ref={heroRef} className="hero">
         <video
           ref={video}
           className="hero-video"
@@ -285,25 +330,27 @@ export default function HomePage() {
       </div>
 
       {/* About & Story Section */}
-      <section id="story" className="story">
+      <section id="story" className="story cv-auto">
         <div className="story-copy">
           <div className="section-label">सुगम प्रार्थना भवन</div>
           <h2>Grow in faith.<br />United in <em>fellowship.</em></h2>
           <p>
             Sugam Prathana Bhawan is a Christian church in Kathmandu, Nepal, dedicated to worship, prayer, fellowship, and community service. Join our congregation for heartfelt prayer and biblical teaching in Nepali.
           </p>
-          <p className="italic font-serif text-[#214b60] my-2">
-            “आफ्‍ना सारा मार्गमा उहाँलाई सम्‍झी, र उहाँले तेरा मार्गहरू सुगम तुल्‍याइदिनुहुनेछ।” — हितोपदेश ३ : ६ (Proverbs 3:6)
-          </p>
-          <p>
-            9 years serving the Lord · 120 church members · 30 youth fellowship members
-          </p>
+          <div className="glass-card p-4 sm:p-5 my-4 border border-white/95 shadow-xs">
+            <p className="italic font-serif text-[#214b60] text-sm sm:text-base leading-relaxed !max-w-none m-0">
+              “आफ्‍ना सारा मार्गमा उहाँलाई सम्‍झी, र उहाँले तेरा मार्गहरू सुगम तुल्‍याइदिनुहुनेछ।” — हितोपदेश ३ : ६ (Proverbs 3:6)
+            </p>
+            <div className="text-[11px] font-semibold text-[#4b9fb9] tracking-wider uppercase mt-2">
+              9 years serving the Lord · 120 church members · 30 youth fellowship members
+            </div>
+          </div>
           <a className="text-link" href="#ministries">
             Get involved in our ministries <Arrow diagonal />
           </a>
         </div>
         <figure className="story-photo">
-          <img src={terrace} alt="Sugam Church Sanctuary" />
+          <img src={terrace} alt="Sugam Church Sanctuary" loading="lazy" decoding="async" />
           <figcaption>WORSHIP GOD. GROW IN BIBLICAL FAITH.</figcaption>
         </figure>
       </section>
@@ -312,7 +359,7 @@ export default function HomePage() {
       <MinistriesSection ministries={ministries} />
 
       {/* Church Gallery Section */}
-      <section id="gallery" className="gallery-section" aria-labelledby="gallery-heading">
+      <section ref={gallerySectionRef} id="gallery" className="gallery-section cv-auto" aria-labelledby="gallery-heading">
         <div className="section-label">MOMENTS OF WORSHIP</div>
         <h2 id="gallery-heading">Church <em>Gallery.</em></h2>
         <p>Worship, prayer, fellowship, and community.</p>
@@ -357,7 +404,7 @@ export default function HomePage() {
                   tabIndex={0}
                   onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setLightboxIndex(index); }}}
                 >
-                  <img src={item.image} alt={item.alt} loading="lazy" />
+                  <img src={item.image} alt={item.alt} loading="lazy" decoding="async" />
                   <figcaption>
                     <span>{String(index + 1).padStart(2, '0')}</span>
                     {item.caption}
@@ -418,6 +465,7 @@ export default function HomePage() {
                     src={galleryItems[activeSlide].image} 
                     alt={galleryItems[activeSlide].alt} 
                     loading="lazy" 
+                    decoding="async"
                   />
                   <div className="gallery-mobile-expand-badge">
                     <span>Tap to enlarge</span>

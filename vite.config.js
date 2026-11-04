@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import extractLyricsHandler from './api/extract-lyrics.js';
 import translateLyricsHandler from './api/translate-lyrics.js';
+import zensyncNoticeHandler from './api/zensync-notice.js';
 
 const DEFAULT_CHURCH_INSTRUCTION = `You are Sugam Church Bot, the official church assistant for Sugam Prathana Bhawan (सुगम प्रार्थना भवन) in Kathmandu, Nepal.
 
@@ -618,6 +619,39 @@ function chatApiDevPlugin(apiKey, supabaseUrl, supabaseAnonKey) {
             res.statusCode = 500;
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify({ error: err.message || 'Translation failed' }));
+          }
+        });
+      });
+
+      // 2.5 ZENSYNC AI NOTICE GENERATION API (Gemini 3.1 Flash Lite)
+      server.middlewares.use('/api/zensync-notice', async (req, res) => {
+        if (req.method !== 'POST') {
+          res.statusCode = 405;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+          return;
+        }
+        let bodyRaw = '';
+        req.on('data', chunk => { bodyRaw += chunk; });
+        req.on('end', async () => {
+          try {
+            req.body = JSON.parse(bodyRaw || '{}');
+          } catch {
+            req.body = {};
+          }
+          res.status = function(code) { res.statusCode = code; return this; };
+          res.json = function(data) {
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify(data));
+            return this;
+          };
+          try {
+            const activeKey = await getActiveGeminiKey();
+            await zensyncNoticeHandler(req, res, activeKey);
+          } catch (err) {
+            res.statusCode = 500;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: err.message || 'Notice generation failed' }));
           }
         });
       });

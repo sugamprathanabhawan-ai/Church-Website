@@ -510,7 +510,7 @@ export default function ChoirPage() {
               <div className="col-span-full py-12 text-center bg-[#e4f3f8]/50 rounded-3xl border border-dashed border-[#d4e8ee] p-8">
                 <YoutubeIcon className="w-10 h-10 text-rose-400 mx-auto mb-2" />
                 <p className="font-bold text-[#214b60] text-sm">No matching worship songs found.</p>
-                <p className="text-xs text-[#52788d] mt-1">You can add songs via the Admin Portal.</p>
+                <p className="text-xs text-[#52788d] mt-1">Please try searching with another song title or clear your filters.</p>
               </div>
             )}
           </div>

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import {
@@ -358,7 +358,7 @@ export function DataProvider({ children }) {
   }, [isZenSync]);
 
   // Update Youth Data directly in Supabase
-  const updateYouthData = async (data) => {
+  const updateYouthData = useCallback(async (data) => {
     setIsSyncing(true);
     try {
       await saveYouthData(data);
@@ -371,10 +371,10 @@ export function DataProvider({ children }) {
     } finally {
       setIsSyncing(false);
     }
-  };
+  }, []);
 
   // Update Choir Data directly in Supabase
-  const updateChoirData = async (data) => {
+  const updateChoirData = useCallback(async (data) => {
     setIsSyncing(true);
     try {
       await saveChoirData(data);
@@ -387,10 +387,10 @@ export function DataProvider({ children }) {
     } finally {
       setIsSyncing(false);
     }
-  };
+  }, []);
 
   // Update YouTube Songs directly in Supabase
-  const updateYouTubeData = async (dataOrSongs) => {
+  const updateYouTubeData = useCallback(async (dataOrSongs) => {
     setIsSyncing(true);
     try {
       const songs = Array.isArray(dataOrSongs) ? dataOrSongs : dataOrSongs.songs || [];
@@ -404,10 +404,10 @@ export function DataProvider({ children }) {
     } finally {
       setIsSyncing(false);
     }
-  };
+  }, []);
 
   // Add a Church PDF Document
-  const addDocument = async ({ section, title, fileUrl, fileName, fileSize }) => {
+  const addDocument = useCallback(async ({ section, title, fileUrl, fileName, fileSize }) => {
     setIsSyncing(true);
     try {
       const newDoc = await addChurchDocument({ section, title, fileUrl, fileName, fileSize });
@@ -423,10 +423,10 @@ export function DataProvider({ children }) {
     } finally {
       setIsSyncing(false);
     }
-  };
+  }, []);
 
   // Delete a Church PDF Document
-  const deleteDocument = async (id, section) => {
+  const deleteDocument = useCallback(async (id, section) => {
     setIsSyncing(true);
     try {
       await deleteChurchDocument(id);
@@ -451,10 +451,10 @@ export function DataProvider({ children }) {
     } finally {
       setIsSyncing(false);
     }
-  };
+  }, []);
 
   // Update Website Pictures directly in Supabase
-  const updateWebsitePictures = async (data) => {
+  const updateWebsitePictures = useCallback(async (data) => {
     setIsSyncing(true);
     try {
       await saveWebsitePictures(data);
@@ -467,10 +467,10 @@ export function DataProvider({ children }) {
     } finally {
       setIsSyncing(false);
     }
-  };
+  }, []);
 
   // --- SUGAM LYRICS BOOK ACTIONS ---
-  const saveLyricsSongData = async (songData) => {
+  const saveLyricsSongData = useCallback(async (songData) => {
     setIsSyncing(true);
     try {
       const saved = await saveLyricsSong(songData);
@@ -489,9 +489,9 @@ export function DataProvider({ children }) {
     } finally {
       setIsSyncing(false);
     }
-  };
+  }, []);
 
-  const deleteLyricsSongData = async (songId) => {
+  const deleteLyricsSongData = useCallback(async (songId) => {
     setIsSyncing(true);
     try {
       await deleteLyricsSong(songId);
@@ -504,9 +504,9 @@ export function DataProvider({ children }) {
     } finally {
       setIsSyncing(false);
     }
-  };
+  }, []);
 
-  const rollbackLyricsSongData = async (songId, targetVersion) => {
+  const rollbackLyricsSongData = useCallback(async (songId, targetVersion) => {
     setIsSyncing(true);
     try {
       const restored = await rollbackLyricsSong(songId, targetVersion);
@@ -519,10 +519,10 @@ export function DataProvider({ children }) {
     } finally {
       setIsSyncing(false);
     }
-  };
+  }, []);
 
   // --- AUDIO SERMONS & BIBLE STREAMING ACTIONS ---
-  const saveAudioSermonData = async (sermonData) => {
+  const saveAudioSermonData = useCallback(async (sermonData) => {
     setIsSyncing(true);
     try {
       const saved = await saveAudioSermon(sermonData);
@@ -541,9 +541,9 @@ export function DataProvider({ children }) {
     } finally {
       setIsSyncing(false);
     }
-  };
+  }, []);
 
-  const deleteAudioSermonData = async (sermonId) => {
+  const deleteAudioSermonData = useCallback(async (sermonId) => {
     setIsSyncing(true);
     try {
       await deleteAudioSermon(sermonId);
@@ -556,45 +556,77 @@ export function DataProvider({ children }) {
     } finally {
       setIsSyncing(false);
     }
-  };
+  }, []);
+
+  const retryConnection = useCallback(() => loadAll(0), [loadAll]);
+
+  const value = useMemo(() => ({
+    youthData,
+    choirData,
+    youtubeData,
+    documents,
+    websitePictures,
+    lyricsSongs,
+    audioSermons,
+    loading,
+    isSyncing,
+    isLive,
+    isStale,
+    error,
+    lastSyncTime,
+    dbStatus,
+    refreshData: loadAll,
+    retryConnection,
+    updateYouthData,
+    updateChoirData,
+    updateYouTubeData,
+    addDocument,
+    deleteDocument,
+    updateWebsitePictures,
+    uploadWebsiteImage,
+    refreshLyricsSongs: refreshLyrics,
+    saveLyricsSong: saveLyricsSongData,
+    deleteLyricsSong: deleteLyricsSongData,
+    rollbackLyricsSong: rollbackLyricsSongData,
+    fetchLyricsSongVersions,
+    refreshAudioSermons: refreshAudio,
+    saveAudioSermon: saveAudioSermonData,
+    deleteAudioSermon: deleteAudioSermonData,
+    uploadAudioSermon: uploadAudioSermonFile
+  }), [
+    youthData,
+    choirData,
+    youtubeData,
+    documents,
+    websitePictures,
+    lyricsSongs,
+    audioSermons,
+    loading,
+    isSyncing,
+    isLive,
+    isStale,
+    error,
+    lastSyncTime,
+    dbStatus,
+    loadAll,
+    retryConnection,
+    updateYouthData,
+    updateChoirData,
+    updateYouTubeData,
+    addDocument,
+    deleteDocument,
+    updateWebsitePictures,
+    refreshLyrics,
+    saveLyricsSongData,
+    deleteLyricsSongData,
+    rollbackLyricsSongData,
+    refreshAudio,
+    saveAudioSermonData,
+    deleteAudioSermonData
+  ]);
 
   return (
-    <DataContext.Provider
-      value={{
-        youthData,
-        choirData,
-        youtubeData,
-        documents,
-        websitePictures,
-        lyricsSongs,
-        audioSermons,
-        loading,
-        isSyncing,
-        isLive,
-        isStale,
-        error,
-        lastSyncTime,
-        dbStatus,
-        refreshData: loadAll,
-        retryConnection: () => loadAll(0),
-        updateYouthData,
-        updateChoirData,
-        updateYouTubeData,
-        addDocument,
-        deleteDocument,
-        updateWebsitePictures,
-        uploadWebsiteImage,
-        refreshLyricsSongs: refreshLyrics,
-        saveLyricsSong: saveLyricsSongData,
-        deleteLyricsSong: deleteLyricsSongData,
-        rollbackLyricsSong: rollbackLyricsSongData,
-        fetchLyricsSongVersions,
-        refreshAudioSermons: refreshAudio,
-        saveAudioSermon: saveAudioSermonData,
-        deleteAudioSermon: deleteAudioSermonData,
-        uploadAudioSermon: uploadAudioSermonFile
-      }}
-    >
+    <DataContext.Provider value={value}>
       {children}
     </DataContext.Provider>
   );

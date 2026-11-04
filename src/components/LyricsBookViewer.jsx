@@ -568,15 +568,9 @@ export default function LyricsBookViewer({
                   <h4 className="font-serif text-xl font-bold text-[#214b60] mb-2">
                     गीत संग्रह खाली छ (No Songs in Songbook Yet)
                   </h4>
-                  <p className="text-xs sm:text-sm text-[#52788d] max-w-md mx-auto mb-5 leading-relaxed">
-                    सुगम मण्डलीको गीत संग्रह अहिले खाली छ। मण्डलीका एडमिनले एडमिन प्यानलबाट नयाँ भजन र गीतहरू थपेपछि यहाँ तुरुन्तै देखिनेछ।
+                  <p className="text-xs sm:text-sm text-[#52788d] max-w-md mx-auto mb-2 leading-relaxed">
+                    सुगम मण्डलीको गीत संग्रह अहिले खाली छ। नयाँ भजन र आत्मिक गीतहरू चाँडै उपलब्ध हुनेछन्।
                   </p>
-                  <a
-                    href="/admin?tab=lyrics"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#285c73] hover:bg-[#214b60] text-white text-xs font-bold rounded-xl shadow-xs transition hover:scale-105"
-                  >
-                    <span>एडमिन प्यानल खोल्नुहोस् (Open Admin Panel)</span>
-                  </a>
                 </>
               ) : (
                 <>

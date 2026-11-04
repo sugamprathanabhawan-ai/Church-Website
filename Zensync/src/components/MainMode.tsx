@@ -17,9 +17,19 @@ import {
   ShieldCheck,
   ShieldAlert,
   Users,
+  Lock,
 } from 'lucide-react';
-import type { SectionItem, SlideItem, ConnectionStatus, DeviceAuditInfo } from '../types';
+import type {
+  SectionItem,
+  SlideItem,
+  ConnectionStatus,
+  DeviceAuditInfo,
+  NoteItem,
+  NoticeItem,
+  HelperJoinRequest,
+} from '../types';
 import { ImageViewer } from './ImageViewer';
+import { MainNotepad } from './MainNotepad';
 import {
   flattenSections,
   resolveSlideState,
@@ -30,22 +40,27 @@ import {
   createSession,
   getSession,
   forceReleaseHelper,
+  respondHelperRequest,
   updateSessionSlide,
   updateSessionContent,
   uploadSlideImage,
   subscribeToSession,
   deleteSlideImage,
   deleteSession,
+  isDeviceAuthorizedAdmin,
+  authorizeAdminForSession,
+  verifySessionAdminPassword,
 } from '../lib/supabaseClient';
 import { collectDeviceAuditInfo, getOrCreateDeviceId } from '../lib/deviceUtils';
 
 interface MainModeProps {
   sessionCode: string;
   initialDeviceInfo?: DeviceAuditInfo;
+  initialAdminPassword?: string;
   onExit: () => void;
 }
 
-export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceInfo, onExit }) => {
+export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceInfo, initialAdminPassword, onExit }) => {
   const [sections, setSections] = useState<SectionItem[]>(() => createDefaultSections());
   const [currentGlobalIndex, setCurrentGlobalIndex] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -58,6 +73,16 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
   const [isUnauthorizedMain, setIsUnauthorizedMain] = useState(false);
   const [claimedHostName, setClaimedHostName] = useState('');
   const [activeHelperInfo, setActiveHelperInfo] = useState<DeviceAuditInfo | null>(null);
+  const [activeTab, setActiveTab] = useState<'slides' | 'notes'>('slides');
+  const [notes, setNotes] = useState<NoteItem[]>([]);
+  const [activeNotice, setActiveNotice] = useState<NoticeItem | null>(null);
+  const [pendingHelperRequest, setPendingHelperRequest] = useState<HelperJoinRequest | null>(null);
+
+  // In-session admin password challenge for unauthorized devices accessing Main URL
+  const [showPasswordGate, setShowPasswordGate] = useState(false);
+  const [gatePasswordInput, setGatePasswordInput] = useState('');
+  const [gatePasswordError, setGatePasswordError] = useState('');
+  const [isVerifyingGate, setIsVerifyingGate] = useState(false);
 
   // Section editing state
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
@@ -80,18 +105,77 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
     }
   };
 
+  const handleUnlockGateSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!gatePasswordInput.trim()) return;
+
+    setIsVerifyingGate(true);
+    setGatePasswordError('');
+    try {
+      const session = await getSession(sessionCode);
+      if (!session) {
+        setGatePasswordError('Session not found or has expired.');
+        return;
+      }
+      const isValid = verifySessionAdminPassword(session, gatePasswordInput);
+      if (isValid) {
+        authorizeAdminForSession(sessionCode, session.content?.creatorToken);
+        setShowPasswordGate(false);
+        setIsUnauthorizedMain(false);
+
+        if (session.content?.sections && session.content.sections.length > 0) {
+          setSections(session.content.sections);
+        }
+        if (session.content?.notes) {
+          setNotes(session.content.notes);
+        }
+        if (session.content?.activeNotice) {
+          setActiveNotice(session.content.activeNotice);
+        }
+        if (session.current_slide) {
+          setCurrentGlobalIndex(session.current_slide.globalIndex || 0);
+        }
+        const helperInfo = session.helper_device_info || session.content?.helper_device_info || null;
+        if (helperInfo) {
+          setActiveHelperInfo(helperInfo);
+        }
+      } else {
+        setGatePasswordError('Incorrect admin password. You cannot access presenter controls.');
+      }
+    } catch (err: any) {
+      setGatePasswordError(err.message || 'Verification failed');
+    } finally {
+      setIsVerifyingGate(false);
+    }
+  };
+
   // Initialize session in Supabase & subscribe
   useEffect(() => {
     let isMounted = true;
 
     async function init() {
-      // 1. Verify exclusive Main role ownership
+      // 1. Verify exclusive Main role ownership & admin password protection
       const existing = await getSession(sessionCode);
       const myDeviceId = getOrCreateDeviceId();
 
       if (existing) {
+        const isAuthorized = isDeviceAuthorizedAdmin(sessionCode);
+
+        // If session has admin password set and this device is NOT yet authorized:
+        if (existing.content?.adminPassword && !isAuthorized) {
+          if (isMounted) {
+            setShowPasswordGate(true);
+            setClaimedHostName(
+              existing.device_info?.deviceName ||
+              existing.content?.device_info?.deviceName ||
+              'Main Presenter'
+            );
+          }
+          return;
+        }
+
         const existingMainSig = existing.main_signature || existing.content?.main_signature;
-        if (existingMainSig && existingMainSig !== myDeviceId) {
+        if (existingMainSig && existingMainSig !== myDeviceId && !isAuthorized) {
           if (isMounted) {
             setIsUnauthorizedMain(true);
             setClaimedHostName(
@@ -107,6 +191,28 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
         if (isMounted && helperInfo) {
           setActiveHelperInfo(helperInfo);
         }
+
+        if (isMounted) {
+          if (existing.content?.sections && existing.content.sections.length > 0) {
+            setSections(existing.content.sections);
+          }
+          if (existing.content?.notes) {
+            setNotes(existing.content.notes);
+          }
+          if (existing.content?.activeNotice) {
+            setActiveNotice(existing.content.activeNotice);
+          }
+          if (existing.content?.helper_request && existing.content.helper_request.status === 'pending') {
+            setPendingHelperRequest(existing.content.helper_request);
+          }
+          if (existing.device_info) {
+            setDeviceInfo(existing.device_info);
+          }
+          if (existing.current_slide) {
+            setCurrentGlobalIndex(existing.current_slide.globalIndex || 0);
+          }
+        }
+        return;
       }
 
       let activeDev = initialDeviceInfo;
@@ -114,10 +220,17 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
         activeDev = await collectDeviceAuditInfo();
         if (isMounted) setDeviceInfo(activeDev);
       }
-      const initial = await createSession(sessionCode, sections, activeDev);
+      const createdPw = initialAdminPassword || (typeof window !== 'undefined' ? sessionStorage.getItem(`zensync_create_pw_${sessionCode}`) : '') || '';
+      const initial = await createSession(sessionCode, sections, activeDev, createdPw);
       if (isMounted && initial) {
         if (initial.content?.sections && initial.content.sections.length > 0) {
           setSections(initial.content.sections);
+        }
+        if (initial.content?.notes) {
+          setNotes(initial.content.notes);
+        }
+        if (initial.content?.activeNotice) {
+          setActiveNotice(initial.content.activeNotice);
         }
         if (initial.device_info && !activeDev) {
           setDeviceInfo(initial.device_info);
@@ -146,6 +259,19 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
           }
         });
       },
+      onNotesChange: (updatedNotes) => {
+        setNotes(updatedNotes);
+      },
+      onNoticeReceived: (notice) => {
+        setActiveNotice(notice);
+      },
+      onHelperRequest: (req) => {
+        if (req && req.status === 'pending') {
+          setPendingHelperRequest(req);
+        } else if (req && (req.status === 'approved' || req.status === 'rejected')) {
+          setPendingHelperRequest(null);
+        }
+      },
       onStatusChange: (newStatus) => {
         setStatus(newStatus);
       },
@@ -160,6 +286,11 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
         const s = await getSession(sessionCode);
         if (isMounted && s) {
           setActiveHelperInfo(s.helper_device_info || s.content?.helper_device_info || null);
+          if (s.content?.helper_request && s.content.helper_request.status === 'pending') {
+            setPendingHelperRequest(s.content.helper_request);
+          } else if (s.content?.helper_request && s.content.helper_request.status !== 'pending') {
+            setPendingHelperRequest(null);
+          }
         }
       } catch {
         // ignore
@@ -177,6 +308,40 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
   const { currentSlide, activeFlatSlide, totalSlides } = resolveSlideState(sections, {
     globalIndex: currentGlobalIndex,
   });
+
+  const handleAcceptHelper = async () => {
+    if (!pendingHelperRequest) return;
+    try {
+      await respondHelperRequest(
+        sessionCode,
+        pendingHelperRequest.deviceId,
+        'approved',
+        pendingHelperRequest.helperInfo
+      );
+      if (pendingHelperRequest.helperInfo) {
+        setActiveHelperInfo(pendingHelperRequest.helperInfo);
+      }
+      setPendingHelperRequest(null);
+    } catch (err: any) {
+      alert(`Failed to accept helper: ${err?.message || 'Error'}`);
+    }
+  };
+
+  const handleDeclineHelper = async () => {
+    if (!pendingHelperRequest) return;
+    try {
+      await respondHelperRequest(
+        sessionCode,
+        pendingHelperRequest.deviceId,
+        'rejected',
+        pendingHelperRequest.helperInfo
+      );
+      setPendingHelperRequest(null);
+    } catch (err: any) {
+      console.warn('Decline error:', err);
+      setPendingHelperRequest(null);
+    }
+  };
 
   // Slide navigation
   const handleGoToSlide = async (globalIndex: number) => {
@@ -455,6 +620,86 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
     setTimeout(() => setCopied(false), 2000);
   };
 
+  if (showPasswordGate) {
+    return (
+      <div className="fullscreen-container" style={{ backgroundColor: 'var(--bg-secondary)', flexDirection: 'column', padding: '1.25rem' }}>
+        <div className="join-card" style={{ textAlign: 'center', maxWidth: '440px' }}>
+          <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: 'rgba(2, 132, 199, 0.1)', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem' }}>
+            <Lock size={28} />
+          </div>
+          <h3 className="join-title" style={{ marginBottom: '0.5rem', fontSize: '1.35rem' }}>
+            Admin Password Required
+          </h3>
+          <p className="join-subtitle" style={{ marginBottom: '1.5rem', lineHeight: 1.5 }}>
+            Presentation session <strong>#{sessionCode}</strong> is protected. Enter the password set by the creator ({claimedHostName || 'Session Admin'}) to unlock controls.
+          </p>
+
+          <form onSubmit={handleUnlockGateSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', textAlign: 'left' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              <label htmlFor="gate-password-input" style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                Session Admin Password:
+              </label>
+              <input
+                id="gate-password-input"
+                type="password"
+                value={gatePasswordInput}
+                onChange={(e) => {
+                  setGatePasswordInput(e.target.value);
+                  setGatePasswordError('');
+                }}
+                placeholder="Enter password"
+                className="input-field"
+                style={{
+                  width: '100%',
+                  padding: '0.8rem 1rem',
+                  borderRadius: 'var(--radius-md)',
+                  border: gatePasswordError ? '1.5px solid var(--danger)' : '1.5px solid var(--border-color)',
+                  fontSize: '1rem',
+                }}
+                autoFocus
+                required
+              />
+            </div>
+
+            {gatePasswordError && (
+              <p style={{ color: 'var(--danger)', fontSize: '0.85rem', fontWeight: 600, margin: 0 }}>
+                {gatePasswordError}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={isVerifyingGate || !gatePasswordInput.trim()}
+              className="btn-primary"
+              style={{
+                width: '100%',
+                padding: '0.85rem',
+                backgroundColor: '#0284c7',
+                color: '#ffffff',
+                border: '1.5px solid #0369a1',
+                boxShadow: '0 4px 12px rgba(2, 132, 199, 0.35)',
+                fontWeight: 700,
+                cursor: (isVerifyingGate || !gatePasswordInput.trim()) ? 'not-allowed' : 'pointer',
+              }}
+              id="btn-gate-unlock"
+            >
+              {isVerifyingGate ? 'Verifying...' : 'Unlock Presenter Controls'}
+            </button>
+
+            <button
+              type="button"
+              onClick={onExit}
+              className="btn-outline"
+              style={{ width: '100%', padding: '0.75rem', fontSize: '0.88rem' }}
+            >
+              Cancel &amp; Return Home
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   if (isUnauthorizedMain) {
     return (
       <div className="fullscreen-container" style={{ backgroundColor: 'var(--bg-secondary)', flexDirection: 'column', padding: '1.25rem' }}>
@@ -535,14 +780,35 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
               {copied ? <Check size={14} color="var(--primary)" /> : <Copy size={14} color="var(--primary)" />}
             </button>
           </div>
+
+          {/* Mode Switcher: Slides vs Notepad & Notices */}
+          <div className="main-view-switcher">
+            <button
+              type="button"
+              onClick={() => setActiveTab('slides')}
+              className={`main-view-tab-btn ${activeTab === 'slides' ? 'active' : ''}`}
+              title="Slides presentation stage"
+            >
+              <span>🖼️ Slides ({totalSlides})</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('notes')}
+              className={`main-view-tab-btn ${activeTab === 'notes' ? 'active' : ''}`}
+              title="Service notepad and instant notice broadcast"
+            >
+              <span>📝 Notes &amp; Notice</span>
+              {activeNotice && <span className="view-tab-badge-dot" title="Active Notice Broadcasted" />}
+            </button>
+          </div>
         </div>
 
         <div className="navbar-actions">
           {/* Active Helper Badge with Kick/Release button */}
-          {activeHelperInfo && (
-            <div className="helper-active-badge" title={`Active Helper: ${activeHelperInfo.deviceName}`}>
+          {activeHelperInfo && (activeHelperInfo.deviceName || activeHelperInfo.deviceId) && (
+            <div className="helper-active-badge" title={`Active Helper: ${activeHelperInfo.deviceName || 'Device'}`}>
               <Users size={13} />
-              <span className="helper-badge-name">Helper: {activeHelperInfo.deviceName}</span>
+              <span className="helper-badge-name">Helper: {activeHelperInfo.deviceName || 'Device'}</span>
               <button
                 onClick={handleDisconnectHelper}
                 className="btn-icon helper-kick-btn"
@@ -589,14 +855,26 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
         </div>
       </header>
 
-      {/* Mobile Backdrop */}
-      <div
-        className={`sidebar-backdrop ${sidebarOpen ? 'open' : ''}`}
-        onClick={() => setSidebarOpen(false)}
-      />
+      {/* Main View Area: Notes vs Presentation Stage */}
+      {activeTab === 'notes' ? (
+        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+          <MainNotepad
+            sessionCode={sessionCode}
+            initialNotes={notes}
+            activeNotice={activeNotice}
+            presenterName={deviceInfo?.deviceName || 'Main Presenter'}
+          />
+        </div>
+      ) : (
+        <>
+          {/* Mobile Backdrop */}
+          <div
+            className={`sidebar-backdrop ${sidebarOpen ? 'open' : ''}`}
+            onClick={() => setSidebarOpen(false)}
+          />
 
-      {/* Main Layout Area: Sidebar + Image Viewer */}
-      <div className="presentation-layout">
+          {/* Main Layout Area: Sidebar + Image Viewer */}
+          <div className="presentation-layout">
         {/* Left Sidebar */}
         <aside className={`presentation-sidebar ${sidebarOpen ? 'open' : ''}`}>
           <div className="sidebar-header">
@@ -889,6 +1167,8 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
           />
         </div>
       </div>
+      </>
+      )}
 
       {/* Host Device Audit Modal */}
       {showAuditModal && deviceInfo && (
@@ -980,6 +1260,75 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
             >
               Close
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Helper Join Request Modal Prompt */}
+      {pendingHelperRequest && pendingHelperRequest.status === 'pending' && (
+        <div className="join-modal-overlay" style={{ zIndex: 1200 }}>
+          <div className="join-card" style={{ maxWidth: '440px', textAlign: 'center' }}>
+            <div
+              style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(2, 132, 199, 0.1)',
+                color: '#0284c7',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 1.25rem',
+                border: '1.5px solid rgba(2, 132, 199, 0.25)',
+              }}
+            >
+              <Users size={28} />
+            </div>
+
+            <h3 className="join-title" style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>
+              Helper Access Request
+            </h3>
+
+            <p className="join-subtitle" style={{ marginBottom: '1.25rem', lineHeight: 1.5 }}>
+              A device is requesting to join as <strong>Helper Controller</strong>:
+              <br /><br />
+              <strong>{pendingHelperRequest.helperInfo?.deviceName || 'Remote Device'}</strong>
+              <br />
+              <span style={{ fontSize: '0.82rem', color: 'var(--text-light)' }}>
+                {pendingHelperRequest.helperInfo?.deviceModel || 'Mobile'} ({pendingHelperRequest.helperInfo?.platform || 'Web'})
+              </span>
+              <br /><br />
+              Accepting will grant this device synchronized slide control. Only 1 Helper is permitted.
+            </p>
+
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button
+                type="button"
+                onClick={handleDeclineHelper}
+                className="btn-danger-outline"
+                style={{ flex: 1, padding: '0.85rem', justifyContent: 'center' }}
+              >
+                <X size={16} />
+                <span>Decline</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleAcceptHelper}
+                className="btn-primary"
+                style={{
+                  flex: 1.2,
+                  padding: '0.85rem',
+                  justifyContent: 'center',
+                  backgroundColor: '#16a34a',
+                  borderColor: '#15803d',
+                  boxShadow: '0 4px 12px rgba(22, 163, 74, 0.35)',
+                }}
+              >
+                <Check size={16} />
+                <span>Accept</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

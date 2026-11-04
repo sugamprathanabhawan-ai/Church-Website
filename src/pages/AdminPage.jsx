@@ -36,7 +36,8 @@ import {
   Bot,
   Sparkles,
   BookOpen,
-  Headphones
+  Headphones,
+  Radio
 } from 'lucide-react';
 import { 
   fetchQuizLeaderboard, 
@@ -47,6 +48,7 @@ import {
 import AdminChatbotTab from '../components/AdminChatbotTab';
 import AdminLyricsBookTab from '../components/AdminLyricsBookTab';
 import AdminAudioSermonsTab from '../components/AdminAudioSermonsTab';
+import AdminZenSyncTab from '../components/AdminZenSyncTab';
 
 function YoutubeIcon({ className = "w-4 h-4" }) {
   return (
@@ -89,7 +91,7 @@ export default function AdminPage() {
   // URL tab support (e.g. /admin?tab=chatbot or /admin?tab=lyrics or /admin?tab=audio)
   const searchParams = new URLSearchParams(window.location.search);
   const paramTab = searchParams.get('tab');
-  const validTabs = ['youth', 'choir', 'lyrics', 'audio', 'youtube', 'quiz', 'documents', 'photos', 'chatbot'];
+  const validTabs = ['youth', 'choir', 'lyrics', 'audio', 'youtube', 'quiz', 'documents', 'photos', 'chatbot', 'zensync'];
   const [activeTab, setActiveTab] = useState(validTabs.includes(paramTab) ? paramTab : 'youth');
 
   const [toastMessage, setToastMessage] = useState(null);
@@ -921,6 +923,23 @@ export default function AdminPage() {
           <span>AI Chatbot</span>
           <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-700">
             Sugam Bot
+          </span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('zensync')}
+          className={`px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 ${
+            activeTab === 'zensync' 
+              ? 'bg-[#285c73] text-white shadow-md shadow-[#285c73]/20 scale-[1.02]' 
+              : 'bg-white text-[#214b60] hover:bg-[#dceef5]/40 border border-[#d4e8ee]'
+          }`}
+        >
+          <Radio className="w-4 h-4 text-sky-500 animate-pulse" />
+          <span>ZenSync</span>
+          <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+            activeTab === 'zensync' ? 'bg-white/20 text-white' : 'bg-sky-100 text-sky-800'
+          }`}>
+            Live
           </span>
         </button>
       </div>
@@ -1824,6 +1843,11 @@ export default function AdminPage() {
       {/* 7. AI CHATBOT & GEMINI FLASH TAB */}
       {activeTab === 'chatbot' && (
         <AdminChatbotTab showToast={showToast} />
+      )}
+
+      {/* 8. ZENSYNC LIVE PRESENTATIONS TAB */}
+      {activeTab === 'zensync' && (
+        <AdminZenSyncTab showToast={showToast} />
       )}
 
       {/* ADD PHOTO MODAL */}

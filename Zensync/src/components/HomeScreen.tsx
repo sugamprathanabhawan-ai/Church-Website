@@ -9,33 +9,71 @@ import {
   Smartphone,
   ShieldAlert,
   ShieldCheck,
+  Loader2,
+  Lock,
+  Mail,
 } from 'lucide-react';
-import type { UserRole, DeviceAuditInfo } from '../types';
+import type { UserRole, DeviceAuditInfo, SessionData } from '../types';
 import {
   getInitialDeviceNameSuggestion,
   detectDeviceModel,
   collectDeviceAuditInfo,
   getOrCreateDeviceId,
 } from '../lib/deviceUtils';
-import { getSession, claimHelperRole, getStoredHostToken } from '../lib/supabaseClient';
+import {
+  getSession,
+  claimHelperRole,
+  requestHelperJoin,
+  subscribeToSession,
+  getStoredHostToken,
+  getSupabase,
+  isDeviceAuthorizedAdmin,
+  authorizeAdminForSession,
+  verifySessionAdminPassword,
+} from '../lib/supabaseClient';
 import { AdminSessionManager } from './AdminSessionManager';
 
 interface HomeScreenProps {
-  onSelectRole: (role: UserRole, code?: string, deviceInfo?: DeviceAuditInfo) => void;
+  onSelectRole: (role: UserRole, code?: string, deviceInfo?: DeviceAuditInfo, adminPassword?: string) => void;
+  isAdmin?: boolean;
+  onLogin?: (email: string, pass: string) => Promise<{ success?: boolean; error?: string } | any>;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
   onSelectRole,
+  isAdmin = false,
+  onLogin,
 }) => {
   const [modalRole, setModalRole] = useState<'sub' | 'helper' | null>(null);
   const [showMainAccessModal, setShowMainAccessModal] = useState(false);
   const [showMainDeviceModal, setShowMainDeviceModal] = useState(false);
   const [showAdminManager, setShowAdminManager] = useState(false);
+  const [showAdminLoginModal, setShowAdminLoginModal] = useState(false);
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminLoginLoading, setAdminLoginLoading] = useState(false);
+  const [adminLoginError, setAdminLoginError] = useState('');
   const [deviceName, setDeviceName] = useState('');
+  const [createdAdminPassword, setCreatedAdminPassword] = useState('');
+  const [showCreatedPassword, setShowCreatedPassword] = useState(false);
+  const [creationError, setCreationError] = useState('');
+
+  // Password verification when joining as Admin/Main on another device
+  const [showAdminPasswordPrompt, setShowAdminPasswordPrompt] = useState(false);
+  const [pendingAdminSession, setPendingAdminSession] = useState<SessionData | null>(null);
+  const [inputAdminPassword, setInputAdminPassword] = useState('');
+  const [showInputAdminPassword, setShowInputAdminPassword] = useState(false);
+  const [adminPasswordError, setAdminPasswordError] = useState('');
+  const [isVerifyingAdminPassword, setIsVerifyingAdminPassword] = useState(false);
+  const adminPasswordInputRef = useRef<HTMLInputElement>(null);
+
   const [detectedModel, setDetectedModel] = useState({ model: '', platform: '' });
   const [isStartingMain, setIsStartingMain] = useState(false);
   const [isVerifyingMain, setIsVerifyingMain] = useState(false);
   const [isVerifyingJoin, setIsVerifyingJoin] = useState(false);
+  const [isWaitingHelperApproval, setIsWaitingHelperApproval] = useState(false);
+  const [waitingHelperInfo, setWaitingHelperInfo] = useState<{ code: string; devInfo: DeviceAuditInfo } | null>(null);
+  const helperUnsubRef = useRef<(() => void) | null>(null);
 
   // Sub & Helper PIN state
   const [pin, setPin] = useState(['', '', '', '']);
@@ -65,14 +103,64 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     const suggested = getInitialDeviceNameSuggestion();
     setDeviceName(suggested);
 
-    // Open session manager if URL specifies manage=true
+    // Open session manager if URL specifies manage=true and user is authenticated
     if (typeof window !== 'undefined') {
       const searchParams = new URLSearchParams(window.location.search);
       if (searchParams.get('manage') === 'true' || searchParams.get('admin') === 'true') {
-        setShowAdminManager(true);
+        if (isAdmin) {
+          setShowAdminManager(true);
+        } else {
+          setShowAdminLoginModal(true);
+        }
       }
     }
-  }, []);
+    return () => {
+      if (helperUnsubRef.current) {
+        helperUnsubRef.current();
+        helperUnsubRef.current = null;
+      }
+    };
+  }, [isAdmin]);
+
+  const handleAdminLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminEmail.trim() || !adminPassword) return;
+
+    setAdminLoginLoading(true);
+    setAdminLoginError('');
+
+    try {
+      if (onLogin) {
+        const res = await onLogin(adminEmail.trim(), adminPassword);
+        if (res && res.error) {
+          setAdminLoginError(res.error);
+          return;
+        }
+      } else {
+        const client = getSupabase();
+        if (client) {
+          const { error } = await client.auth.signInWithPassword({
+            email: adminEmail.trim(),
+            password: adminPassword,
+          });
+          if (error) {
+            setAdminLoginError(error.message || 'Invalid administrator credentials');
+            return;
+          }
+        }
+      }
+
+      // Login success
+      setShowAdminLoginModal(false);
+      setShowAdminManager(true);
+      setAdminEmail('');
+      setAdminPassword('');
+    } catch (err: any) {
+      setAdminLoginError(err?.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setAdminLoginLoading(false);
+    }
+  };
 
   // When clicking MAIN card on home screen
   const handleOpenMainModal = () => {
@@ -133,17 +221,29 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           return;
         }
 
-        // Verify that this device possesses the cryptographic host token for this session
-        const hostToken = getStoredHostToken(code);
-        if (!hostToken) {
-          setMainErrorMessage(
-            `Host Authorization Required: This device does not hold the presenter host token for session "${code}". Only the original creator on this device can resume as Main. If you are participating, join as Sub (Viewer) or Helper.`
-          );
-          setIsVerifyingMain(false);
+        // 1. If this device is the authorized session creator/admin, allow instant re-entry
+        const isAuthorized = isDeviceAuthorizedAdmin(code);
+        if (isAuthorized) {
+          setShowMainAccessModal(false);
+          onSelectRole('main', code, session.device_info);
           return;
         }
 
-        // Authorized presenter
+        // 2. If another device attempts to enter as Main, require the Session Admin Password!
+        if (session.content?.adminPassword) {
+          setPendingAdminSession(session);
+          setShowAdminPasswordPrompt(true);
+          setInputAdminPassword('');
+          setAdminPasswordError('');
+          setShowMainAccessModal(false);
+          setTimeout(() => {
+            adminPasswordInputRef.current?.focus();
+          }, 100);
+          return;
+        }
+
+        // 3. Fallback for open/legacy sessions without password
+        authorizeAdminForSession(code);
         setShowMainAccessModal(false);
         onSelectRole('main', code, session.device_info);
       } catch (err: any) {
@@ -157,9 +257,42 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     setMainErrorMessage('Please enter your 4-digit session code, or start a new presentation below.');
   };
 
+  const handleVerifyAdminPasswordSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!pendingAdminSession) return;
+
+    if (!inputAdminPassword.trim()) {
+      setAdminPasswordError('Please enter the session admin password.');
+      return;
+    }
+
+    setIsVerifyingAdminPassword(true);
+    setAdminPasswordError('');
+
+    try {
+      const isMatch = verifySessionAdminPassword(pendingAdminSession, inputAdminPassword);
+      if (isMatch) {
+        authorizeAdminForSession(pendingAdminSession.code, pendingAdminSession.content?.creatorToken);
+        setShowAdminPasswordPrompt(false);
+        const dev = pendingAdminSession.device_info;
+        const code = pendingAdminSession.code;
+        setPendingAdminSession(null);
+        onSelectRole('main', code, dev);
+      } else {
+        setAdminPasswordError('Incorrect admin password. You cannot control this session as admin.');
+      }
+    } catch (err: any) {
+      setAdminPasswordError(err.message || 'Verification failed');
+    } finally {
+      setIsVerifyingAdminPassword(false);
+    }
+  };
+
   const handleProceedToCreateMain = () => {
     setShowMainAccessModal(false);
     setShowMainDeviceModal(true);
+    setCreatedAdminPassword('');
+    setCreationError('');
     setTimeout(() => {
       deviceInputRef.current?.focus();
       deviceInputRef.current?.select();
@@ -170,21 +303,48 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     if (e) e.preventDefault();
     if (!deviceName.trim()) return;
 
+    if (!createdAdminPassword.trim()) {
+      setCreationError('Please create a session admin password to protect your presentation.');
+      return;
+    }
+
+    if (createdAdminPassword.trim().length < 3) {
+      setCreationError('Password must be at least 3 characters long.');
+      return;
+    }
+
     setIsStartingMain(true);
+    setCreationError('');
     try {
       const auditInfo = await collectDeviceAuditInfo(deviceName);
       setShowMainDeviceModal(false);
-      onSelectRole('main', undefined, auditInfo);
+      onSelectRole('main', undefined, auditInfo, createdAdminPassword.trim());
     } catch (err) {
       console.error('Failed to collect device audit info:', err);
-      // Fallback
-      onSelectRole('main');
+      onSelectRole('main', undefined, undefined, createdAdminPassword.trim());
     } finally {
       setIsStartingMain(false);
     }
   };
 
+  const handleClosePinModal = () => {
+    if (helperUnsubRef.current) {
+      helperUnsubRef.current();
+      helperUnsubRef.current = null;
+    }
+    setIsWaitingHelperApproval(false);
+    setWaitingHelperInfo(null);
+    setModalRole(null);
+    setErrorMessage('');
+  };
+
   const handleOpenPinModal = (role: 'sub' | 'helper') => {
+    if (helperUnsubRef.current) {
+      helperUnsubRef.current();
+      helperUnsubRef.current = null;
+    }
+    setIsWaitingHelperApproval(false);
+    setWaitingHelperInfo(null);
     setModalRole(role);
     setPin(['', '', '', '']);
     setErrorMessage('');
@@ -244,17 +404,77 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
     try {
       if (modalRole === 'helper') {
-        const myDevInfo = await collectDeviceAuditInfo();
-        const myDeviceId = getOrCreateDeviceId();
-        const claimRes = await claimHelperRole(code, myDeviceId, myDevInfo);
-        if (!claimRes.success) {
-          setErrorMessage(claimRes.error || 'Only 1 Helper is allowed per presentation session.');
+        const session = await getSession(code);
+        if (!session) {
+          setErrorMessage(`Session "${code}" was not found. Please verify the code with the Main presenter.`);
           setIsVerifyingJoin(false);
           return;
         }
 
-        onSelectRole('helper', code, myDevInfo);
-        setModalRole(null);
+        const myDevInfo = await collectDeviceAuditInfo();
+        const myDeviceId = getOrCreateDeviceId();
+
+        // 1. Submit helper join request to Main presenter
+        const reqRes = await requestHelperJoin(code, myDeviceId, myDevInfo);
+        if (!reqRes.success) {
+          setErrorMessage(reqRes.error || 'Only 1 Helper is allowed per presentation session.');
+          setIsVerifyingJoin(false);
+          return;
+        }
+
+        if (reqRes.status === 'approved') {
+          // Already approved or re-joining
+          onSelectRole('helper', code, myDevInfo);
+          setModalRole(null);
+          setIsVerifyingJoin(false);
+          return;
+        }
+
+        // 2. Put Helper into waiting state and listen for Main decision
+        setIsWaitingHelperApproval(true);
+        setWaitingHelperInfo({ code, devInfo: myDevInfo });
+        setIsVerifyingJoin(false);
+
+        if (helperUnsubRef.current) {
+          helperUnsubRef.current();
+        }
+
+        const unsub = subscribeToSession(code, {
+          onHelperDecision: (decision) => {
+            if (decision.deviceId === myDeviceId) {
+              if (decision.status === 'approved') {
+                if (helperUnsubRef.current) {
+                  helperUnsubRef.current();
+                  helperUnsubRef.current = null;
+                }
+                setIsWaitingHelperApproval(false);
+                setWaitingHelperInfo(null);
+                setModalRole(null);
+                onSelectRole('helper', code, myDevInfo);
+              } else if (decision.status === 'rejected') {
+                if (helperUnsubRef.current) {
+                  helperUnsubRef.current();
+                  helperUnsubRef.current = null;
+                }
+                setIsWaitingHelperApproval(false);
+                setWaitingHelperInfo(null);
+                setErrorMessage('The Main Presenter declined your request to join as Helper.');
+              }
+            }
+          },
+          onSessionDeleted: () => {
+            if (helperUnsubRef.current) {
+              helperUnsubRef.current();
+              helperUnsubRef.current = null;
+            }
+            setIsWaitingHelperApproval(false);
+            setWaitingHelperInfo(null);
+            setErrorMessage('The presentation session was ended by the presenter.');
+          },
+        });
+
+        helperUnsubRef.current = unsub;
+        return;
       } else if (modalRole === 'sub') {
         // Check if presentation exists
         const session = await getSession(code);
@@ -383,7 +603,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           <div className="join-card">
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-0.5rem' }}>
               <button
-                onClick={() => setModalRole(null)}
+                onClick={handleClosePinModal}
                 className="btn-icon modal-close-btn"
                 aria-label="Close"
               >
@@ -391,76 +611,138 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               </button>
             </div>
 
-            <div className="join-header">
-              <div
-                className="role-card-icon"
-                style={{ margin: '0 auto 1.25rem', width: '48px', height: '48px' }}
-              >
-                {modalRole === 'sub' ? <Eye size={24} /> : <SlidersHorizontal size={24} />}
+            {isWaitingHelperApproval ? (
+              <div className="helper-waiting-container" style={{ textAlign: 'center', padding: '0.5rem 0' }}>
+                <div
+                  className="role-card-icon"
+                  style={{
+                    margin: '0 auto 1.25rem',
+                    width: '56px',
+                    height: '56px',
+                    backgroundColor: 'rgba(2, 132, 199, 0.1)',
+                    color: '#0284c7',
+                    animation: 'pulse 2s infinite',
+                  }}
+                >
+                  <SlidersHorizontal size={28} />
+                </div>
+                <h3 className="join-title" style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>
+                  Waiting for Presenter Approval
+                </h3>
+                <p className="join-subtitle" style={{ marginBottom: '1.25rem', lineHeight: 1.5 }}>
+                  A join request has been sent to the Main Presenter for presentation session <strong>{waitingHelperInfo?.code}</strong>.
+                  <br /><br />
+                  Device: <strong>{waitingHelperInfo?.devInfo.deviceName}</strong> ({waitingHelperInfo?.devInfo.deviceModel})
+                </p>
+
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.6rem 1.2rem',
+                    backgroundColor: 'rgba(2, 132, 199, 0.08)',
+                    border: '1.5px solid rgba(2, 132, 199, 0.25)',
+                    borderRadius: '2rem',
+                    color: '#0284c7',
+                    fontSize: '0.88rem',
+                    fontWeight: 600,
+                    marginBottom: '1.5rem',
+                  }}
+                >
+                  <Loader2 size={16} className="spin" />
+                  <span>Awaiting Presenter Acceptance...</span>
+                </div>
+
+                {errorMessage && (
+                  <p style={{ color: 'var(--danger)', fontSize: '0.85rem', marginBottom: '1rem', fontWeight: 500 }}>
+                    {errorMessage}
+                  </p>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleClosePinModal}
+                  className="btn-outline"
+                  style={{ width: '100%', padding: '0.85rem' }}
+                >
+                  Cancel Request
+                </button>
               </div>
-              <h3 className="join-title">
-                {modalRole === 'sub' ? 'Join as Sub' : 'Join as Helper'}
-              </h3>
-              <p className="join-subtitle">Enter the 4-digit session code from the Main presenter</p>
-            </div>
+            ) : (
+              <>
+                <div className="join-header">
+                  <div
+                    className="role-card-icon"
+                    style={{ margin: '0 auto 1.25rem', width: '48px', height: '48px' }}
+                  >
+                    {modalRole === 'sub' ? <Eye size={24} /> : <SlidersHorizontal size={24} />}
+                  </div>
+                  <h3 className="join-title">
+                    {modalRole === 'sub' ? 'Join as Sub' : 'Join as Helper'}
+                  </h3>
+                  <p className="join-subtitle">Enter the 4-digit session code from the Main presenter</p>
+                </div>
 
-            <div className="pin-inputs-container">
-              {pin.map((digit, idx) => (
-                <input
-                  key={idx}
-                  ref={inputRefs[idx]}
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  maxLength={1}
-                  value={digit}
-                  aria-label={`PIN Digit ${idx + 1}`}
-                  onChange={(e) => handlePinChange(idx, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(idx, e)}
-                  onPaste={handlePaste}
-                  className="pin-input"
-                  id={`pin-input-${idx}`}
-                />
-              ))}
-            </div>
+                <div className="pin-inputs-container">
+                  {pin.map((digit, idx) => (
+                    <input
+                      key={idx}
+                      ref={inputRefs[idx]}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={1}
+                      value={digit}
+                      aria-label={`PIN Digit ${idx + 1}`}
+                      onChange={(e) => handlePinChange(idx, e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(idx, e)}
+                      onPaste={handlePaste}
+                      className="pin-input"
+                      id={`pin-input-${idx}`}
+                    />
+                  ))}
+                </div>
 
-            {errorMessage && (
-              <p style={{ color: 'var(--danger)', fontSize: '0.85rem', marginBottom: '1rem', fontWeight: 500 }}>
-                {errorMessage}
-              </p>
+                {errorMessage && (
+                  <p style={{ color: 'var(--danger)', fontSize: '0.85rem', marginBottom: '1rem', fontWeight: 500 }}>
+                    {errorMessage}
+                  </p>
+                )}
+
+                <button
+                  onClick={handleJoinSession}
+                  disabled={isVerifyingJoin}
+                  className="btn-primary"
+                  style={{
+                    width: '100%',
+                    padding: '0.9rem',
+                    fontSize: '1.05rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.03em',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    backgroundColor: '#0284c7',
+                    color: '#ffffff',
+                    border: '1.5px solid #0369a1',
+                    boxShadow: '0 4px 12px rgba(2, 132, 199, 0.35)',
+                    cursor: isVerifyingJoin ? 'not-allowed' : 'pointer',
+                  }}
+                  id="btn-join-session"
+                >
+                  {isVerifyingJoin ? (
+                    <>
+                      <Loader2 size={19} className="spin" />
+                      <span>Connecting...</span>
+                    </>
+                  ) : (
+                    <span>JOIN SESSION</span>
+                  )}
+                </button>
+              </>
             )}
-
-            <button
-              onClick={handleJoinSession}
-              disabled={isVerifyingJoin}
-              className="btn-primary"
-              style={{
-                width: '100%',
-                padding: '0.9rem',
-                fontSize: '1.05rem',
-                fontWeight: 700,
-                letterSpacing: '0.03em',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem',
-                backgroundColor: '#0284c7',
-                color: '#ffffff',
-                border: '1.5px solid #0369a1',
-                boxShadow: '0 4px 12px rgba(2, 132, 199, 0.35)',
-                cursor: isVerifyingJoin ? 'not-allowed' : 'pointer',
-              }}
-              id="btn-join-session"
-            >
-              {isVerifyingJoin ? (
-                <>
-                  <Loader2 size={19} className="spin" />
-                  <span>Connecting...</span>
-                </>
-              ) : (
-                <span>JOIN SESSION</span>
-              )}
-            </button>
           </div>
         </div>
       )}
@@ -469,7 +751,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       {showMainDeviceModal && (
         <div className="join-modal-overlay">
           <div className="join-card device-modal-card">
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-0.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-0.25rem' }}>
               <button
                 onClick={() => setShowMainDeviceModal(false)}
                 className="btn-icon modal-close-btn"
@@ -479,26 +761,36 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               </button>
             </div>
 
-            <div className="join-header" style={{ marginBottom: '1.25rem' }}>
+            <div className="join-header" style={{ marginBottom: '1rem' }}>
               <div
                 className="role-card-icon"
-                style={{ margin: '0 auto 1rem', width: '48px', height: '48px', backgroundColor: 'var(--primary-soft)', color: 'var(--primary)' }}
+                style={{
+                  margin: '0 auto 0.6rem',
+                  width: '42px',
+                  height: '42px',
+                  backgroundColor: 'rgba(2, 132, 199, 0.1)',
+                  color: '#0284c7',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
               >
-                <Smartphone size={26} />
+                <Smartphone size={22} />
               </div>
-              <h3 className="join-title" style={{ fontSize: '1.25rem' }}>
+              <h3 className="join-title" style={{ fontSize: '1.2rem', marginBottom: '0.25rem' }}>
                 Presenter Device Setup
               </h3>
-              <p className="join-subtitle">
-                Enter your device / phone name. This records ownership of the session so uploaded presentation slides are traceable.
+              <p className="join-subtitle" style={{ fontSize: '0.82rem', margin: 0, color: 'var(--text-muted)' }}>
+                Set your presenter device name and admin session password.
               </p>
             </div>
 
-            <form onSubmit={handleConfirmMainDevice} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', textAlign: 'left' }}>
+            <form onSubmit={handleConfirmMainDevice} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', textAlign: 'left' }}>
                 <label
                   htmlFor="device-name-input"
-                  style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)' }}
+                  style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)' }}
                 >
                   Your Phone / Device Name:
                 </label>
@@ -508,59 +800,89 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   type="text"
                   value={deviceName}
                   onChange={(e) => setDeviceName(e.target.value)}
-                  placeholder="e.g. John's iPhone, Samsung S24"
+                  placeholder="e.g. Aryan's Phone, Laptop"
                   maxLength={50}
                   className="input-field"
                   style={{
                     width: '100%',
-                    padding: '0.75rem 1rem',
+                    padding: '0.65rem 0.85rem',
                     borderRadius: 'var(--radius-md)',
                     border: '1.5px solid var(--border-color)',
-                    fontSize: '1rem',
+                    fontSize: '0.95rem',
                     fontWeight: 500,
                   }}
                   required
                 />
               </div>
 
-              {/* Hardware hint pill */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  padding: '0.6rem 0.85rem',
-                  backgroundColor: 'var(--bg-secondary)',
-                  borderRadius: 'var(--radius-sm)',
-                  fontSize: '0.8rem',
-                  color: 'var(--text-muted)',
-                }}
-              >
-                <Smartphone size={15} style={{ flexShrink: 0 }} />
-                <span>
-                  Detected: <strong>{detectedModel.model || 'Mobile Device'}</strong> ({detectedModel.platform})
+              {/* Session Admin Password Field */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', textAlign: 'left' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <label
+                    htmlFor="session-password-input"
+                    style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+                  >
+                    <Lock size={13} style={{ color: '#0284c7' }} />
+                    <span>Session Admin Password (Required):</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowCreatedPassword(!showCreatedPassword)}
+                    style={{ background: 'none', border: 'none', color: '#0284c7', fontSize: '0.75rem', cursor: 'pointer', padding: 0, fontWeight: 600 }}
+                  >
+                    {showCreatedPassword ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+                <input
+                  id="session-password-input"
+                  type={showCreatedPassword ? 'text' : 'password'}
+                  value={createdAdminPassword}
+                  onChange={(e) => {
+                    setCreatedAdminPassword(e.target.value);
+                    setCreationError('');
+                  }}
+                  placeholder="Create admin password (e.g. 1234)"
+                  maxLength={40}
+                  className="input-field"
+                  style={{
+                    width: '100%',
+                    padding: '0.65rem 0.85rem',
+                    borderRadius: 'var(--radius-md)',
+                    border: creationError ? '1.5px solid var(--danger)' : '1.5px solid var(--border-color)',
+                    fontSize: '0.95rem',
+                    fontWeight: 500,
+                  }}
+                  required
+                />
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.3 }}>
+                  Required to enter as Admin from other devices. Viewers don't need it.
                 </span>
               </div>
 
-              {/* Security Audit notice */}
+              {creationError && (
+                <p style={{ color: 'var(--danger)', fontSize: '0.82rem', fontWeight: 600, margin: 0, textAlign: 'left' }}>
+                  {creationError}
+                </p>
+              )}
+
+              {/* Hardware hint pill */}
               <div
                 style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '0.55rem',
-                  padding: '0.65rem 0.85rem',
-                  backgroundColor: '#fef3c7',
-                  border: '1px solid #fde68a',
-                  borderRadius: 'var(--radius-sm)',
-                  fontSize: '0.78rem',
-                  color: '#92400e',
-                  lineHeight: 1.4,
-                  textAlign: 'left',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.45rem',
+                  padding: '0.4rem 0.75rem',
+                  backgroundColor: 'rgba(2, 132, 199, 0.06)',
+                  border: '1px solid rgba(2, 132, 199, 0.15)',
+                  borderRadius: '20px',
+                  fontSize: '0.75rem',
+                  color: '#0369a1',
+                  alignSelf: 'flex-start',
                 }}
               >
-                <ShieldAlert size={16} style={{ flexShrink: 0, marginTop: '2px', color: '#b45309' }} />
+                <Smartphone size={13} style={{ flexShrink: 0 }} />
                 <span>
-                  <strong>Security Tracking Active:</strong> Device name, ID, and IP are linked to this session to track and hold accountable anyone uploading unwanted pictures.
+                  Detected: <strong>{detectedModel.model || 'Device'}</strong> ({detectedModel.platform})
                 </span>
               </div>
 
@@ -570,21 +892,27 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 className="btn-primary"
                 style={{
                   width: '100%',
-                  padding: '0.85rem',
-                  fontSize: '1rem',
+                  padding: '0.75rem 1rem',
+                  fontSize: '0.95rem',
+                  fontWeight: 700,
                   letterSpacing: '0.02em',
-                  marginTop: '0.25rem',
+                  marginTop: '0.35rem',
                   backgroundColor: '#0284c7',
                   color: '#ffffff',
-                  border: '1.5px solid #0369a1',
-                  boxShadow: '0 4px 12px rgba(2, 132, 199, 0.35)',
+                  border: 'none',
+                  borderRadius: 'var(--radius-md)',
+                  boxShadow: '0 4px 14px rgba(2, 132, 199, 0.35)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
                   cursor: (isStartingMain || !deviceName.trim()) ? 'not-allowed' : 'pointer',
                 }}
                 id="btn-confirm-main-device"
               >
                 {isStartingMain ? (
                   <>
-                    <Loader2 size={18} className="spin" />
+                    <Loader2 size={17} className="spin" />
                     <span>Connecting Device...</span>
                   </>
                 ) : (
@@ -711,32 +1039,144 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 <span>Start New Presentation</span>
                 <ArrowRight size={16} />
               </button>
+            </div>
+          </div>
+        </div>
+      )}
 
+      {/* Session Admin Password Verification Modal (When joining existing session as Main from another device) */}
+      {showAdminPasswordPrompt && pendingAdminSession && (
+        <div className="join-modal-overlay">
+          <div className="join-card">
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-0.5rem' }}>
               <button
-                type="button"
                 onClick={() => {
-                  setShowMainAccessModal(false);
-                  if (isAdminUser) {
-                    setShowAdminManager(true);
-                  } else {
-                    setShowAdminLoginModal(true);
-                  }
+                  setShowAdminPasswordPrompt(false);
+                  setPendingAdminSession(null);
                 }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#0284c7',
-                  fontSize: '0.82rem',
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
-                  marginTop: '0.4rem',
-                  textAlign: 'center',
-                }}
-                id="btn-modal-manage-sessions"
+                className="btn-icon modal-close-btn"
+                aria-label="Close"
               >
-                Manage active presentation sessions
+                <X size={18} />
               </button>
             </div>
+
+            <div className="join-header">
+              <div
+                className="role-card-icon"
+                style={{
+                  margin: '0 auto 1.25rem',
+                  width: '48px',
+                  height: '48px',
+                  backgroundColor: 'rgba(2, 132, 199, 0.1)',
+                  color: '#0284c7'
+                }}
+              >
+                <Lock size={24} />
+              </div>
+              <h3 className="join-title">Admin Password Required</h3>
+              <p className="join-subtitle">
+                Presentation session <strong>#{pendingAdminSession.code}</strong> is protected. Enter the password set by the creator to unlock Admin/Main controls.
+              </p>
+            </div>
+
+            <form onSubmit={handleVerifyAdminPasswordSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', textAlign: 'left' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <label
+                    htmlFor="input-admin-password"
+                    style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)' }}
+                  >
+                    Enter Session Password:
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowInputAdminPassword(!showInputAdminPassword)}
+                    style={{ background: 'none', border: 'none', color: '#0284c7', fontSize: '0.78rem', cursor: 'pointer', padding: 0 }}
+                  >
+                    {showInputAdminPassword ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+                <input
+                  id="input-admin-password"
+                  ref={adminPasswordInputRef}
+                  type={showInputAdminPassword ? 'text' : 'password'}
+                  value={inputAdminPassword}
+                  onChange={(e) => {
+                    setInputAdminPassword(e.target.value);
+                    setAdminPasswordError('');
+                  }}
+                  placeholder="Enter session admin password"
+                  className="input-field"
+                  style={{
+                    width: '100%',
+                    padding: '0.8rem 1rem',
+                    borderRadius: 'var(--radius-md)',
+                    border: adminPasswordError ? '1.5px solid var(--danger)' : '1.5px solid var(--border-color)',
+                    fontSize: '1rem',
+                  }}
+                  required
+                />
+              </div>
+
+              {adminPasswordError && (
+                <p style={{ color: 'var(--danger)', fontSize: '0.85rem', fontWeight: 600, margin: 0, textAlign: 'left' }}>
+                  {adminPasswordError}
+                </p>
+              )}
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                <button
+                  type="submit"
+                  disabled={isVerifyingAdminPassword || !inputAdminPassword.trim()}
+                  className="btn-primary"
+                  style={{
+                    width: '100%',
+                    padding: '0.85rem',
+                    fontSize: '1rem',
+                    fontWeight: 700,
+                    backgroundColor: '#0284c7',
+                    color: '#ffffff',
+                    border: '1.5px solid #0369a1',
+                    boxShadow: '0 4px 12px rgba(2, 132, 199, 0.35)',
+                    cursor: (isVerifyingAdminPassword || !inputAdminPassword.trim()) ? 'not-allowed' : 'pointer',
+                  }}
+                  id="btn-verify-session-password"
+                >
+                  {isVerifyingAdminPassword ? (
+                    <>
+                      <Loader2 size={18} className="spin" />
+                      <span>Verifying...</span>
+                    </>
+                  ) : (
+                    <span>Unlock Admin Controls</span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const code = pendingAdminSession.code;
+                    setShowAdminPasswordPrompt(false);
+                    setPendingAdminSession(null);
+                    onSelectRole('sub', code);
+                  }}
+                  className="btn-outline"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    fontSize: '0.88rem',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.4rem',
+                  }}
+                >
+                  <Eye size={15} />
+                  <span>Join as Viewer (Sub) Instead</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

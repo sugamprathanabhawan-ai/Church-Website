@@ -146,6 +146,139 @@ function NotFoundPage() {
   );
 }
 
+// Route SEO, AEO & GEO Metadata Configuration
+const ROUTE_SEO = {
+  '/': {
+    title: 'Sugam Prathana Bhawan | Sugam Church Kathmandu, Nepal',
+    description: 'Sugam Prathana Bhawan (Sugam Church) is a vibrant Christian church in Kathmandu, Nepal. Join us for Saturday Worship (11:00 AM – 1:00 PM), Youth Fellowship, Choir ministry, and biblical prayer.',
+    canonical: 'https://sugamchurch.org/'
+  },
+  '/youth': {
+    title: 'Youth Fellowship & Routine | Sugam Church Kathmandu',
+    description: 'Explore the youth fellowship routine, groups (Patrus, Yakub, Yahunna), worship programs, and team schedules at Sugam Prathana Bhawan, Kathmandu, Nepal.',
+    canonical: 'https://sugamchurch.org/youth'
+  },
+  '/youthroutine': {
+    title: 'Youth Fellowship & Routine | Sugam Church Kathmandu',
+    description: 'Explore the youth fellowship routine, groups (Patrus, Yakub, Yahunna), worship programs, and team schedules at Sugam Prathana Bhawan, Kathmandu, Nepal.',
+    canonical: 'https://sugamchurch.org/youth'
+  },
+  '/choir': {
+    title: 'Choir Ministry & Christian Bhajan Lyrics | Sugam Church',
+    description: 'Access Sugam Church choir worship songs, Nepali Christian bhajan lyrics with chords, choral arrangements, and Saturday practice schedules.',
+    canonical: 'https://sugamchurch.org/choir'
+  },
+  '/choir/lyrics': {
+    title: 'Lyrics & Bhajan Songbook | Sugam Church Kathmandu',
+    description: 'Sing along with Sugam Church lyrics book: Nepali Christian worship songs, chords, transpose tools, and bhajan collection.',
+    canonical: 'https://sugamchurch.org/choir'
+  },
+  '/calendar': {
+    title: 'Church Calendar & Events Schedule | Sugam Church',
+    description: 'View the official yearly calendar, Saturday services, fasting prayer days, and spiritual program dates of Sugam Prathana Bhawan in Kathmandu.',
+    canonical: 'https://sugamchurch.org/calendar'
+  },
+  '/calender': {
+    title: 'Church Calendar & Events Schedule | Sugam Church',
+    description: 'View the official yearly calendar, Saturday services, fasting prayer days, and spiritual program dates of Sugam Prathana Bhawan in Kathmandu.',
+    canonical: 'https://sugamchurch.org/calendar'
+  },
+  '/quiz': {
+    title: 'Bible Quiz & Christian Trivia | Sugam Church',
+    description: 'Test your biblical knowledge and deepen your Christian faith with our interactive bilingual (Nepali & English) Bible trivia quiz.',
+    canonical: 'https://sugamchurch.org/quiz'
+  },
+  '/laws': {
+    title: 'Church Constitution & Ministry Guidelines | Sugam Church',
+    description: 'Read the official church guidelines, Aradhana laws, choir discipline, baptism process, and constitution of Sugam Prathana Bhawan.',
+    canonical: 'https://sugamchurch.org/laws'
+  },
+  '/admin': {
+    title: 'Admin Portal | Sugam Church',
+    description: 'Administrative portal for Sugam Prathana Bhawan.',
+    canonical: 'https://sugamchurch.org/admin',
+    noindex: true
+  },
+  '/zensync': {
+    title: 'ZenSync Live Display | Sugam Church',
+    description: 'Congregation live worship display system for Sugam Church.',
+    canonical: 'https://sugamchurch.org/zensync',
+    noindex: true
+  }
+};
+
+// Dynamic Route SEO, Canonical & Social Meta Updater
+function RouteSeoManager() {
+  const location = useLocation();
+  const { pathname } = location;
+
+  useEffect(() => {
+    // Exact or prefix route match
+    let matched = ROUTE_SEO[pathname];
+    if (!matched) {
+      const baseKey = Object.keys(ROUTE_SEO).find(key => key !== '/' && pathname.startsWith(key));
+      matched = baseKey ? ROUTE_SEO[baseKey] : {
+        title: 'Sugam Prathana Bhawan | Sugam Church Kathmandu, Nepal',
+        description: 'Sugam Prathana Bhawan (Sugam Church) is a vibrant Christian church in Kathmandu, Nepal. Saturday Worship 11:00 AM – 1:00 PM.',
+        canonical: `https://sugamchurch.org${pathname}`
+      };
+    }
+
+    // Update document title
+    document.title = matched.title;
+
+    // Update meta description
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta');
+      metaDescription.name = 'description';
+      document.head.appendChild(metaDescription);
+    }
+    metaDescription.setAttribute('content', matched.description);
+
+    // Update OpenGraph Title & Description
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) ogTitle.setAttribute('content', matched.title);
+
+    const ogDescription = document.querySelector('meta[property="og:description"]');
+    if (ogDescription) ogDescription.setAttribute('content', matched.description);
+
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    if (ogUrl) ogUrl.setAttribute('content', matched.canonical);
+
+    // Update Twitter Title & Description
+    const twTitle = document.querySelector('meta[name="twitter:title"]');
+    if (twTitle) twTitle.setAttribute('content', matched.title);
+
+    const twDescription = document.querySelector('meta[name="twitter:description"]');
+    if (twDescription) twDescription.setAttribute('content', matched.description);
+
+    // Update Canonical link tag
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.rel = 'canonical';
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute('href', matched.canonical);
+
+    // Update robots meta tag for sensitive or internal routes
+    let robots = document.querySelector('meta[name="robots"]');
+    if (!robots) {
+      robots = document.createElement('meta');
+      robots.name = 'robots';
+      document.head.appendChild(robots);
+    }
+    if (matched.noindex) {
+      robots.setAttribute('content', 'noindex, nofollow');
+    } else {
+      robots.setAttribute('content', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
+    }
+  }, [pathname]);
+
+  return null;
+}
+
 // Scroll restoration component with retry for dynamic/lazy elements
 function ScrollToTop() {
   const location = useLocation();
@@ -234,6 +367,7 @@ export default function App() {
   return (
     <AuthProvider>
       <Router>
+        <RouteSeoManager />
         <ScrollToTop />
         <DataProvider>
           <MainLayout />

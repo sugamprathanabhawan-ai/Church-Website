@@ -142,11 +142,14 @@ CRITICAL RULES:
   "confidence": "high"
 }`;
 
-  // Call Gemini multimodal vision API
+  // Call Gemini multimodal vision API with prioritized Gemini 3.1 Flash Lite
   const candidateModels = [
-    'gemini-1.5-flash',
+    'gemini-3.1-flash-lite',
+    'gemini-flash-lite-latest',
+    'gemini-2.5-flash-lite',
+    'gemini-2.5-flash',
     'gemini-2.0-flash',
-    'gemini-1.5-pro',
+    'gemini-1.5-flash',
     'gemini-flash-latest'
   ];
 
@@ -200,7 +203,10 @@ CRITICAL RULES:
               const hasDevanagari = /[\u0900-\u097F]/.test(sampleText);
               parsed.detectedLanguage = hasDevanagari ? 'Nepali' : 'English';
             }
-            return res.status(200).json(parsed);
+            return res.status(200).json({
+              ...parsed,
+              model: model
+            });
           } catch (parseErr) {
             console.warn('[extract-lyrics] JSON parse failed, returning raw text fallback:', parseErr);
             const hasDevanagari = /[\u0900-\u097F]/.test(candidate);
@@ -210,7 +216,8 @@ CRITICAL RULES:
               key: 'G',
               detectedLanguage: hasDevanagari ? 'Nepali' : 'English',
               rawLyrics: candidate,
-              confidence: 'medium'
+              confidence: 'medium',
+              model: model
             });
           }
         }

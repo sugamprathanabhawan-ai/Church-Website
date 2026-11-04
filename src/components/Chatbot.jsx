@@ -16,7 +16,8 @@ import {
   ExternalLink,
   MapPin,
   ChevronRight,
-  Share2
+  Share2,
+  Database
 } from 'lucide-react';
 import { fetchFaqs } from '../services/supabaseService';
 import { 
@@ -24,6 +25,7 @@ import {
   getStoredGeminiConfig, 
   fetchRemoteGeminiConfig 
 } from '../services/geminiService';
+import DatabaseManagerModal from './DatabaseManagerModal';
 
 // Custom Social Icons
 function FacebookChatIcon({ className = "w-4 h-4" }) {
@@ -278,16 +280,17 @@ function parseRichContent(text) {
 export default function Chatbot() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const [showDatabaseModal, setShowDatabaseModal] = useState(false);
   const [messages, setMessages] = useState([
     {
       id: 'welcome',
       sender: 'bot',
-      text: 'जयमसीह! (Peace be with you!) Welcome to Sugam Prathana Bhawan. How can I help you today? मलाई सोध्नुहोस् (Ask me anything)!',
+      text: 'जयमसीह! (Peace be with you!) I am Fofu, your official church assistant for Sugam Prathana Bhawan. How can I help you today? मलाई सोध्नुहोस् (Ask me anything)!',
       options: [
         'चर्चको स्थान र नक्सा कहाँ छ? (Where is church?)',
         'फेसबुक र युट्युब लिङ्क दिनुहोस् (Facebook & YouTube)',
         'When are the church service times?',
-        'What is the youth routine?'
+        'Open live database manager (Fofu Database)'
       ]
     }
   ]);
@@ -297,6 +300,23 @@ export default function Chatbot() {
   const [geminiConfig, setGeminiConfig] = useState(getStoredGeminiConfig);
   const messagesEndRef = useRef(null);
   const chatScrollContainerRef = useRef(null);
+
+  // Global trigger: typing "fofu" anywhere on keyboard opens the database manager
+  useEffect(() => {
+    let keyBuffer = '';
+    const handleGlobalKey = (e) => {
+      const tag = e.target.tagName?.toLowerCase();
+      if (tag === 'input' || tag === 'textarea') return;
+      keyBuffer += e.key.toLowerCase();
+      if (keyBuffer.length > 8) keyBuffer = keyBuffer.slice(-8);
+      if (keyBuffer.endsWith('fofu')) {
+        setShowDatabaseModal(true);
+        keyBuffer = '';
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKey);
+    return () => window.removeEventListener('keydown', handleGlobalKey);
+  }, []);
 
   // Voice to text (Speech Recognition) state
   const [isListening, setIsListening] = useState(false);
@@ -589,6 +609,28 @@ export default function Chatbot() {
     setMessages(prev => [...prev, userMessage]);
     setInputText('');
     baseTextBeforeSpeechRef.current = '';
+
+    // Direct Fofu Database trigger: opening the currently running database
+    const lowerQuery = query.toLowerCase();
+    const isFofuTrigger = lowerQuery.includes('fofu') || 
+                          lowerQuery.includes('database') || 
+                          lowerQuery.includes('open db') ||
+                          lowerQuery.includes('delete session') ||
+                          lowerQuery.includes('delete data');
+
+    if (isFofuTrigger) {
+      setShowDatabaseModal(true);
+      const fofuResponse = {
+        id: (Date.now() + 1).toString(),
+        sender: 'bot',
+        text: 'जयमसीह! I am Fofu. I have opened the Database Manager for the currently running Supabase instance (aiufpdabglxhojmmkedp).\n\nYou can inspect active presentation sessions and delete them directly.',
+        isDatabaseAction: true,
+      };
+      setMessages(prev => [...prev, fofuResponse]);
+      setIsTyping(false);
+      return;
+    }
+
     setIsTyping(true);
 
     const activeConfig = getStoredGeminiConfig();
@@ -696,7 +738,7 @@ export default function Chatbot() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="w-[94vw] sm:w-[420px] max-w-[420px] h-[590px] max-h-[88vh] bg-white rounded-3xl shadow-2xl border border-[#d4e8ee] flex flex-col overflow-hidden animate-scale-in">
+        <div className="w-[94vw] sm:w-[420px] max-w-[420px] h-[590px] max-h-[88vh] bg-white/94 backdrop-blur-2xl rounded-3xl shadow-[0_25px_60px_-15px_rgba(33,75,96,0.22),inset_0_1px_2px_rgba(255,255,255,1)] border border-white/95 flex flex-col overflow-hidden animate-scale-in">
           
           {/* 1. TOP ANIMATED LINE: मलाई सोध्नुहोस् (Malai Sodhnuhos) */}
           <div className="bg-gradient-to-r from-[#173a4b] via-[#214b60] to-[#173a4b] text-white px-3 py-1.5 border-b border-[#285c73]/40 flex items-center justify-between overflow-hidden relative shadow-inner">
@@ -736,11 +778,11 @@ export default function Chatbot() {
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="font-bold text-sm leading-tight text-white">
-                    Sugam Church Assistant
+                    Fofu • Church Assistant
                   </h3>
                 </div>
                 <div className="text-[11px] text-[#dceef5] flex items-center gap-1.5 mt-0.5">
-                  <span className="text-amber-200 font-semibold">मलाई सोध्नुहोस्</span>
+                  <span className="text-amber-200 font-semibold">मलाई सोध्नुहोस् (Ask Fofu)</span>
                   <span className="text-white/40">•</span>
                   <span>{isAiOnline ? 'Online • Verified Church AI' : 'FAQ Mode • Church Assistant'}</span>
                 </div>
@@ -840,6 +882,20 @@ export default function Chatbot() {
                                 </button>
                               );
                             })}
+                          </div>
+                        )}
+
+                        {/* Interactive Database Action Button */}
+                        {msg.isDatabaseAction && (
+                          <div className="mt-2.5 pt-2 border-t border-slate-200/80">
+                            <button
+                              type="button"
+                              onClick={() => setShowDatabaseModal(true)}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#285c73] hover:bg-[#1f4a5c] text-white rounded-xl text-xs font-bold shadow-xs transition hover:scale-102"
+                            >
+                              <Database className="w-3.5 h-3.5 text-sky-300" />
+                              <span>Open Database Manager</span>
+                            </button>
                           </div>
                         )}
                       </div>
@@ -1010,11 +1066,17 @@ export default function Chatbot() {
 
             <div className="flex items-center justify-between text-[10px] text-[#52788d] px-1">
               <span>नेपाली/English मा सोध्नुहोस् • <strong>मलाई सोध्नुहोस्</strong></span>
-              <span>Sugam Church Bot</span>
+              <span>Fofu Church Bot</span>
             </div>
           </div>
         </div>
       )}
+
+      {/* Live Database Manager Modal triggered by writing to Fofu */}
+      <DatabaseManagerModal
+        isOpen={showDatabaseModal}
+        onClose={() => setShowDatabaseModal(false)}
+      />
     </div>
   );
 }

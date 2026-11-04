@@ -55,13 +55,19 @@ export default function Navbar() {
   const isQuiz = location.pathname === '/quiz';
   const isChoir = location.pathname === '/choir';
 
-  // Scroll detection for transparent hero vs frosted glass
+  // Scroll detection for transparent hero vs frosted glass (threshold filtered to avoid redundant re-renders)
   useEffect(() => {
+    let prev = window.scrollY > 30;
+    setScrolled(prev);
+
     const handleScroll = () => {
-      setScrolled(window.scrollY > 30);
+      const isPast = window.scrollY > 30;
+      if (isPast !== prev) {
+        prev = isPast;
+        setScrolled(isPast);
+      }
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 

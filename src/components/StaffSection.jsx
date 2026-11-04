@@ -81,7 +81,7 @@ export default function StaffSection() {
   const people = displayTeam.filter(person => filter === 'Everyone' || person.group === filter);
 
   return (
-    <section ref={section} id="leadership" className={`staff-section ${visible ? 'staff-visible' : ''}`} aria-labelledby="staff-title">
+    <section ref={section} id="leadership" className={`staff-section cv-auto ${visible ? 'staff-visible' : ''}`} aria-labelledby="staff-title">
       <div className="staff-heading">
         <div>
           <div className="section-label">OUR SERVANT LEADERS</div>
@@ -113,7 +113,7 @@ export default function StaffSection() {
         {people.map((person, index) => (
           <article className="staff-card" key={person.name} style={{ animationDelay: `${index * 65}ms` }} tabIndex={0}>
             <div className="staff-portrait">
-              <img src={person.image} alt={person.name} loading="lazy" />
+              <img src={person.image} alt={person.name} loading="lazy" decoding="async" />
               <span className="staff-department">{person.department || person.group}</span>
               <div className="staff-quote">
                 <span>{person.group === 'Community' ? 'GET INVOLVED' : 'SERVING OUR CONGREGATION'}</span>

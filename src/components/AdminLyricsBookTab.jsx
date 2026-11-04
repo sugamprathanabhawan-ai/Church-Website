@@ -34,7 +34,9 @@ import {
   Languages,
   ArrowRightLeft,
   Key,
-  RefreshCw
+  RefreshCw,
+  Database,
+  Zap
 } from 'lucide-react';
 import { 
   parseLyricsWithChords, 
@@ -83,6 +85,8 @@ export default function AdminLyricsBookTab({
   const [extractedTitle, setExtractedTitle] = useState('');
   const [extractedRawLyrics, setExtractedRawLyrics] = useState('');
   const [extractionConfidence, setExtractionConfidence] = useState('high');
+  const [extractedModel, setExtractedModel] = useState('gemini-3.1-flash-lite');
+  const [directUploading, setDirectUploading] = useState(false);
 
   // Language Detection & Bidirectional Translation state
   const [detectedLanguage, setDetectedLanguage] = useState(null); // 'Nepali' | 'English'
@@ -283,6 +287,7 @@ export default function AdminLyricsBookTab({
       setExtractedRawLyrics(finalLyrics);
       setExtractedOriginalLyrics(finalLyrics);
       setExtractionConfidence(result.confidence || 'high');
+      setExtractedModel(result.model || 'gemini-3.1-flash-lite');
 
       // Detect language
       const detected = result.detectedLanguage || (/[\u0900-\u097F]/.test(finalLyrics) ? 'Nepali' : 'English');
@@ -456,6 +461,59 @@ export default function AdminLyricsBookTab({
 
     setActiveSong(song);
     setCurrentView('editor');
+  };
+
+  // Direct 1-Click Upload & Persistence to Database from AI Extraction
+  const handleDirectUploadToDatabase = async (targetStatus = 'published') => {
+    const titleClean = (extractedTitle || '').trim();
+    if (!titleClean) {
+      showToast('Please provide a song title before uploading to database.', 'error');
+      return;
+    }
+    if (!extractedRawLyrics || !extractedRawLyrics.trim()) {
+      showToast('No lyrics found to upload.', 'error');
+      return;
+    }
+
+    setDirectUploading(true);
+    try {
+      const parsedSections = parseLyricsWithChords(extractedRawLyrics);
+
+      let uploadedUrl = null;
+      if (uploadedFile) {
+        try {
+          uploadedUrl = await uploadSongSourceDocument(uploadedFile);
+        } catch (uploadErr) {
+          console.warn('[AdminLyricsBook] Source file retention warning:', uploadErr.message);
+        }
+      }
+
+      const payload = {
+        id: `temp_${Date.now()}`,
+        title: titleClean,
+        author: 'Sugam Church Choir',
+        key_signature: 'G',
+        time_signature: '4/4',
+        category: 'Worship',
+        language: detectedLanguage || 'Nepali',
+        status: targetStatus,
+        source_file_url: uploadedUrl,
+        sections: parsedSections
+      };
+
+      await onSaveSong(payload);
+      showToast(
+        targetStatus === 'published'
+          ? `🎉 "${payload.title}" extracted via Gemini 3.1 Flash Lite and published to database!`
+          : `📁 "${payload.title}" saved to database as draft!`,
+        'success'
+      );
+      setCurrentView('list');
+    } catch (err) {
+      showToast(err.message || 'Failed to upload song to database.', 'error');
+    } finally {
+      setDirectUploading(false);
+    }
   };
 
   // --- ACTIONS: EDIT EXISTING SONG ---
@@ -1151,11 +1209,15 @@ export default function AdminLyricsBookTab({
             <div className="bg-[#f8faf7] rounded-3xl p-6 border border-[#d4e8ee] flex flex-col justify-between min-h-[300px]">
               <div>
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <h4 className="font-bold text-sm text-[#214b60] flex items-center gap-1.5">
                       <Sparkles className="w-4 h-4 text-[#4b9fb9]" />
                       <span>AI Extracted Lyrics</span>
                     </h4>
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <Zap className="w-3 h-3 text-emerald-600" />
+                      <span>Gemini 3.1 Flash Lite</span>
+                    </span>
                     {detectedLanguage && (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#e4f3f8] text-[#285c73] border border-[#d4e8ee]">
                         <Globe className="w-3 h-3 text-[#4b9fb9]" />
@@ -1167,7 +1229,7 @@ export default function AdminLyricsBookTab({
                   {extracting && (
                     <span className="text-[10px] font-bold text-[#4b9fb9] animate-pulse flex items-center gap-1">
                       <RefreshCw className="w-3 h-3 animate-spin" />
-                      <span>Extracting with Gemini Vision...</span>
+                      <span>Extracting with Gemini 3.1 Flash Lite...</span>
                     </span>
                   )}
                 </div>
@@ -1303,16 +1365,42 @@ export default function AdminLyricsBookTab({
                 </div>
               </div>
 
-              {/* Edit & Continue Button */}
-              <button
-                type="button"
-                onClick={handleContinueToEditor}
-                disabled={extracting || !extractedRawLyrics.trim()}
-                className="w-full py-2.5 bg-[#285c73] hover:bg-[#214b60] text-white rounded-xl text-xs sm:text-sm font-bold shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                <span>Edit &amp; Continue to Chord Editor</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
+              {/* Actions: Direct Upload to Database or Continue to Chord Editor */}
+              <div className="flex flex-col gap-2 pt-2 border-t border-[#d4e8ee]">
+                <div className="flex flex-col sm:flex-row items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleDirectUploadToDatabase('published')}
+                    disabled={extracting || directUploading || !extractedRawLyrics.trim()}
+                    className="w-full sm:flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs sm:text-sm font-bold shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2"
+                    title="Upload extracted lyrics and publish directly to church songbook database"
+                  >
+                    <Database className="w-4 h-4" />
+                    <span>{directUploading ? 'Uploading to Database...' : 'Upload & Publish to Database'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDirectUploadToDatabase('draft')}
+                    disabled={extracting || directUploading || !extractedRawLyrics.trim()}
+                    className="w-full sm:w-auto px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition disabled:opacity-50 flex items-center justify-center gap-1.5"
+                    title="Save to database as draft"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                    <span>Save Draft</span>
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleContinueToEditor}
+                  disabled={extracting || directUploading || !extractedRawLyrics.trim()}
+                  className="w-full py-2 bg-[#285c73] hover:bg-[#214b60] text-white rounded-xl text-xs sm:text-sm font-bold shadow-xs transition disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  <span>Edit Lyrics &amp; Add Chords in Editor</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
           </div>

@@ -37,12 +37,41 @@ export interface FlatSlide {
   slide: SlideItem;
 }
 
+export interface NoteItem {
+  id: string;
+  heading: string;
+  headingColor?: string; // default '#ffffff'
+  body: string;
+  bodyColor?: string; // default '#ffffff'
+  bgColor?: string; // default '#000000'
+  updatedAt: number;
+}
+
+export interface NoticeItem {
+  id: string;
+  text: string;
+  timestamp: number;
+  senderName?: string;
+}
+
+export interface HelperJoinRequest {
+  deviceId: string;
+  helperInfo: DeviceAuditInfo;
+  status: 'pending' | 'approved' | 'rejected';
+  requestedAt: number;
+}
+
 export interface SessionContent {
   sections: SectionItem[];
   device_info?: DeviceAuditInfo;
   main_signature?: string;
   helper_signature?: string | null;
   helper_device_info?: DeviceAuditInfo | null;
+  notes?: NoteItem[];
+  activeNotice?: NoticeItem | null;
+  helper_request?: HelperJoinRequest | null;
+  adminPassword?: string;
+  creatorToken?: string;
 }
 
 export interface SessionData {

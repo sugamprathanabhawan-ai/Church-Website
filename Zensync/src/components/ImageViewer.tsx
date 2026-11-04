@@ -258,28 +258,34 @@ export const ImageViewer: React.FC<ImageViewerProps> = ({
               alignItems: 'center',
               justifyContent: 'center',
               textAlign: 'center',
-              padding: '2.5rem',
-              backgroundColor: '#ffffff',
-              borderRadius: 'var(--radius-lg)',
-              border: '2px dashed var(--primary-border)',
+              padding: '3rem 2.5rem',
+              background: 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(24px) saturate(160%)',
+              WebkitBackdropFilter: 'blur(24px) saturate(160%)',
+              borderRadius: '24px',
+              border: '1.5px solid rgba(255, 255, 255, 0.95)',
               maxWidth: '480px',
-              boxShadow: 'var(--shadow-sm)',
+              boxShadow: '0 20px 50px -10px rgba(33, 75, 96, 0.1), inset 0 1px 2px rgba(255, 255, 255, 1)',
             }}
           >
             <div
               style={{
                 width: '64px',
                 height: '64px',
-                borderRadius: 'var(--radius-md)',
-                backgroundColor: 'var(--primary-soft)',
-                color: 'var(--primary)',
+                borderRadius: '20px',
+                background: 'rgba(255, 255, 255, 0.92)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                border: '1px solid rgba(255, 255, 255, 0.95)',
+                color: '#0284c7',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginBottom: '1rem',
+                marginBottom: '1.25rem',
+                boxShadow: '0 6px 18px rgba(33, 75, 96, 0.06), inset 0 1px 1px rgba(255, 255, 255, 1)',
               }}
             >
-              <ImageOff size={32} />
+              <ImageOff size={30} />
             </div>
             <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.35rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.4rem' }}>
               No Slides in Presentation
@@ -288,9 +294,9 @@ export const ImageViewer: React.FC<ImageViewerProps> = ({
               Add sections and upload slide images to start presenting.
             </p>
             {onAddSlidePrompt && (
-              <button onClick={onAddSlidePrompt} className="btn-primary">
+              <button onClick={onAddSlidePrompt} className="btn-primary" style={{ borderRadius: '14px', padding: '0.75rem 1.4rem' }}>
                 <Plus size={18} />
-                Add First Slide
+                <span>Add First Slide</span>
               </button>
             )}
           </div>
@@ -303,15 +309,16 @@ export const ImageViewer: React.FC<ImageViewerProps> = ({
               position: 'absolute',
               top: '1.25rem',
               left: '1.5rem',
-              backgroundColor: 'rgba(255, 255, 255, 0.94)',
-              backdropFilter: 'blur(6px)',
-              border: '1px solid var(--border-color)',
-              padding: '0.35rem 0.85rem',
+              background: 'rgba(255, 255, 255, 0.88)',
+              backdropFilter: 'blur(14px)',
+              WebkitBackdropFilter: 'blur(14px)',
+              border: '1px solid rgba(255, 255, 255, 0.95)',
+              padding: '0.4rem 0.95rem',
               borderRadius: 'var(--radius-full)',
               fontSize: '0.85rem',
-              fontWeight: 600,
-              color: 'var(--primary)',
-              boxShadow: 'var(--shadow-sm)',
+              fontWeight: 700,
+              color: '#0284c7',
+              boxShadow: '0 4px 14px rgba(33, 75, 96, 0.08), inset 0 1px 1px rgba(255, 255, 255, 1)',
               pointerEvents: 'none',
               zIndex: 12,
             }}

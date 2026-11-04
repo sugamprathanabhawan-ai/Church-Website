@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Home, Maximize2, Minimize2 } from 'lucide-react';
-import type { SectionItem, ConnectionStatus } from '../types';
+import { Home, Maximize2, Minimize2, FileText, Image as ImageIcon } from 'lucide-react';
+import type { SectionItem, ConnectionStatus, NoteItem, NoticeItem } from '../types';
 import { ImageViewer } from './ImageViewer';
+import { NotesViewer } from './NotesViewer';
+import { NoticePopup } from './NoticePopup';
 import { resolveSlideState } from '../lib/presentationUtils';
 import { getSession, subscribeToSession } from '../lib/supabaseClient';
 
@@ -18,19 +20,22 @@ export const SubMode: React.FC<SubModeProps> = ({ sessionCode, onExit }) => {
   const [sessionEnded, setSessionEnded] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
 
+  // Notes and Notice states
+  const [activeSectionView, setActiveSectionView] = useState<'slides' | 'notes'>('slides');
+  const [notes, setNotes] = useState<NoteItem[]>([]);
+  const [activeNotice, setActiveNotice] = useState<NoticeItem | null>(null);
+
   useEffect(() => {
     let isMounted = true;
 
     async function load() {
       const data = await getSession(sessionCode);
-      if (isMounted) {
-        if (data) {
-          setSections(data.content?.sections || []);
-          setCurrentGlobalIndex(data.current_slide?.globalIndex || 0);
-          setStatus('connected');
-        } else {
-          // If not found in remote DB or local storage yet, keep listening via Realtime
-        }
+      if (isMounted && data) {
+        setSections(data.content?.sections || []);
+        setNotes(data.content?.notes || []);
+        setActiveNotice(data.content?.activeNotice || null);
+        setCurrentGlobalIndex(data.current_slide?.globalIndex || 0);
+        setStatus('connected');
       }
     }
     load();
@@ -42,6 +47,14 @@ export const SubMode: React.FC<SubModeProps> = ({ sessionCode, onExit }) => {
       },
       onContentChange: (newSections) => {
         setSections(newSections);
+        setStatus('connected');
+      },
+      onNotesChange: (newNotes) => {
+        setNotes(newNotes);
+        setStatus('connected');
+      },
+      onNoticeReceived: (newNotice) => {
+        setActiveNotice(newNotice);
         setStatus('connected');
       },
       onStatusChange: (newStatus) => {
@@ -100,8 +113,19 @@ export const SubMode: React.FC<SubModeProps> = ({ sessionCode, onExit }) => {
       className="sub-presentation-stage"
       onClick={() => setHeaderVisible((prev) => !prev)}
       title="Tap anywhere to toggle header"
+      style={{ display: 'flex', flexDirection: 'column', height: '100dvh', minHeight: '100dvh', overflow: 'hidden' }}
     >
-      {/* Floating Sub Header with Status and Exit */}
+      {/* Real-time Notice Pop-up Banner for Sub */}
+      <NoticePopup
+        notice={activeNotice}
+        onDismiss={() => setActiveNotice(null)}
+        onOpenNotes={() => {
+          setActiveSectionView('notes');
+          setHeaderVisible(true);
+        }}
+      />
+
+      {/* Floating Sub Header with Status, View Switcher and Exit */}
       <div
         className="sub-header"
         style={{
@@ -141,6 +165,29 @@ export const SubMode: React.FC<SubModeProps> = ({ sessionCode, onExit }) => {
             }}
           >
             CODE: <span>{sessionCode}</span>
+          </div>
+
+          {/* Sub View Mode Switcher: Slides vs Notes Section */}
+          <div className="sub-view-switcher">
+            <button
+              type="button"
+              onClick={() => setActiveSectionView('slides')}
+              className={`sub-view-tab-btn ${activeSectionView === 'slides' ? 'active' : ''}`}
+              title="View Slides presentation"
+            >
+              <ImageIcon size={14} />
+              <span>Slides</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveSectionView('notes')}
+              className={`sub-view-tab-btn ${activeSectionView === 'notes' ? 'active' : ''}`}
+              title="View Service Notes Section"
+            >
+              <FileText size={14} />
+              <span>Notes</span>
+              {activeNotice && <span className="sub-view-notice-dot" title="Active Notice Available" />}
+            </button>
           </div>
         </div>
 
@@ -199,14 +246,22 @@ export const SubMode: React.FC<SubModeProps> = ({ sessionCode, onExit }) => {
         </button>
       )}
 
-      {/* Maximized Image Display (No Prev/Next buttons, read-only) */}
-      <ImageViewer
-        activeSlide={activeFlatSlide}
-        currentIndex={currentGlobalIndex}
-        totalSlides={totalSlides}
-        canNavigate={false}
-        showFullscreenBtn={false}
-      />
+      {/* Main Content: Notes Section or Maximized Slides Display */}
+      {activeSectionView === 'notes' ? (
+        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', backgroundColor: '#09090b', width: '100%' }}>
+          <NotesViewer notes={notes} activeNotice={activeNotice} />
+        </div>
+      ) : (
+        <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+          <ImageViewer
+            activeSlide={activeFlatSlide}
+            currentIndex={currentGlobalIndex}
+            totalSlides={totalSlides}
+            canNavigate={false}
+            showFullscreenBtn={false}
+          />
+        </div>
+      )}
     </div>
   );
 };

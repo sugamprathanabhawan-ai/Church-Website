@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import type { CurrentSlideState, SectionItem, SessionData, DeviceAuditInfo, ConnectionStatus } from '../types';
+import type { CurrentSlideState, SectionItem, SessionData, DeviceAuditInfo, ConnectionStatus, NoteItem, NoticeItem, HelperJoinRequest } from '../types';
 import { getOrCreateDeviceId } from './deviceUtils';
 
 const envUrl = (import.meta.env.VITE_SUPABASE_URL as string || 'https://aiufpdabglxhojmmkedp.supabase.co').trim();
@@ -57,6 +57,31 @@ export function getStoredHostToken(code: string): string {
   return localStorage.getItem(`zensync_host_token_${clean}`) || '';
 }
 
+export function isDeviceAuthorizedAdmin(code: string): boolean {
+  if (typeof window === 'undefined' || !window.localStorage) return false;
+  const clean = (code || '').trim().toLowerCase();
+  const token = localStorage.getItem(`zensync_host_token_${clean}`);
+  const authFlag = localStorage.getItem(`zensync_admin_auth_${clean}`);
+  return Boolean(token || authFlag);
+}
+
+export function authorizeAdminForSession(code: string, token?: string): void {
+  if (typeof window === 'undefined' || !window.localStorage) return;
+  const clean = (code || '').trim().toLowerCase();
+  localStorage.setItem(`zensync_admin_auth_${clean}`, 'true');
+  if (token) {
+    localStorage.setItem(`zensync_host_token_${clean}`, token);
+  } else if (!localStorage.getItem(`zensync_host_token_${clean}`)) {
+    localStorage.setItem(`zensync_host_token_${clean}`, generateHostToken());
+  }
+}
+
+export function verifySessionAdminPassword(session: SessionData, inputPassword: string): boolean {
+  const sessionPassword = session.content?.adminPassword || (session as any).admin_password;
+  if (!sessionPassword) return true; // Open if no password set
+  return sessionPassword.trim() === (inputPassword || '').trim();
+}
+
 // --- Session Persistence & Realtime Functions Using Verified Server RPCs ---
 
 /**
@@ -66,16 +91,19 @@ export function getStoredHostToken(code: string): string {
 export async function createSession(
   code: string,
   sections: SectionItem[],
-  deviceInfo?: DeviceAuditInfo
+  deviceInfo?: DeviceAuditInfo,
+  adminPassword?: string
 ): Promise<SessionData> {
   const cleanCode = validateSessionCode(code);
   const mainSignature = deviceInfo?.deviceId || getOrCreateDeviceId();
   const hostToken = generateHostToken();
 
-  const contentPayload = {
+  const contentPayload: any = {
     sections,
     device_info: deviceInfo,
     main_signature: mainSignature,
+    adminPassword: adminPassword?.trim() || undefined,
+    creatorToken: hostToken,
   };
 
   const client = getSupabase();
@@ -96,14 +124,14 @@ export async function createSession(
     console.warn('[ZenSync] Server create_zen_session RPC notice:', rpcError.message);
     try {
       // Direct table fallback if RPC is not present
-      const { error: insErr } = await client.from('sessions').insert({
+      const { error: insErr } = await client.from('sessions').upsert({
         code: cleanCode,
         device_name: deviceInfo?.deviceName || '',
         device_info: deviceInfo || {},
         main_signature: mainSignature,
         content: contentPayload,
         current_slide: { sectionId: sections[0]?.id || '', slideIndex: 0, globalIndex: 0 }
-      });
+      }, { onConflict: 'code', ignoreDuplicates: true });
       if (insErr) {
         console.warn('[ZenSync] Direct sessions insert notice (continuing in local session mode):', insErr.message);
       }
@@ -114,6 +142,10 @@ export async function createSession(
 
   // 2. Only store host token and local cache after remote confirmation
   localStorage.setItem(`zensync_host_token_${cleanCode}`, hostToken);
+  localStorage.setItem(`zensync_admin_auth_${cleanCode}`, 'true');
+  if (adminPassword?.trim()) {
+    localStorage.setItem(`zensync_admin_pass_${cleanCode}`, adminPassword.trim());
+  }
 
   const sessionData: SessionData = {
     code: cleanCode,
@@ -145,7 +177,7 @@ export async function getSession(code: string): Promise<SessionData | null> {
     try {
       const { data, error } = await client
         .from('sessions')
-        .select('code, created_at, updated_at, expires_at, device_name, content, current_slide, helper_signature, helper_device_info')
+        .select('code, created_at, updated_at, device_name, content, current_slide, helper_signature, helper_device_info')
         .eq('code', cleanCode)
         .maybeSingle();
 
@@ -154,15 +186,24 @@ export async function getSession(code: string): Promise<SessionData | null> {
       }
 
       if (data) {
-        // Enforce expiration check
-        if (data.expires_at && new Date(data.expires_at).getTime() < Date.now()) {
+        // Enforce 12-hour session expiration check
+        const createdMs = data.created_at ? new Date(data.created_at).getTime() : 0;
+        const isExpired = data.expires_at 
+          ? new Date(data.expires_at).getTime() < Date.now()
+          : (createdMs > 0 && Date.now() - createdMs > 12 * 60 * 60 * 1000);
+
+        if (isExpired) {
           localStorage.removeItem(`zensync_session_${cleanCode}`);
           return null;
         }
 
         const mainSignature = data.content?.main_signature || null;
-        const helperSignature = data.helper_signature || data.content?.helper_signature || null;
-        const helperDeviceInfo = data.helper_device_info || data.content?.helper_device_info || null;
+        const rawHelperSig = data.helper_signature || data.content?.helper_signature;
+        const helperSignature = typeof rawHelperSig === 'string' && rawHelperSig.trim() ? rawHelperSig.trim() : null;
+        const rawHelperDev = data.helper_device_info || data.content?.helper_device_info;
+        const helperDeviceInfo = (helperSignature && rawHelperDev && (rawHelperDev.deviceName || rawHelperDev.deviceId))
+          ? rawHelperDev
+          : null;
 
         const session: SessionData = {
           code: data.code,
@@ -178,6 +219,11 @@ export async function getSession(code: string): Promise<SessionData | null> {
             main_signature: mainSignature,
             helper_signature: helperSignature,
             helper_device_info: helperDeviceInfo,
+            notes: data.content?.notes || [],
+            activeNotice: data.content?.activeNotice || null,
+            helper_request: data.content?.helper_request || null,
+            adminPassword: data.content?.adminPassword || (data.content as any)?.admin_password || undefined,
+            creatorToken: data.content?.creatorToken || undefined,
           },
           current_slide: data.current_slide || { sectionId: '', slideIndex: 0, globalIndex: 0 },
         };
@@ -209,7 +255,290 @@ export async function getSession(code: string): Promise<SessionData | null> {
 }
 
 /**
- * Claims the exclusive HELPER role for a session using the atomic RPC `claim_zen_helper`.
+ * Submits a join request for the HELPER role which requires approval by the Main presenter.
+ * If this device is already the approved helper (reconnecting), returns immediately as approved.
+ */
+export async function requestHelperJoin(
+  code: string,
+  signature: string,
+  helperInfo?: DeviceAuditInfo
+): Promise<{ success: boolean; status: 'approved' | 'pending' | 'occupied' | 'error'; error?: string; session?: SessionData }> {
+  let cleanCode: string;
+  try {
+    cleanCode = validateSessionCode(code);
+  } catch (valErr: any) {
+    return { success: false, status: 'error', error: valErr.message };
+  }
+  const client = getSupabase();
+  if (!client) {
+    return { success: false, status: 'error', error: 'Supabase client is not connected.' };
+  }
+
+  try {
+    const existing = await getSession(cleanCode);
+    if (!existing) {
+      return { success: false, status: 'error', error: `Session "${cleanCode}" not found.` };
+    }
+
+    // 1. If this device is already the assigned helper, allow instant re-entry
+    const existingHelperSig = existing.helper_signature || existing.content?.helper_signature;
+    if (existingHelperSig && existingHelperSig === signature) {
+      return { success: true, status: 'approved', session: existing };
+    }
+
+    // 2. If another device is already approved and active as helper, reject
+    if (existingHelperSig && existingHelperSig !== signature) {
+      return { success: false, status: 'occupied', error: 'Only 1 Helper is allowed per presentation session.' };
+    }
+
+    // 3. Create pending join request
+    const joinReq: HelperJoinRequest = {
+      deviceId: signature,
+      helperInfo: helperInfo || {
+        deviceId: signature,
+        deviceName: 'Helper Device',
+        deviceModel: 'Mobile Web',
+        platform: 'Web',
+        userAgent: '',
+        timestamp: new Date().toISOString()
+      },
+      status: 'pending',
+      requestedAt: Date.now()
+    };
+
+    const updatedContent = {
+      ...existing.content,
+      helper_request: joinReq
+    };
+
+    // Update in Supabase
+    await client
+      .from('sessions')
+      .update({
+        content: updatedContent,
+        updated_at: new Date().toISOString()
+      })
+      .eq('code', cleanCode);
+
+    // Broadcast join request to Main presenter via Supabase Realtime & BroadcastChannel
+    try {
+      const channel = client.channel(`zen_session_${cleanCode}`);
+      await channel.send({
+        type: 'broadcast',
+        event: 'helper_request',
+        payload: { request: joinReq },
+      });
+    } catch {}
+
+    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+      try {
+        const bc = new BroadcastChannel(`zensync_local_${cleanCode}`);
+        bc.postMessage({ type: 'helper_request', request: joinReq });
+        bc.close();
+      } catch {}
+    }
+
+    return { success: true, status: 'pending', session: existing };
+  } catch (err: any) {
+    return { success: false, status: 'error', error: err.message || 'Failed to submit helper join request.' };
+  }
+}
+
+/**
+ * Main presenter responds to a helper join request (accept or decline).
+ */
+export async function respondHelperRequest(
+  code: string,
+  deviceId: string,
+  decision: 'approved' | 'rejected',
+  helperInfo?: DeviceAuditInfo
+): Promise<void> {
+  const cleanCode = validateSessionCode(code);
+  const client = getSupabase();
+  if (!client) return;
+
+  const existing = await getSession(cleanCode);
+  if (!existing) return;
+
+  const req: HelperJoinRequest = {
+    deviceId,
+    helperInfo: helperInfo || existing.content?.helper_request?.helperInfo || {
+      deviceId,
+      deviceName: 'Helper Device',
+      deviceModel: 'Mobile Web',
+      platform: 'Web',
+      userAgent: '',
+      timestamp: new Date().toISOString()
+    },
+    status: decision,
+    requestedAt: Date.now()
+  };
+
+  const updatedContent = {
+    ...existing.content,
+    helper_request: req,
+    ...(decision === 'approved' ? {
+      helper_signature: deviceId,
+      helper_device_info: req.helperInfo
+    } : {
+      helper_signature: null,
+      helper_device_info: null
+    })
+  };
+
+  const updatePayload: any = {
+    content: updatedContent,
+    updated_at: new Date().toISOString()
+  };
+
+  if (decision === 'approved') {
+    updatePayload.helper_signature = deviceId;
+    updatePayload.helper_device_info = req.helperInfo;
+  } else {
+    updatePayload.helper_signature = null;
+    updatePayload.helper_device_info = null;
+  }
+
+  await client.from('sessions').update(updatePayload).eq('code', cleanCode);
+
+  // Broadcast decision to Helper
+  try {
+    const channel = client.channel(`zen_session_${cleanCode}`);
+    await channel.send({
+      type: 'broadcast',
+      event: 'helper_decision',
+      payload: { deviceId, status: decision, helperInfo: req.helperInfo },
+    });
+  } catch {}
+
+  if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+    try {
+      const bc = new BroadcastChannel(`zensync_local_${cleanCode}`);
+      bc.postMessage({ type: 'helper_decision', deviceId, status: decision, helperInfo: req.helperInfo });
+      bc.close();
+    } catch {}
+  }
+}
+
+/**
+ * Synchronizes presentation notes across all connected devices (Main, Sub, Helper).
+ */
+export async function updateSessionNotes(
+  code: string,
+  notes: NoteItem[]
+): Promise<void> {
+  const cleanCode = validateSessionCode(code);
+  const client = getSupabase();
+
+  if (client) {
+    const existing = await getSession(cleanCode);
+    if (existing) {
+      const updatedContent = {
+        ...existing.content,
+        notes
+      };
+      await client
+        .from('sessions')
+        .update({
+          content: updatedContent,
+          updated_at: new Date().toISOString()
+        })
+        .eq('code', cleanCode);
+    }
+
+    try {
+      const channel = client.channel(`zen_session_${cleanCode}`);
+      await channel.send({
+        type: 'broadcast',
+        event: 'notes_change',
+        payload: { notes },
+      });
+    } catch {}
+  }
+
+  if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+    try {
+      const bc = new BroadcastChannel(`zensync_local_${cleanCode}`);
+      bc.postMessage({ type: 'notes_change', notes });
+      bc.close();
+    } catch {}
+  }
+
+  // Local cache
+  const cached = localStorage.getItem(`zensync_session_${cleanCode}`);
+  if (cached) {
+    try {
+      const parsed: SessionData = JSON.parse(cached);
+      parsed.content = { ...parsed.content, notes };
+      localStorage.setItem(`zensync_session_${cleanCode}`, JSON.stringify(parsed));
+    } catch {}
+  }
+}
+
+/**
+ * Broadcasts an instant notice announcement to all Sub and Helper screens.
+ */
+export async function broadcastSessionNotice(
+  code: string,
+  notice: NoticeItem | null
+): Promise<void> {
+  const cleanCode = validateSessionCode(code);
+  const client = getSupabase();
+
+  if (client) {
+    const existing = await getSession(cleanCode);
+    if (existing) {
+      const updatedContent = {
+        ...existing.content,
+        activeNotice: notice
+      };
+      await client
+        .from('sessions')
+        .update({
+          content: updatedContent,
+          updated_at: new Date().toISOString()
+        })
+        .eq('code', cleanCode);
+    }
+
+    try {
+      const channel = client.channel(`zen_session_${cleanCode}`);
+      await channel.send({
+        type: 'broadcast',
+        event: 'notice_broadcast',
+        payload: { notice },
+      });
+    } catch {}
+  }
+
+  if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+    try {
+      const bc = new BroadcastChannel(`zensync_local_${cleanCode}`);
+      bc.postMessage({ type: 'notice_broadcast', notice });
+      bc.close();
+    } catch {}
+  }
+
+  const cached = localStorage.getItem(`zensync_session_${cleanCode}`);
+  if (cached) {
+    try {
+      const parsed: SessionData = JSON.parse(cached);
+      parsed.content = { ...parsed.content, activeNotice: notice };
+      localStorage.setItem(`zensync_session_${cleanCode}`, JSON.stringify(parsed));
+    } catch {}
+  }
+}
+
+/**
+ * Dismisses/clears the active notice announcement.
+ */
+export async function dismissSessionNotice(code: string): Promise<void> {
+  await broadcastSessionNotice(code, null);
+}
+
+/**
+ * Claims the exclusive HELPER role for a session using the atomic RPC `claim_zen_helper`
+ * with direct table-level fallback if RPC is not deployed.
  */
 export async function claimHelperRole(
   code: string,
@@ -229,25 +558,65 @@ export async function claimHelperRole(
   }
 
   try {
+    // 1. If this exact device already claimed the helper role, allow smooth reconnection
+    const existing = await getSession(cleanCode);
+    if (existing) {
+      const existingHelperSig = existing.helper_signature || existing.content?.helper_signature;
+      if (existingHelperSig && existingHelperSig === signature) {
+        return { success: true, session: existing };
+      }
+    }
+
+    // 2. Invoke atomic claim RPC
     const { data: rpcRes, error: rpcErr } = await client.rpc('claim_zen_helper', {
       p_code: cleanCode,
       p_helper_signature: signature,
       p_helper_device_info: helperInfo || {}
     });
 
-    if (rpcErr) {
-      return { success: false, error: rpcErr.message || 'Failed to claim helper role.' };
+    if (!rpcErr) {
+      const session = await getSession(cleanCode);
+      return { success: true, session: session || undefined };
     }
 
-    const session = await getSession(cleanCode);
-    return { success: true, session: session || undefined };
+    // 3. Fallback: direct table claim if RPC is not present
+    if (rpcErr.code === 'PGRST202' || rpcErr.message?.includes('schema cache')) {
+      const latest = await getSession(cleanCode);
+      const activeSig = latest?.helper_signature || latest?.content?.helper_signature;
+
+      if (!activeSig || activeSig === signature) {
+        const { error: updErr } = await client
+          .from('sessions')
+          .update({
+            helper_signature: signature,
+            helper_device_info: helperInfo || {},
+            updated_at: new Date().toISOString()
+          })
+          .eq('code', cleanCode);
+
+        if (!updErr) {
+          const refreshed = await getSession(cleanCode);
+          return { success: true, session: refreshed || undefined };
+        }
+      } else {
+        return { success: false, error: 'Only 1 Helper is allowed per presentation session.' };
+      }
+    }
+
+    // If RPC rejected but session already matches this device signature, allow it
+    const refreshed = await getSession(cleanCode);
+    const currentHelperSig = refreshed?.helper_signature || refreshed?.content?.helper_signature;
+    if (currentHelperSig === signature) {
+      return { success: true, session: refreshed || undefined };
+    }
+    return { success: false, error: rpcErr.message || 'Only 1 Helper is allowed per presentation session.' };
   } catch (err: any) {
     return { success: false, error: err.message || 'An error occurred while claiming helper role.' };
   }
 }
 
 /**
- * Releases the HELPER role using `release_zen_helper`.
+ * Releases the HELPER role using `release_zen_helper` with direct table fallback.
  */
 export async function releaseHelperRole(code: string, signature: string): Promise<void> {
   const cleanCode = validateSessionCode(code);
@@ -258,14 +627,26 @@ export async function releaseHelperRole(code: string, signature: string): Promis
       p_helper_signature: signature
     });
     if (error) {
-      console.error('[ZenSync] Could not release helper role via RPC:', error.message);
-      throw new Error(`Failed to release helper role: ${error.message}`);
+      try {
+        await client
+          .from('sessions')
+          .update({
+            helper_signature: null,
+            helper_device_info: null,
+            updated_at: new Date().toISOString()
+          })
+          .eq('code', cleanCode)
+          .eq('helper_signature', signature);
+      } catch (tErr: any) {
+        console.warn('[ZenSync] Fallback table release helper notice:', tErr?.message);
+      }
     }
   }
 }
 
 /**
- * Main presenter forcefully kicks active helper using `force_release_zen_helper`.
+ * Main presenter forcefully kicks active helper using `force_release_zen_helper`
+ * with direct table fallback.
  */
 export async function forceReleaseHelper(code: string): Promise<void> {
   const cleanCode = validateSessionCode(code);
@@ -278,8 +659,18 @@ export async function forceReleaseHelper(code: string): Promise<void> {
       p_host_token: hostToken
     });
     if (error) {
-      console.error('[ZenSync] Could not force release helper via RPC:', error.message);
-      throw new Error(`Failed to release helper: ${error.message}`);
+      try {
+        await client
+          .from('sessions')
+          .update({
+            helper_signature: null,
+            helper_device_info: null,
+            updated_at: new Date().toISOString()
+          })
+          .eq('code', cleanCode);
+      } catch (tErr: any) {
+        console.warn('[ZenSync] Fallback table force release notice:', tErr?.message);
+      }
     }
   }
 }
@@ -301,7 +692,7 @@ export async function updateSessionSlide(
   if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
     try {
       const bc = new BroadcastChannel(`zensync_local_${cleanCode}`);
-      bc.postMessage({ type: 'slide_change', currentSlide });
+      bc.postMessage({ type: 'slide_change', currentSlide, slide: currentSlide });
       bc.close();
     } catch {}
   }
@@ -310,17 +701,17 @@ export async function updateSessionSlide(
   const client = getSupabase();
   if (client) {
     try {
-      const channel = client.channel(`session:${cleanCode}`);
+      const channel = client.channel(`zen_session_${cleanCode}`);
       await channel.send({
         type: 'broadcast',
         event: 'slide_change',
-        payload: { currentSlide },
+        payload: { currentSlide, slide: currentSlide },
       });
     } catch (bcErr) {
       console.warn('[ZenSync] Realtime broadcast warning:', bcErr);
     }
 
-    // 3. Persistent state update via RPC with authorization
+    // 3. Persistent state update via RPC or direct table
     const { error } = await client.rpc('update_zen_current_slide', {
       p_code: cleanCode,
       p_current_slide: currentSlide,
@@ -329,7 +720,6 @@ export async function updateSessionSlide(
     });
 
     if (error) {
-      console.warn('[ZenSync] update_zen_current_slide RPC notice:', error.message);
       try {
         await client.from('sessions').update({
           current_slide: currentSlide,
@@ -365,13 +755,13 @@ export async function updateSessionContent(
   const cleanCode = validateSessionCode(code);
   const hostToken = options?.hostToken || getStoredHostToken(cleanCode);
 
-  // Validate payload size (< 500KB)
+  // Validate payload size (< 5MB for multi-section slide presentations)
   const payloadStr = JSON.stringify(sections);
-  if (payloadStr.length > 500 * 1024) {
-    throw new Error('Slide content payload exceeds maximum limit of 500KB. Please optimize images.');
+  if (payloadStr.length > 5 * 1024 * 1024) {
+    throw new Error('Slide content payload exceeds maximum safe limit of 5MB. Please optimize high-resolution images.');
   }
 
-  // 1. Supabase Server RPC
+  // 1. Supabase Server RPC or direct table update
   const client = getSupabase();
   if (client) {
     const { error } = await client.rpc('update_zen_session_content', {
@@ -381,7 +771,6 @@ export async function updateSessionContent(
     });
 
     if (error) {
-      console.warn('[ZenSync] update_zen_session_content notice:', error.message);
       try {
         await client.from('sessions').update({
           content: { sections },
@@ -394,11 +783,11 @@ export async function updateSessionContent(
 
     // Channel broadcast for connected viewers
     try {
-      const channel = client.channel(`session:${cleanCode}`);
+      const channel = client.channel(`zen_session_${cleanCode}`);
       await channel.send({
         type: 'broadcast',
         event: 'content_change',
-        payload: { sections },
+        payload: { sections, content: { sections } },
       });
     } catch {}
   }
@@ -407,7 +796,7 @@ export async function updateSessionContent(
   if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
     try {
       const bc = new BroadcastChannel(`zensync_local_${cleanCode}`);
-      bc.postMessage({ type: 'content_change', sections });
+      bc.postMessage({ type: 'content_change', sections, content: { sections } });
       bc.close();
     } catch {}
   }
@@ -563,7 +952,7 @@ export async function deleteSession(code: string): Promise<void> {
 
     // 3. Broadcast termination event
     try {
-      const channel = client.channel(`session:${cleanCode}`);
+      const channel = client.channel(`zen_session_${cleanCode}`);
       await channel.send({
         type: 'broadcast',
         event: 'session_deleted',
@@ -614,7 +1003,29 @@ export async function fetchAllSessions(): Promise<SessionData[]> {
 
   const { data, error } = await client.rpc('admin_list_zen_sessions');
   if (error) {
-    console.error('[ZenSync] RPC admin_list_zen_sessions error:', error.message);
+    console.warn('[ZenSync] RPC admin_list_zen_sessions notice, attempting direct sessions table query:', error.message);
+    try {
+      const { data: tableData, error: tableErr } = await client
+        .from('sessions')
+        .select('code, created_at, updated_at, device_name, current_slide, helper_signature')
+        .order('created_at', { ascending: false });
+
+      if (!tableErr && Array.isArray(tableData)) {
+        return tableData.map((row: any) => ({
+          code: row.code,
+          created_at: row.created_at,
+          updated_at: row.updated_at || row.created_at,
+          device_info: { deviceName: row.device_name || 'Presenter Device' },
+          main_signature: null,
+          helper_signature: row.helper_signature ? 'assigned' : null,
+          helper_device_info: null,
+          content: { sections: [] } as any,
+          current_slide: row.current_slide || { sectionId: '', slideIndex: 0, globalIndex: 0 },
+        }));
+      }
+    } catch (fallbackErr) {
+      console.warn('[ZenSync] Direct table fallback notice:', fallbackErr);
+    }
     throw new Error(`Failed to list sessions: ${error.message}`);
   }
 
@@ -636,7 +1047,8 @@ export async function fetchAllSessions(): Promise<SessionData[]> {
 }
 
 /**
- * Permanently deletes all sessions (Admin only) using `admin_delete_all_zen_sessions`.
+ * Permanently deletes all sessions (Admin only) using `admin_delete_all_zen_sessions`
+ * with direct table fallback.
  */
 export async function deleteAllSessions(): Promise<void> {
   const client = getSupabase();
@@ -644,7 +1056,11 @@ export async function deleteAllSessions(): Promise<void> {
 
   const { error } = await client.rpc('admin_delete_all_zen_sessions');
   if (error) {
-    throw new Error(`Failed to delete all sessions: ${error.message}`);
+    console.warn('[ZenSync] admin_delete_all_zen_sessions RPC notice, using direct table delete:', error.message);
+    const { error: delErr } = await client.from('sessions').delete().neq('code', '');
+    if (delErr) {
+      throw new Error(`Failed to delete all sessions: ${delErr.message}`);
+    }
   }
 
   // Clear local caches
@@ -656,11 +1072,15 @@ export interface SessionSubscriptionCallbacks {
   onContentChange?: (sections: SectionItem[]) => void;
   onStatusChange?: (status: ConnectionStatus) => void;
   onSessionDeleted?: () => void;
+  onNotesChange?: (notes: NoteItem[]) => void;
+  onNoticeReceived?: (notice: NoticeItem | null) => void;
+  onHelperRequest?: (request: HelperJoinRequest | null) => void;
+  onHelperDecision?: (decision: { deviceId: string; status: 'approved' | 'rejected'; helperInfo?: DeviceAuditInfo }) => void;
 }
 
 /**
  * Subscribes to realtime session updates with coalescing, BroadcastChannel integration,
- * and stale polling prevention.
+ * Supabase Realtime WebSocket broadcast, and stale polling prevention.
  */
 export function subscribeToSession(
   code: string,
@@ -702,6 +1122,18 @@ export function subscribeToSession(
           if (newRow.content?.sections && callbacks.onContentChange) {
             callbacks.onContentChange(newRow.content.sections);
           }
+
+          if (newRow.content?.notes && callbacks.onNotesChange) {
+            callbacks.onNotesChange(newRow.content.notes);
+          }
+
+          if (callbacks.onNoticeReceived) {
+            callbacks.onNoticeReceived(newRow.content?.activeNotice || null);
+          }
+
+          if (newRow.content?.helper_request && callbacks.onHelperRequest) {
+            callbacks.onHelperRequest(newRow.content.helper_request);
+          }
         }
       )
       .on(
@@ -717,6 +1149,60 @@ export function subscribeToSession(
           callbacks.onSessionDeleted?.();
         }
       )
+      .on('broadcast', { event: 'slide_change' }, (payload: any) => {
+        if (isUnsubscribed) return;
+        lastRealtimeTimestamp = Date.now();
+        callbacks.onStatusChange?.('connected');
+        const slide = payload.payload?.currentSlide || payload.payload?.slide || payload.currentSlide || payload.slide;
+        if (slide && callbacks.onSlideChange) {
+          callbacks.onSlideChange(slide);
+        }
+      })
+      .on('broadcast', { event: 'content_change' }, (payload: any) => {
+        if (isUnsubscribed) return;
+        lastRealtimeTimestamp = Date.now();
+        callbacks.onStatusChange?.('connected');
+        const sections = payload.payload?.sections || payload.payload?.content?.sections || payload.sections;
+        if (sections && callbacks.onContentChange) {
+          callbacks.onContentChange(sections);
+        }
+      })
+      .on('broadcast', { event: 'notes_change' }, (payload: any) => {
+        if (isUnsubscribed) return;
+        lastRealtimeTimestamp = Date.now();
+        callbacks.onStatusChange?.('connected');
+        const notes = payload.payload?.notes || payload.notes;
+        if (notes && callbacks.onNotesChange) {
+          callbacks.onNotesChange(notes);
+        }
+      })
+      .on('broadcast', { event: 'notice_broadcast' }, (payload: any) => {
+        if (isUnsubscribed) return;
+        lastRealtimeTimestamp = Date.now();
+        callbacks.onStatusChange?.('connected');
+        const notice = payload.payload !== undefined ? payload.payload.notice : payload.notice;
+        if (callbacks.onNoticeReceived) {
+          callbacks.onNoticeReceived(notice ?? null);
+        }
+      })
+      .on('broadcast', { event: 'helper_request' }, (payload: any) => {
+        if (isUnsubscribed) return;
+        const req = payload.payload?.request || payload.request;
+        if (req && callbacks.onHelperRequest) {
+          callbacks.onHelperRequest(req);
+        }
+      })
+      .on('broadcast', { event: 'helper_decision' }, (payload: any) => {
+        if (isUnsubscribed) return;
+        const decision = payload.payload || payload;
+        if (decision && callbacks.onHelperDecision) {
+          callbacks.onHelperDecision(decision);
+        }
+      })
+      .on('broadcast', { event: 'session_deleted' }, () => {
+        if (isUnsubscribed) return;
+        callbacks.onSessionDeleted?.();
+      })
       .subscribe((status: string) => {
         if (isUnsubscribed) return;
         if (status === 'SUBSCRIBED') {
@@ -739,12 +1225,25 @@ export function subscribeToSession(
         const data = event.data;
         if (!data) return;
 
-        if (data.type === 'slide_change' && data.slide && callbacks.onSlideChange) {
+        const slide = data.currentSlide || data.slide;
+        const sections = data.sections || data.content?.sections;
+
+        if (data.type === 'slide_change' && slide && callbacks.onSlideChange) {
           lastRealtimeTimestamp = Date.now();
-          callbacks.onSlideChange(data.slide);
-        } else if (data.type === 'content_change' && data.content?.sections && callbacks.onContentChange) {
+          callbacks.onSlideChange(slide);
+        } else if (data.type === 'content_change' && sections && callbacks.onContentChange) {
           lastRealtimeTimestamp = Date.now();
-          callbacks.onContentChange(data.content.sections);
+          callbacks.onContentChange(sections);
+        } else if (data.type === 'notes_change' && data.notes && callbacks.onNotesChange) {
+          lastRealtimeTimestamp = Date.now();
+          callbacks.onNotesChange(data.notes);
+        } else if (data.type === 'notice_broadcast' && callbacks.onNoticeReceived) {
+          lastRealtimeTimestamp = Date.now();
+          callbacks.onNoticeReceived(data.notice ?? null);
+        } else if (data.type === 'helper_request' && data.request && callbacks.onHelperRequest) {
+          callbacks.onHelperRequest(data.request);
+        } else if (data.type === 'helper_decision' && callbacks.onHelperDecision) {
+          callbacks.onHelperDecision(data);
         } else if (data.type === 'session_deleted') {
           callbacks.onSessionDeleted?.();
         }
@@ -778,6 +1277,15 @@ export function subscribeToSession(
       }
       if (session.content?.sections && callbacks.onContentChange) {
         callbacks.onContentChange(session.content.sections);
+      }
+      if (session.content?.notes && callbacks.onNotesChange) {
+        callbacks.onNotesChange(session.content.notes);
+      }
+      if (callbacks.onNoticeReceived) {
+        callbacks.onNoticeReceived(session.content?.activeNotice || null);
+      }
+      if (session.content?.helper_request && callbacks.onHelperRequest) {
+        callbacks.onHelperRequest(session.content.helper_request);
       }
     } catch {
       if (!isUnsubscribed) {

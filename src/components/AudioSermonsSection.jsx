@@ -242,14 +242,14 @@ export default function AudioSermonsSection() {
   return (
     <section 
       id="audio-sermons" 
-      className="church-section bg-[#edf6fa] border-t border-[#dcebf0] py-16 sm:py-24"
+      className="church-section cv-auto bg-gradient-to-b from-[#f0f7fa] via-[#e8f3f8] to-[#f8fafc] border-t border-white/80 py-16 sm:py-24"
       aria-labelledby="audio-sermons-heading"
     >
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         
         {/* Section Heading */}
         <div className="church-section-heading text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#dceef5] text-[#285c73] text-xs font-bold uppercase tracking-wider mb-3">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 backdrop-blur-md border border-white/95 shadow-2xs text-[#285c73] text-xs font-bold uppercase tracking-wider mb-3">
             <Radio className="w-3.5 h-3.5 text-[#4b9fb9] animate-pulse" />
             <span>DIRECT AUDIO SERMON</span>
           </div>
@@ -262,15 +262,15 @@ export default function AudioSermonsSection() {
         </div>
 
         {/* Player Navigation / Mode Switcher */}
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-6 bg-white p-2.5 rounded-2xl border border-[#dcebf0] shadow-xs">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6 bg-white/75 backdrop-blur-xl p-2.5 rounded-2xl border border-white/95 shadow-[0_8px_30px_rgba(33,75,96,0.05),inset_0_1px_1px_rgba(255,255,255,0.95)]">
           <div className="flex items-center gap-1.5">
             <button
               type="button"
               onClick={() => setActiveTab('embed')}
               className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
                 activeTab === 'embed'
-                  ? 'bg-[#285c73] text-white shadow-xs'
-                  : 'text-[#214b60] hover:bg-[#edf6fa]'
+                  ? 'bg-gradient-to-r from-[#214b60] to-[#285c73] text-white shadow-xs'
+                  : 'text-[#214b60] hover:bg-white/80'
               }`}
             >
               <Radio className="w-4 h-4 text-[#7cc5dc]" />
@@ -281,8 +281,8 @@ export default function AudioSermonsSection() {
               onClick={() => setActiveTab('direct')}
               className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
                 activeTab === 'direct'
-                  ? 'bg-[#285c73] text-white shadow-xs'
-                  : 'text-[#214b60] hover:bg-[#edf6fa]'
+                  ? 'bg-gradient-to-r from-[#214b60] to-[#285c73] text-white shadow-xs'
+                  : 'text-[#214b60] hover:bg-white/80'
               }`}
             >
               <Headphones className="w-4 h-4 text-[#4b9fb9]" />
@@ -294,7 +294,7 @@ export default function AudioSermonsSection() {
             href={ARCHIVE_COLLECTION_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#edf6fa] hover:bg-[#dceef5] text-[#285c73] hover:text-[#214b60] text-xs font-semibold border border-[#dcebf0] transition hover:scale-105"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white/80 hover:bg-white text-[#285c73] hover:text-[#214b60] text-xs font-semibold border border-white/90 shadow-2xs transition hover:scale-105"
             title="Open on Internet Archive (sugam_202610)"
           >
             <span>Open on Internet Archive</span>
@@ -304,7 +304,7 @@ export default function AudioSermonsSection() {
 
         {/* 1. INTERNET ARCHIVE EMBEDDED PLAYER (Direct playback of https://archive.org/details/sugam_202610/) */}
         {activeTab === 'embed' && (
-          <div className="bg-white rounded-3xl p-4 sm:p-6 border border-[#dcebf0] shadow-sm mb-10 transition-all animate-fade-in">
+          <div className="bg-white/85 backdrop-blur-2xl rounded-3xl p-4 sm:p-6 border border-white/95 shadow-[0_15px_40px_-5px_rgba(33,75,96,0.08),inset_0_1px_2px_rgba(255,255,255,1)] mb-10 transition-all animate-fade-in">
             <div className="flex items-center justify-between mb-3 px-2">
               <span className="text-[11px] font-bold uppercase tracking-wider text-[#4b9fb9] flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
@@ -325,6 +325,7 @@ export default function AudioSermonsSection() {
                 mozallowfullscreen="true" 
                 allowFullScreen
                 allow="autoplay; fullscreen"
+                loading="lazy"
                 title="Sugam Church Bachan Audio Sermons - Internet Archive"
                 className="w-full block"
               />
@@ -338,7 +339,7 @@ export default function AudioSermonsSection() {
 
         {/* 2. DIRECT HIGH-FIDELITY TRACK STREAMER */}
         {activeTab === 'direct' && (
-          <div className="bg-white rounded-3xl p-6 sm:p-10 border border-[#dcebf0] shadow-sm mb-10 text-center transition-all animate-fade-in">
+          <div className="bg-white/85 backdrop-blur-2xl rounded-3xl p-6 sm:p-10 border border-white/95 shadow-[0_15px_40px_-5px_rgba(33,75,96,0.08),inset_0_1px_2px_rgba(255,255,255,1)] mb-10 text-center transition-all animate-fade-in">
             {/* Audio Element */}
             <audio
               ref={audioRef}
@@ -479,8 +480,8 @@ export default function AudioSermonsSection() {
                   key={sermon.id || idx}
                   className={`w-full text-left px-5 py-4 rounded-2xl transition-all duration-200 border flex items-center justify-between group ${
                     isSelected
-                      ? 'bg-[#285c73] text-white border-[#285c73] shadow-sm'
-                      : 'bg-white text-[#214b60] border-[#dcebf0] hover:border-[#4b9fb9] hover:bg-[#f0f7fa]'
+                      ? 'bg-gradient-to-r from-[#214b60] to-[#285c73] text-white border-transparent shadow-md'
+                      : 'bg-white/75 backdrop-blur-md text-[#214b60] border-white/85 hover:border-[#4b9fb9]/50 hover:bg-white/95 shadow-2xs'
                   }`}
                 >
                   <button

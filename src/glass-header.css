@@ -33,7 +33,10 @@ main > .header nav button:hover {
 }
 
 main > .hero {
-  height: 790px;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 main > .hero .hero-content {
@@ -45,13 +48,13 @@ main > .hero .hero-topline {
 }
 
 @media (min-width: 1600px) {
-  main > .hero { height: 880px; }
+  main > .hero { height: 100vh; height: 100dvh; min-height: 100vh; min-height: 100dvh; }
   main > .hero .hero-content { padding-top: 265px; }
 }
 
 @media (max-width: 760px) {
   main > .header { height: 80px; }
-  main > .hero { height: 760px; }
+  main > .hero { height: 100vh; height: 100dvh; min-height: 100vh; min-height: 100dvh; }
   main > .hero .hero-content { padding-top: 225px; }
   main > .hero .hero-topline { top: 113px; }
 }

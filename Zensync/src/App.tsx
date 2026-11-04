@@ -6,10 +6,16 @@ import { SubMode } from './components/SubMode';
 import { HelperMode } from './components/HelperMode';
 import { generateSessionCode } from './lib/presentationUtils';
 
-export function App() {
+interface AppProps {
+  isAdmin?: boolean;
+  onLogin?: (email: string, pass: string) => Promise<any>;
+}
+
+export function App({ isAdmin = false, onLogin }: AppProps) {
   const [role, setRole] = useState<UserRole>('home');
   const [sessionCode, setSessionCode] = useState<string>('');
   const [deviceInfo, setDeviceInfo] = useState<DeviceAuditInfo | undefined>(undefined);
+  const [createdAdminPassword, setCreatedAdminPassword] = useState<string | undefined>(undefined);
 
   // Sync state with browser URL search params and respond to browser Back/Forward (popstate)
   useEffect(() => {
@@ -39,12 +45,16 @@ export function App() {
     return window.location.pathname.includes('sync') ? window.location.pathname : '/zensync';
   };
 
-  const handleSelectRole = (newRole: UserRole, code?: string, devInfo?: DeviceAuditInfo) => {
+  const handleSelectRole = (newRole: UserRole, code?: string, devInfo?: DeviceAuditInfo, adminPassword?: string) => {
     const basePath = getBasePath();
     if (newRole === 'main') {
       const newCode = code || generateSessionCode();
       setSessionCode(newCode);
       setDeviceInfo(devInfo);
+      setCreatedAdminPassword(adminPassword);
+      if (adminPassword) {
+        sessionStorage.setItem(`zensync_create_pw_${newCode}`, adminPassword);
+      }
       setRole('main');
       window.history.pushState({}, '', `${basePath}?role=main&code=${newCode}`);
     } else if ((newRole === 'sub' || newRole === 'helper') && code) {
@@ -57,17 +67,23 @@ export function App() {
   const handleExit = () => {
     setRole('home');
     setSessionCode('');
+    setCreatedAdminPassword(undefined);
     window.history.pushState({}, '', getBasePath());
   };
 
   return (
     <div className="zensync-scope">
       {role === 'home' && (
-        <HomeScreen onSelectRole={handleSelectRole} />
+        <HomeScreen onSelectRole={handleSelectRole} isAdmin={isAdmin} onLogin={onLogin} />
       )}
 
       {role === 'main' && sessionCode && (
-        <MainMode sessionCode={sessionCode} initialDeviceInfo={deviceInfo} onExit={handleExit} />
+        <MainMode
+          sessionCode={sessionCode}
+          initialDeviceInfo={deviceInfo}
+          initialAdminPassword={createdAdminPassword}
+          onExit={handleExit}
+        />
       )}
 
       {role === 'sub' && sessionCode && (

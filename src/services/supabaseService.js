@@ -1927,4 +1927,103 @@ export async function uploadAudioSermonFile(file) {
   throw new Error('Failed to retrieve public audio URL after upload.');
 }
 
+// ============================================================================
+// 10. ZENSYNC SESSION MANAGEMENT SERVICES (ADMIN PANEL)
+// ============================================================================
+
+/**
+ * Fetches all live ZenSync sessions from Supabase database.
+ */
+export async function fetchZenSyncSessions() {
+  try {
+    const { data, error } = await supabase
+      .from('sessions')
+      .select('code, created_at, updated_at, device_name, content, current_slide, helper_signature, helper_device_info')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  } catch (err) {
+    console.error('[supabaseService] fetchZenSyncSessions failed:', err);
+    throw formatSupabaseError(err, 'Fetching ZenSync sessions');
+  }
+}
+
+/**
+ * Deletes a single ZenSync session by code from Supabase database and clears its storage images.
+ */
+export async function deleteZenSyncSession(code) {
+  if (!code) return;
+  const cleanCode = code.toString().trim().toLowerCase();
+  try {
+    // 1. Delete session from sessions table
+    const { error } = await supabase
+      .from('sessions')
+      .delete()
+      .eq('code', cleanCode);
+
+    if (error) throw error;
+
+    // 2. Clean up slide images stored in zen_sync_images bucket under this session code
+    try {
+      const { data: files } = await supabase.storage
+        .from('zen_sync_images')
+        .list(cleanCode, { limit: 1000 });
+      if (files && files.length > 0) {
+        const filePaths = files.map((f) => `${cleanCode}/${f.name}`);
+        await supabase.storage.from('zen_sync_images').remove(filePaths);
+      }
+    } catch (storageErr) {
+      console.warn('[supabaseService] ZenSync storage cleanup notice:', storageErr?.message);
+    }
+
+    return true;
+  } catch (err) {
+    console.error('[supabaseService] deleteZenSyncSession failed:', err);
+    throw formatSupabaseError(err, `Deleting session ${cleanCode}`);
+  }
+}
+
+/**
+ * Deletes ALL ZenSync presentation sessions from Supabase database and clears storage files.
+ */
+export async function deleteAllZenSyncSessions() {
+  try {
+    // Fetch all current codes first to clean storage
+    const { data: allSessions } = await supabase.from('sessions').select('code');
+    const codes = (allSessions || []).map(s => s.code).filter(Boolean);
+
+    // Delete all rows from sessions table
+    const { error } = await supabase
+      .from('sessions')
+      .delete()
+      .neq('code', '');
+
+    if (error) throw error;
+
+    // Remove storage directories for each session
+    if (codes.length > 0) {
+      for (const code of codes) {
+        try {
+          const { data: files } = await supabase.storage
+            .from('zen_sync_images')
+            .list(code, { limit: 1000 });
+          if (files && files.length > 0) {
+            const filePaths = files.map((f) => `${code}/${f.name}`);
+            await supabase.storage.from('zen_sync_images').remove(filePaths);
+          }
+        } catch (stErr) {
+          console.warn('[supabaseService] Storage cleanup notice for code ' + code + ':', stErr?.message);
+        }
+      }
+    }
+
+    return true;
+  } catch (err) {
+    console.error('[supabaseService] deleteAllZenSyncSessions failed:', err);
+    throw formatSupabaseError(err, 'Deleting all ZenSync sessions');
+  }
+}
+
+
 

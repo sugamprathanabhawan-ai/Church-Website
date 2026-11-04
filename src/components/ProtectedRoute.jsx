@@ -177,7 +177,7 @@ export default function ProtectedRoute({ children }) {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@sugamchurch.com"
+                  placeholder="email@example.com"
                   className="w-full pl-10 pr-4 py-3 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#285c73] rounded-2xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#285c73]/20 transition-all font-medium"
                 />
               </div>
@@ -293,7 +293,7 @@ export default function ProtectedRoute({ children }) {
                     required
                     value={resetEmail}
                     onChange={(e) => setResetEmail(e.target.value)}
-                    placeholder="admin@sugamchurch.com"
+                    placeholder="email@example.com"
                     className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-[#285c73]/20"
                   />
                   <div className="flex gap-2 pt-2">

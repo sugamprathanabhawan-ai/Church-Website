@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Home, Menu, X, ShieldAlert } from 'lucide-react';
-import type { SectionItem, ConnectionStatus } from '../types';
+import { Home, Menu, X, ShieldAlert, FileText, Image as ImageIcon } from 'lucide-react';
+import type { SectionItem, ConnectionStatus, NoteItem, NoticeItem } from '../types';
 import { ImageViewer } from './ImageViewer';
+import { NotesViewer } from './NotesViewer';
+import { NoticePopup } from './NoticePopup';
 import {
   flattenSections,
   resolveSlideState,
@@ -28,6 +30,11 @@ export const HelperMode: React.FC<HelperModeProps> = ({ sessionCode, onExit }) =
   const [sessionEnded, setSessionEnded] = useState(false);
   const [isUnauthorizedHelper, setIsUnauthorizedHelper] = useState(false);
   const [claimedHelperDevice, setClaimedHelperDevice] = useState('');
+
+  // Notes and Notice states
+  const [activeSectionView, setActiveSectionView] = useState<'slides' | 'notes'>('slides');
+  const [notes, setNotes] = useState<NoteItem[]>([]);
+  const [activeNotice, setActiveNotice] = useState<NoticeItem | null>(null);
 
   const handleSafeExit = async () => {
     try {
@@ -66,6 +73,8 @@ export const HelperMode: React.FC<HelperModeProps> = ({ sessionCode, onExit }) =
         }
 
         setSections(data.content?.sections || []);
+        setNotes(data.content?.notes || []);
+        setActiveNotice(data.content?.activeNotice || null);
         setCurrentGlobalIndex(data.current_slide?.globalIndex || 0);
         setStatus('connected');
       }
@@ -79,6 +88,14 @@ export const HelperMode: React.FC<HelperModeProps> = ({ sessionCode, onExit }) =
       },
       onContentChange: (newSections) => {
         setSections(newSections);
+        setStatus('connected');
+      },
+      onNotesChange: (newNotes) => {
+        setNotes(newNotes);
+        setStatus('connected');
+      },
+      onNoticeReceived: (newNotice) => {
+        setActiveNotice(newNotice);
         setStatus('connected');
       },
       onStatusChange: (newStatus) => {
@@ -170,18 +187,26 @@ export const HelperMode: React.FC<HelperModeProps> = ({ sessionCode, onExit }) =
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', minHeight: '100dvh', maxHeight: '100dvh', overflow: 'hidden' }}>
+      {/* Real-time Notice Pop-up Banner for Helper */}
+      <NoticePopup
+        notice={activeNotice}
+        onOpenNotes={() => setActiveSectionView('notes')}
+      />
+
       {/* Top Navbar */}
       <header className="app-navbar helper-navbar">
         <div className="navbar-left">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="btn-icon"
-            style={{ display: 'flex', flexShrink: 0 }}
-            title="Toggle Sections Sidebar"
-            aria-label="Toggle Sidebar"
-          >
-            {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
-          </button>
+          {activeSectionView === 'slides' && (
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="btn-icon"
+              style={{ display: 'flex', flexShrink: 0 }}
+              title="Toggle Sections Sidebar"
+              aria-label="Toggle Sidebar"
+            >
+              {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
+          )}
 
           <div className="app-brand" onClick={handleSafeExit} title="Return to Home">
             <span className="app-brand-title">ZEN SYNC</span>
@@ -194,6 +219,29 @@ export const HelperMode: React.FC<HelperModeProps> = ({ sessionCode, onExit }) =
 
           <div className="role-pill-badge helper">
             HELPER
+          </div>
+
+          {/* View Switcher: Slides vs Notes Section */}
+          <div className="sub-view-switcher">
+            <button
+              type="button"
+              onClick={() => setActiveSectionView('slides')}
+              className={`sub-view-tab-btn ${activeSectionView === 'slides' ? 'active' : ''}`}
+              title="Control Slides Presentation"
+            >
+              <ImageIcon size={14} />
+              <span>Slides ({totalSlides})</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveSectionView('notes')}
+              className={`sub-view-tab-btn ${activeSectionView === 'notes' ? 'active' : ''}`}
+              title="View Notes Section"
+            >
+              <FileText size={14} />
+              <span>Notes</span>
+              {activeNotice && <span className="sub-view-notice-dot" title="Active Notice Broadcasted" />}
+            </button>
           </div>
         </div>
 
@@ -227,134 +275,151 @@ export const HelperMode: React.FC<HelperModeProps> = ({ sessionCode, onExit }) =
         </div>
       </header>
 
-      {/* Mobile Backdrop */}
-      <div
-        className={`sidebar-backdrop ${sidebarOpen ? 'open' : ''}`}
-        onClick={() => setSidebarOpen(false)}
+      {/* Real-time Notice Pop-up Banner for Helper */}
+      <NoticePopup
+        notice={activeNotice}
+        onDismiss={() => {
+          setActiveNotice(null);
+        }}
       />
 
-      {/* Main Layout Area: Read-Only Section Sidebar + Image Viewer with Controls */}
-      <div className="presentation-layout">
-        {/* Left Sidebar (Read-only sections & slides list) */}
-        <aside className={`presentation-sidebar ${sidebarOpen ? 'open' : ''}`}>
-          <div className="sidebar-header">
-            <span className="sidebar-title">Sections ({sections.length})</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', fontWeight: 600 }}>
-                Read-Only
-              </span>
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="btn-icon"
-                style={{ width: '28px', height: '28px', border: 'none' }}
-                title="Close sidebar"
-              >
-                <X size={18} />
-              </button>
-            </div>
-          </div>
-
-          <div className="sidebar-content">
-            {sections.map((section) => {
-              const isActiveSection = currentSlide.sectionId === section.id;
-
-              return (
-                <div
-                  key={section.id}
-                  className={`section-card ${isActiveSection ? 'active-section' : ''}`}
-                >
-                  <div className="section-header">
-                    <div className="section-header-title">
-                      <span>{section.title}</span>
-                      <span className="section-count-badge">{section.slides.length} slides</span>
-                    </div>
-                  </div>
-
-                  <div className="section-slides-list">
-                    {section.slides.map((slide, slideIdx) => {
-                      const isCurrent =
-                        currentSlide.sectionId === section.id &&
-                        currentSlide.slideIndex === slideIdx;
-
-                      const flat = flattenSections(sections);
-                      const targetFlat = flat.find(
-                        (f) => f.sectionId === section.id && f.slideIndex === slideIdx
-                      );
-
-                      return (
-                        <div
-                          key={slide.id}
-                          className={`slide-row ${isCurrent ? 'active' : ''}`}
-                          onClick={() => {
-                            if (targetFlat) {
-                              handleGoToSlide(targetFlat.globalIndex);
-                            }
-                          }}
-                        >
-                          <div className="slide-row-info">
-                            <div className="slide-num-pill">{slideIdx + 1}</div>
-                            <span style={{ fontSize: '0.85rem' }}>{slide.name}</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Sidebar Bottom Action - Always accessible Exit button */}
-          <div className="sidebar-footer">
-            <button
-              onClick={handleSafeExit}
-              className="btn-outline btn-sidebar-exit"
-              style={{ width: '100%', justifyContent: 'center', gap: '0.5rem', padding: '0.65rem' }}
-              title="Exit Presentation"
-              id="btn-helper-sidebar-exit"
-            >
-              <Home size={16} />
-              <span>Exit Presentation</span>
-            </button>
-          </div>
-        </aside>
-
-        {/* Center Presentation Stage with Full Control (Previous/Next/Fullscreen) */}
-        <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          {/* Horizontal Section Track for Fast Mobile Access */}
-          {sections.length > 0 && (
-            <div className="mobile-section-bar">
-              {sections.map((sec) => {
-                const isActive = currentSlide.sectionId === sec.id;
-                const flat = flattenSections(sections);
-                const firstInSec = flat.find((f) => f.sectionId === sec.id);
-
-                return (
-                  <button
-                    key={sec.id}
-                    onClick={() => {
-                      if (firstInSec) handleGoToSlide(firstInSec.globalIndex);
-                    }}
-                    className={`mobile-section-chip ${isActive ? 'active' : ''}`}
-                  >
-                    <span>{sec.title}</span>
-                    <span className="mobile-section-chip-count">({sec.slides.length})</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          <ImageViewer
-            activeSlide={activeFlatSlide}
-            currentIndex={currentGlobalIndex}
-            totalSlides={totalSlides}
-            onPrevious={handlePrevious}
-            onNext={handleNext}
-            canNavigate={true}
-          />
+      {/* Main View Area: Notes Section or Slide Stage */}
+      {activeSectionView === 'notes' ? (
+        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', backgroundColor: '#09090b', width: '100%' }}>
+          <NotesViewer notes={notes} activeNotice={activeNotice} />
         </div>
-      </div>
+      ) : (
+        <>
+          {/* Mobile Backdrop */}
+          <div
+            className={`sidebar-backdrop ${sidebarOpen ? 'open' : ''}`}
+            onClick={() => setSidebarOpen(false)}
+          />
+
+          {/* Main Layout Area: Read-Only Section Sidebar + Image Viewer with Controls */}
+          <div className="presentation-layout">
+            {/* Left Sidebar (Read-only sections & slides list) */}
+            <aside className={`presentation-sidebar ${sidebarOpen ? 'open' : ''}`}>
+              <div className="sidebar-header">
+                <span className="sidebar-title">Sections ({sections.length})</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', fontWeight: 600 }}>
+                    Read-Only
+                  </span>
+                  <button
+                    onClick={() => setSidebarOpen(false)}
+                    className="btn-icon"
+                    style={{ width: '28px', height: '28px', border: 'none' }}
+                    title="Close sidebar"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="sidebar-content">
+                {sections.map((section) => {
+                  const isActiveSection = currentSlide.sectionId === section.id;
+
+                  return (
+                    <div
+                      key={section.id}
+                      className={`section-card ${isActiveSection ? 'active-section' : ''}`}
+                    >
+                      <div className="section-header">
+                        <div className="section-header-title">
+                          <span>{section.title}</span>
+                          <span className="section-count-badge">{section.slides.length} slides</span>
+                        </div>
+                      </div>
+
+                      <div className="section-slides-list">
+                        {section.slides.map((slide, slideIdx) => {
+                          const isCurrent =
+                            currentSlide.sectionId === section.id &&
+                            currentSlide.slideIndex === slideIdx;
+
+                          const flat = flattenSections(sections);
+                          const targetFlat = flat.find(
+                            (f) => f.sectionId === section.id && f.slideIndex === slideIdx
+                          );
+
+                          return (
+                            <div
+                              key={slide.id}
+                              className={`slide-row ${isCurrent ? 'active' : ''}`}
+                              onClick={() => {
+                                if (targetFlat) {
+                                  handleGoToSlide(targetFlat.globalIndex);
+                                }
+                              }}
+                            >
+                              <div className="slide-row-info">
+                                <div className="slide-num-pill">{slideIdx + 1}</div>
+                                <span style={{ fontSize: '0.85rem' }}>{slide.name}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Sidebar Bottom Action - Always accessible Exit button */}
+              <div className="sidebar-footer">
+                <button
+                  onClick={handleSafeExit}
+                  className="btn-outline btn-sidebar-exit"
+                  style={{ width: '100%', justifyContent: 'center', gap: '0.5rem', padding: '0.65rem' }}
+                  title="Exit Presentation"
+                  id="btn-helper-sidebar-exit"
+                >
+                  <Home size={16} />
+                  <span>Exit Presentation</span>
+                </button>
+              </div>
+            </aside>
+
+            {/* Center Presentation Stage with Full Control (Previous/Next/Fullscreen) */}
+            <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              {/* Horizontal Section Track for Fast Mobile Access */}
+              {sections.length > 0 && (
+                <div className="mobile-section-bar">
+                  {sections.map((sec) => {
+                    const isActive = currentSlide.sectionId === sec.id;
+                    const flat = flattenSections(sections);
+                    const firstInSec = flat.find((f) => f.sectionId === sec.id);
+
+                    return (
+                      <button
+                        key={sec.id}
+                        onClick={() => {
+                          if (firstInSec) handleGoToSlide(firstInSec.globalIndex);
+                        }}
+                        className={`mobile-section-chip ${isActive ? 'active' : ''}`}
+                      >
+                        <span>{sec.title}</span>
+                        <span className="mobile-section-chip-count">({sec.slides.length})</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              <ImageViewer
+                activeSlide={activeFlatSlide}
+                currentIndex={currentGlobalIndex}
+                totalSlides={totalSlides}
+                onPrevious={handlePrevious}
+                onNext={handleNext}
+                canNavigate={true}
+              />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

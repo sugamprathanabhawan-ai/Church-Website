@@ -161,10 +161,10 @@ export default function LyricsBookViewer({
         }`}>
           
           {/* Top Bar / Navigation */}
-          <div className="no-print flex flex-wrap items-center justify-between gap-3 pb-6 border-b border-inherit/20 mb-6">
+          <div className="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-inherit/20 mb-6">
             <button
               onClick={() => setActiveSong(null)}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition hover:scale-105 ${
+              className={`self-start inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition hover:scale-105 active:scale-95 ${
                 rehearsalMode
                   ? 'bg-slate-800 hover:bg-slate-700 text-slate-200'
                   : 'bg-[#e4f3f8] hover:bg-[#dceef5] text-[#285c73]'
@@ -175,7 +175,7 @@ export default function LyricsBookViewer({
             </button>
 
             {/* Viewer Controls */}
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
               
               {/* Show/Hide Chords Toggle */}
               <button

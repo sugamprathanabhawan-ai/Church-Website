@@ -717,7 +717,7 @@ export default function Chatbot() {
   const isAiOnline = geminiConfig.enabled !== false;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 no-print font-sans">
+    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 no-print font-sans">
       {/* Floating Toggle Button */}
       {!isOpen && (
         <button
@@ -738,7 +738,7 @@ export default function Chatbot() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="w-[94vw] sm:w-[420px] max-w-[420px] h-[590px] max-h-[88vh] bg-white/94 backdrop-blur-2xl rounded-3xl shadow-[0_25px_60px_-15px_rgba(33,75,96,0.22),inset_0_1px_2px_rgba(255,255,255,1)] border border-white/95 flex flex-col overflow-hidden animate-scale-in">
+        <div className="w-[calc(100vw-2rem)] sm:w-[420px] max-w-[420px] h-[82dvh] sm:h-[590px] max-h-[88dvh] bg-white/94 backdrop-blur-2xl rounded-3xl shadow-[0_25px_60px_-15px_rgba(33,75,96,0.22),inset_0_1px_2px_rgba(255,255,255,1)] border border-white/95 flex flex-col overflow-hidden animate-scale-in">
           
           {/* 1. TOP ANIMATED LINE: मलाई सोध्नुहोस् (Malai Sodhnuhos) */}
           <div className="bg-gradient-to-r from-[#173a4b] via-[#214b60] to-[#173a4b] text-white px-3 py-1.5 border-b border-[#285c73]/40 flex items-center justify-between overflow-hidden relative shadow-inner">

@@ -302,7 +302,7 @@ export default function ChoirPage() {
 
           {/* Sub-Navigation Tabs inside Choir Resources */}
           <div className="flex justify-center mb-10">
-            <div className="inline-flex p-1.5 rounded-2xl bg-[#f0f7fa] border border-[#d4e8ee] shadow-2xs gap-1.5">
+            <div className="inline-flex flex-wrap sm:flex-nowrap justify-center p-1.5 rounded-2xl bg-[#f0f7fa] border border-[#d4e8ee] shadow-2xs gap-1.5 max-w-full">
               <button
                 type="button"
                 onClick={() => setResourceTab('lyrics')}

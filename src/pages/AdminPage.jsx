@@ -738,10 +738,10 @@ export default function AdminPage() {
           </h1>
         </div>
 
-        <div className="flex items-center gap-2.5 ml-auto">
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end sm:ml-auto pt-2 sm:pt-0">
           <Link
             to="/"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-[#f8faf7] hover:bg-[#dceef5] text-[#214b60] border border-[#d4e8ee] rounded-xl text-xs font-semibold transition"
+            className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#f8faf7] hover:bg-[#dceef5] text-[#214b60] border border-[#d4e8ee] rounded-xl text-xs font-semibold transition"
             title="View live website"
           >
             <Globe className="w-3.5 h-3.5 text-[#285c73]" />
@@ -751,7 +751,7 @@ export default function AdminPage() {
           <button
             onClick={refreshData}
             disabled={globalLoading}
-            className="p-2.5 bg-[#f8faf7] hover:bg-[#dceef5] text-[#214b60] border border-[#d4e8ee] rounded-xl transition"
+            className="p-2 bg-[#f8faf7] hover:bg-[#dceef5] text-[#214b60] border border-[#d4e8ee] rounded-xl transition"
             title="Reload from Supabase"
           >
             <RotateCw className={`w-4 h-4 ${globalLoading ? 'animate-spin' : ''}`} />
@@ -760,15 +760,15 @@ export default function AdminPage() {
           <button
             onClick={handleSaveAll}
             disabled={saving}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#285c73] hover:bg-[#214b60] text-white text-xs sm:text-sm font-semibold rounded-xl shadow-md transition hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#285c73] hover:bg-[#214b60] text-white text-xs sm:text-sm font-semibold rounded-xl shadow-md transition hover:scale-[1.02] active:scale-95 disabled:opacity-50"
           >
             <Save className="w-4 h-4" />
-            <span>{saving ? 'Saving to Supabase...' : 'Save Live Changes'}</span>
+            <span>{saving ? 'Saving...' : 'Save Live Changes'}</span>
           </button>
 
           <button
             onClick={handleLogout}
-            className="p-2.5 bg-[#f8faf7] hover:bg-rose-50 text-slate-500 hover:text-rose-600 border border-[#d4e8ee] rounded-xl transition"
+            className="p-2 bg-[#f8faf7] hover:bg-rose-50 text-slate-500 hover:text-rose-600 border border-[#d4e8ee] rounded-xl transition"
             title="Log Out"
           >
             <LogOut className="w-4 h-4" />
@@ -793,8 +793,8 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="flex flex-wrap gap-2 mb-6 border-b border-[#d4e8ee] pb-3">
+      {/* Navigation Tabs (Horizontal scroll on phone) */}
+      <div className="flex items-center gap-2 mb-6 border-b border-[#d4e8ee] pb-3 overflow-x-auto no-scrollbar flex-nowrap sm:flex-wrap [&>button]:shrink-0 [&>button]:whitespace-nowrap">
         <button
           onClick={() => setActiveTab('youth')}
           className={`px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 ${

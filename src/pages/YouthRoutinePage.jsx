@@ -233,7 +233,7 @@ export default function YouthRoutinePage() {
 
               <div className="bg-white shadow-md shadow-[#214b60]/5 rounded-b-2xl border border-[#d4e8ee] overflow-hidden">
                 {/* Desktop & Default Table View */}
-                <div className={`w-full overflow-x-auto ${viewMode === 'cards' ? 'hidden' : 'block'}`}>
+                <div className={`w-full overflow-x-auto ${viewMode === 'cards' ? 'hidden' : viewMode === 'table' ? 'block' : 'hidden sm:block'}`}>
                   <table className="w-full text-left border-collapse">
                     <thead className="bg-[#e4f3f8] text-[#214b60] border-b border-[#d4e8ee]">
                       <tr>
@@ -260,9 +260,8 @@ export default function YouthRoutinePage() {
                   </table>
                 </div>
 
-                {/* Mobile Cards View Alternative */}
-                {viewMode === 'cards' && (
-                  <div className="p-4 space-y-2.5 sm:hidden">
+                  {/* Mobile Cards View (Responsive by default on phones) */}
+                  <div className={`p-4 space-y-2.5 ${viewMode === 'table' ? 'hidden' : viewMode === 'cards' ? 'block' : 'block sm:hidden'}`}>
                     {(month.rows || []).map((row, rIdx) => (
                       <div key={rIdx} className="p-3.5 rounded-2xl bg-sky-50/50 border border-sky-100 flex flex-col gap-1">
                         <span className="text-xs font-bold text-sky-700 bg-sky-100/80 px-2.5 py-0.5 rounded-full w-fit">
@@ -274,7 +273,6 @@ export default function YouthRoutinePage() {
                       </div>
                     ))}
                   </div>
-                )}
               </div>
             </div>
           ))}

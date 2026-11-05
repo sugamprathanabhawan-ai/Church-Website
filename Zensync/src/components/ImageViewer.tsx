@@ -304,25 +304,7 @@ export const ImageViewer: React.FC<ImageViewerProps> = ({
 
         {/* Floating section title tag in presentation view */}
         {activeSlide && !isFullscreen && (
-          <div
-            style={{
-              position: 'absolute',
-              top: '1.25rem',
-              left: '1.5rem',
-              background: 'rgba(255, 255, 255, 0.88)',
-              backdropFilter: 'blur(14px)',
-              WebkitBackdropFilter: 'blur(14px)',
-              border: '1px solid rgba(255, 255, 255, 0.95)',
-              padding: '0.4rem 0.95rem',
-              borderRadius: 'var(--radius-full)',
-              fontSize: '0.85rem',
-              fontWeight: 700,
-              color: '#0284c7',
-              boxShadow: '0 4px 14px rgba(33, 75, 96, 0.08), inset 0 1px 1px rgba(255, 255, 255, 1)',
-              pointerEvents: 'none',
-              zIndex: 12,
-            }}
-          >
+          <div className="viewer-floating-section-badge">
             {activeSlide.sectionTitle}
           </div>
         )}

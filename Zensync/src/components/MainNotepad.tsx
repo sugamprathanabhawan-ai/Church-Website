@@ -14,6 +14,7 @@ import {
   UploadCloud,
   Loader2,
   Zap,
+  Music,
 } from 'lucide-react';
 import type { NoteItem, NoticeItem } from '../types';
 import { updateSessionNotes, broadcastSessionNotice, dismissSessionNotice } from '../lib/supabaseClient';
@@ -45,13 +46,9 @@ const DEFAULT_QUICK_PRESETS: QuickPreset[] = [
   { id: 'song', text: 'Song has changed', emoji: '📑' },
   { id: 'piano', text: 'Play the piano', emoji: '🎹' },
   { id: 'guitar', text: 'Play the guitar', emoji: '🎸' },
-  { id: 'chorus', text: 'Repeat Chorus', emoji: '🔁' },
-  { id: 'key', text: 'Key Change / Modulation', emoji: '🎼' },
-  { id: 'bridge', text: 'Bridge / Solo', emoji: '⚡' },
-  { id: 'stop', text: 'Soft Ending / Cut', emoji: '🛑' },
-  { id: 'accapella', text: 'Singers Only / Accapella', emoji: '🎤' },
-  { id: 'band', text: 'Full Band In', emoji: '🥁' },
 ];
+
+const CHORD_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
 export const MainNotepad: React.FC<MainNotepadProps> = ({
   sessionCode,
@@ -88,16 +85,17 @@ export const MainNotepad: React.FC<MainNotepadProps> = ({
   const [currentActiveNotice, setCurrentActiveNotice] = useState<NoticeItem | null>(activeNotice);
   const [isSendingNotice, setIsSendingNotice] = useState(false);
   const [noticeSentToast, setNoticeSentToast] = useState(false);
+  const [chordQuality, setChordQuality] = useState<'major' | 'minor'>('major');
 
   // Quick Notice Presets (user can send with 1-click or add custom presets)
   const [quickPresets, setQuickPresets] = useState<QuickPreset[]>(() => {
     try {
-      const saved = localStorage.getItem('zensync_quick_notices');
+      const saved = localStorage.getItem('zensync_quick_notices_v4');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
-    } catch {}
+    } catch { }
     return DEFAULT_QUICK_PRESETS;
   });
 
@@ -237,9 +235,15 @@ export const MainNotepad: React.FC<MainNotepadProps> = ({
       const updated = [...quickPresets, newPreset];
       setQuickPresets(updated);
       try {
-        localStorage.setItem('zensync_quick_notices', JSON.stringify(updated));
-      } catch {}
+        localStorage.setItem('zensync_quick_notices_v4', JSON.stringify(updated));
+      } catch { }
     }
+  };
+
+  // 1-Click Chord Notice Broadcast (C, C#, D... B with Major / Minor)
+  const handleSendChordNotice = async (note: string) => {
+    const qualityLabel = chordQuality === 'major' ? 'Major' : 'Minor';
+    await handleSendPresetNotice(`🎵 Chord: ${note} ${qualityLabel}`);
   };
 
   // Send custom typed notice
@@ -484,6 +488,55 @@ export const MainNotepad: React.FC<MainNotepadProps> = ({
                 <Send size={12} className="quick-chip-send-icon" />
               </button>
             ))}
+          </div>
+        </div>
+
+        {/* Chord Notice Section: 1-Click C to B + Major / Minor buttons */}
+        <div className="chord-notices-container">
+          <div className="chord-notices-header">
+            <span className="chord-notices-label">
+              <Music size={14} color="#0284c7" />
+              <span>Chord Notice (1-Click Instant Send):</span>
+            </span>
+            <div className="chord-quality-toggle" role="radiogroup" aria-label="Chord Mode">
+              <span className="chord-quality-hint">Mode:</span>
+              <button
+                type="button"
+                onClick={() => setChordQuality('major')}
+                className={`chord-quality-btn ${chordQuality === 'major' ? 'active' : ''}`}
+                title="Slide to Major (clicking C sends 'C Major')"
+              >
+                Major
+              </button>
+              <button
+                type="button"
+                onClick={() => setChordQuality('minor')}
+                className={`chord-quality-btn ${chordQuality === 'minor' ? 'active' : ''}`}
+                title="Slide to Minor (clicking C sends 'C Minor')"
+              >
+                Minor
+              </button>
+            </div>
+          </div>
+
+          <div className="chord-notices-grid">
+            {CHORD_NOTES.map((note) => {
+              const displayChord = chordQuality === 'minor' ? `${note}m` : note;
+              const qualityLabel = chordQuality === 'major' ? 'Major' : 'Minor';
+              return (
+                <button
+                  key={note}
+                  type="button"
+                  onClick={() => handleSendChordNotice(note)}
+                  disabled={isSendingNotice}
+                  className={`chord-notice-btn ${chordQuality}`}
+                  title={`Instantly broadcast "🎵 Chord: ${note} ${qualityLabel}" to all screens`}
+                >
+                  <span className="chord-name">{displayChord}</span>
+                  <Send size={10} className="chord-send-icon" />
+                </button>
+              );
+            })}
           </div>
         </div>
 

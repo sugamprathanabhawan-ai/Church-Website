@@ -220,29 +220,29 @@ export const HelperMode: React.FC<HelperModeProps> = ({ sessionCode, onExit }) =
           <div className="role-pill-badge helper">
             HELPER
           </div>
+        </div>
 
-          {/* View Switcher: Slides vs Notes Section */}
-          <div className="sub-view-switcher">
-            <button
-              type="button"
-              onClick={() => setActiveSectionView('slides')}
-              className={`sub-view-tab-btn ${activeSectionView === 'slides' ? 'active' : ''}`}
-              title="Control Slides Presentation"
-            >
-              <ImageIcon size={14} />
-              <span>Slides ({totalSlides})</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveSectionView('notes')}
-              className={`sub-view-tab-btn ${activeSectionView === 'notes' ? 'active' : ''}`}
-              title="View Notes Section"
-            >
-              <FileText size={14} />
-              <span>Notes</span>
-              {activeNotice && <span className="sub-view-notice-dot" title="Active Notice Broadcasted" />}
-            </button>
-          </div>
+        {/* View Switcher: Slides vs Notes Section */}
+        <div className="sub-view-switcher">
+          <button
+            type="button"
+            onClick={() => setActiveSectionView('slides')}
+            className={`sub-view-tab-btn ${activeSectionView === 'slides' ? 'active' : ''}`}
+            title="Control Slides Presentation"
+          >
+            <ImageIcon size={14} />
+            <span>Slides ({totalSlides})</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveSectionView('notes')}
+            className={`sub-view-tab-btn ${activeSectionView === 'notes' ? 'active' : ''}`}
+            title="View Notes Section"
+          >
+            <FileText size={14} />
+            <span>Notes</span>
+            {activeNotice && <span className="sub-view-notice-dot" title="Active Notice Broadcasted" />}
+          </button>
         </div>
 
         <div className="navbar-actions">

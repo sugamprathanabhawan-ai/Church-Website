@@ -780,27 +780,27 @@ export const MainMode: React.FC<MainModeProps> = ({ sessionCode, initialDeviceIn
               {copied ? <Check size={14} color="var(--primary)" /> : <Copy size={14} color="var(--primary)" />}
             </button>
           </div>
+        </div>
 
-          {/* Mode Switcher: Slides vs Notepad & Notices */}
-          <div className="main-view-switcher">
-            <button
-              type="button"
-              onClick={() => setActiveTab('slides')}
-              className={`main-view-tab-btn ${activeTab === 'slides' ? 'active' : ''}`}
-              title="Slides presentation stage"
-            >
-              <span>🖼️ Slides ({totalSlides})</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('notes')}
-              className={`main-view-tab-btn ${activeTab === 'notes' ? 'active' : ''}`}
-              title="Service notepad and instant notice broadcast"
-            >
-              <span>📝 Notes &amp; Notice</span>
-              {activeNotice && <span className="view-tab-badge-dot" title="Active Notice Broadcasted" />}
-            </button>
-          </div>
+        {/* Mode Switcher: Slides vs Notepad & Notices */}
+        <div className="main-view-switcher">
+          <button
+            type="button"
+            onClick={() => setActiveTab('slides')}
+            className={`main-view-tab-btn ${activeTab === 'slides' ? 'active' : ''}`}
+            title="Slides presentation stage"
+          >
+            <span>🖼️ Slides ({totalSlides})</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('notes')}
+            className={`main-view-tab-btn ${activeTab === 'notes' ? 'active' : ''}`}
+            title="Service notepad and instant notice broadcast"
+          >
+            <span>📝 Notes &amp; Notice</span>
+            {activeNotice && <span className="view-tab-badge-dot" title="Active Notice Broadcasted" />}
+          </button>
         </div>
 
         <div className="navbar-actions">

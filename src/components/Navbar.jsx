@@ -284,11 +284,11 @@ export default function Navbar() {
 
       {/* Mobile Drawer Navigation Menu */}
       <div 
-        className={`fixed inset-0 flex flex-col justify-between p-6 pt-24 text-white lg:hidden z-40 transition-transform duration-300 ${
+        className={`fixed inset-0 flex flex-col justify-between p-4 sm:p-6 pt-20 sm:pt-24 text-white lg:hidden z-40 transition-transform duration-300 overflow-y-auto ${
           mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
         style={{
-          background: 'linear-gradient(135deg, rgba(15, 40, 53, 0.96), rgba(20, 52, 68, 0.94))',
+          background: 'linear-gradient(135deg, rgba(15, 40, 53, 0.98), rgba(20, 52, 68, 0.96))',
           backdropFilter: 'blur(24px)',
           WebkitBackdropFilter: 'blur(24px)'
         }}

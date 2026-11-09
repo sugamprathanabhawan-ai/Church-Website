@@ -1,0 +1,48 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Diagnostic & test outputs
+.playwright-mcp/
+*.png.tmp
+mobile_gallery_view.png
+mobile_lightbox_view.png
+staff_naresh_mobile.png
+staff_pastoral_mobile.png
+staff_youth_mobile.png
+youth_leadership_mobile.png
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production builds
+dist/
+dist-ssr/
+*.local
+
+# Environment variables & secrets (Protects Gemini API key and Supabase config)
+.env
+.env.*
+!.env.example
+
+# Supabase local files
+.supabase/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.figma/

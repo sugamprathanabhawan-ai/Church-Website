@@ -1,0 +1,126 @@
+.church-section{padding:85px 7%;scroll-margin-top:25px}
+.church-section h2{font-family:'Playfair Display',serif;font-size:52px;line-height:1.2;font-weight:400;letter-spacing:-1.5px;margin:20px 0;color:#214b60}
+.church-section h2 em{color:#6a9daf}
+.church-section p{font-size:13px;line-height:1.9;color:#71818a}
+.church-section h3{font-family:'Playfair Display',serif;font-weight:400;font-size:23px;line-height:1.4;margin:0;color:#214b60}
+.church-section-heading{text-align:center;margin:0 auto 45px;max-width:680px}
+.church-split-heading{display:flex;justify-content:space-between;align-items:center;gap:60px;margin-bottom:35px}
+.church-split-heading>p{max-width:365px}
+.church-content-link{display:flex;align-items:center;justify-content:space-between;gap:22px;border-bottom:1px solid rgba(214,235,244,0.8);padding:13px 0;font-size:12px;color:#214b60;transition:all .2s ease}
+.church-content-link:hover{color:#4b92ae;border-color:#4b92ae}
+.church-content-link>span{font-size:19px}
+.church-action{display:inline-flex;align-items:center;justify-content:space-between;gap:30px;background:linear-gradient(135deg,#214b60,#285c73);color:#fff;padding:16px 24px;border-radius:12px;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,0.3);box-shadow:0 8px 24px -4px rgba(33,75,96,0.25);transition:all .25s ease}
+.church-action:hover{background:linear-gradient(135deg,#1b3e50,#225167);transform:translateY(-2px);box-shadow:0 12px 28px -4px rgba(33,75,96,0.35)}
+.church-icon{width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,0.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.95);box-shadow:0 4px 15px rgba(33,75,96,0.06);color:#4b9fb9;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.church-number{font-size:10px;letter-spacing:1.4px;color:#83a2af;font-weight:600}
+.ministry-section{background:radial-gradient(ellipse at 20% 0%,rgba(224,242,254,0.5) 0%,transparent 60%),radial-gradient(ellipse at 80% 100%,rgba(240,249,255,0.7) 0%,transparent 60%),#f8fafc}
+.ministry-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;max-width:1250px;margin:auto}
+.ministry-card{padding:32px;background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.95);border-radius:20px;display:flex;flex-direction:column;box-shadow:0 10px 30px -5px rgba(33,75,96,0.05),inset 0 1px 1px 0 rgba(255,255,255,0.95);transition:all .25s ease}
+.ministry-card:hover{transform:translateY(-6px);background:rgba(255,255,255,0.95);border-color:rgba(75,159,185,0.5);box-shadow:0 20px 40px -8px rgba(33,75,96,0.12),0 0 25px rgba(75,159,185,0.15),inset 0 1px 2px rgba(255,255,255,1)}
+.ministry-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:25px}
+.ministry-time{font-size:10px;letter-spacing:.4px;color:#6491a5;font-weight:600;margin:12px 0 0}
+.ministry-card p{margin:15px 0 22px}
+.ministry-card .church-content-link{margin-top:auto}
+.fellowship-section{background:radial-gradient(circle at top right,rgba(224,242,254,0.4) 0%,transparent 50%),#f8fafc}
+.youth-overview{display:flex;align-items:center;gap:22px;padding:28px 34px;border:1px solid rgba(255,255,255,0.95);background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:20px;box-shadow:0 12px 35px -5px rgba(33,75,96,0.06),inset 0 1px 1px rgba(255,255,255,0.95)}
+.youth-overview h3{font-size:21px}
+.youth-overview p{margin:5px 0 0;font-size:12px}
+.youth-leader{margin-left:auto;display:flex;flex-direction:column;gap:8px}
+.youth-leader>span{font-size:8px;letter-spacing:1.5px;color:#60899b;font-weight:700}
+.youth-leader>strong{font-weight:500;font-size:17px;color:#214b60}
+.youth-overview .church-content-link{margin-left:15px}
+.youth-groups{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:25px;margin-top:25px}
+.youth-groups article{display:flex;align-items:center;gap:20px;padding:26px;background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.9);border-radius:18px;box-shadow:0 8px 25px -4px rgba(33,75,96,0.05),inset 0 1px 1px rgba(255,255,255,0.95);transition:all .25s ease}
+.youth-groups article:hover{transform:translateY(-3px);background:rgba(255,255,255,0.95);border-color:rgba(75,159,185,0.4);box-shadow:0 14px 30px -5px rgba(33,75,96,0.1)}
+.youth-group-mark{font-family:'Playfair Display',serif;font-size:45px;color:#b5d4df}
+.youth-groups .section-label{font-size:8px}
+.youth-groups h3{font-size:25px;margin:8px 0}
+.youth-groups p{margin:0;color:#456879}
+.youth-groups small{font-size:10px;color:#81969f}
+.church-section .church-source-note{font-size:10px;margin-top:22px;color:#81969f}
+.choir-section{background:radial-gradient(ellipse at 30% 50%,rgba(220,241,251,0.7) 0%,rgba(240,248,253,0.9) 100%);display:grid;grid-template-columns:1fr 1fr;gap:9%;align-items:center}
+.choir-practice{display:flex;align-items:center;gap:18px;margin:27px 0;color:#699aaf}
+.choir-practice>div{display:flex;flex-direction:column;gap:8px}
+.choir-practice span{font-size:8px;letter-spacing:1.5px;font-weight:700}
+.choir-practice strong{font-weight:500;font-size:13px;color:#285269}
+.choir-resources{padding:38px;border:1px solid rgba(255,255,255,0.95);background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:80px 20px 20px 20px;box-shadow:0 16px 40px -5px rgba(33,75,96,0.08),inset 0 1px 2px rgba(255,255,255,1)}
+.choir-resources>.section-label{padding-top:14px;display:block}
+.choir-resources h3{margin-top:15px;font-size:30px}
+.choir-resources .church-content-link{font-size:12px;padding:15px 0}
+.choir-resources small{font-size:8px;color:#83a2af;letter-spacing:1px;margin-left:auto}
+.calendar-section{background:radial-gradient(circle at bottom left,rgba(224,242,254,0.4) 0%,transparent 60%),#f8fafc}
+.calendar-feature{display:flex;align-items:center;gap:30px;padding:35px;background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.95);border-radius:20px;box-shadow:0 12px 35px -5px rgba(33,75,96,0.06),inset 0 1px 1px rgba(255,255,255,0.95)}
+.calendar-symbol{background:rgba(220,240,249,0.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.9);border-radius:100px 100px 14px 14px;width:100px;height:115px;display:grid;place-items:center;flex-shrink:0;color:#4b92ae;box-shadow:inset 0 1px 2px rgba(255,255,255,0.8)}
+.calendar-symbol svg{width:40px;height:40px}
+.calendar-feature h3{margin-top:10px;font-size:27px}
+.calendar-feature p{margin-bottom:0}
+.calendar-feature>.church-action{margin-left:auto;white-space:nowrap}
+.calendar-preview{margin-top:20px;background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.9);border-radius:16px;box-shadow:0 8px 25px rgba(33,75,96,0.05);overflow:hidden}
+.calendar-preview>summary{padding:20px 25px;cursor:pointer;font-size:13px;list-style:none;display:flex;align-items:center;justify-content:space-between;color:#214b60;font-weight:500}
+.calendar-preview>summary::-webkit-details-marker{display:none}
+.calendar-preview>summary span{font-size:23px}
+.calendar-preview[open]>summary span{transform:rotate(45deg)}
+.church-document-frame{background:rgba(255,255,255,0.75);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.9);border-radius:14px;padding:15px;margin-top:25px}
+.calendar-preview .church-document-frame{margin:0;border:0;border-top:1px solid rgba(214,235,244,0.7)}
+.church-document-frame iframe{border:0;width:100%;height:610px;border-radius:10px;background:#fff}
+.church-document-frame>p{font-size:11px;margin:12px 0 0}
+.church-document-frame>p a{text-decoration:underline}
+.laws-section{background:radial-gradient(at 10% 20%,rgba(224,242,254,0.4) 0%,transparent 50%),#f8fafc}
+.church-document-toolbar{display:flex;justify-content:space-between;align-items:center;gap:25px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.78);backdrop-filter:blur(14px);border-radius:18px;padding:20px 25px;box-shadow:0 8px 25px rgba(33,75,96,0.04)}
+.church-document-toolbar h3{font-size:21px;display:flex;align-items:center;gap:14px}
+.church-document-toolbar h3 span{font-family:'DM Sans',sans-serif;font-size:10px;border-radius:20px;background:rgba(230,241,246,0.8);padding:7px 12px;color:#4b9fb9;font-weight:600}
+.church-document-toolbar label{display:flex;align-items:center;gap:10px;padding:12px 18px;border:1px solid rgba(209,227,234,0.8);border-radius:30px;background:rgba(255,255,255,0.85);color:#7395a5}
+.church-document-toolbar input{border:0;outline:0;background:none;font:inherit;font-size:12px;color:#214b60;width:180px}
+.church-document-toolbar label:focus-within{outline:2px solid #87c8e1;background:#fff}
+.church-document-list article{display:flex;align-items:center;gap:22px;padding:23px 0;border-bottom:1px solid rgba(213,229,235,0.6)}
+.church-document-list article>svg{color:#719aac}
+.church-document-list h3{font-size:20px}
+.document-type{margin-left:auto;color:#83a2af;font-size:9px;letter-spacing:1.5px;font-weight:600}
+.church-document-list button{display:flex;align-items:center;gap:23px;font-size:11px;background:rgba(255,255,255,0.85);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.9);border-radius:25px;padding:10px 18px;color:#285269;font-weight:600;box-shadow:0 4px 12px rgba(33,75,96,0.05);transition:all .2s ease}
+.church-document-list button:hover{background:#fff;transform:translateY(-1px);box-shadow:0 6px 16px rgba(33,75,96,0.1)}
+.church-document-list button[aria-expanded=true]{background:linear-gradient(135deg,#214b60,#285c73);color:#fff;border-color:transparent}
+.document-preview-heading{display:flex;justify-content:space-between;align-items:center;padding:0 0 15px}
+.document-preview-heading h3{font-size:20px}
+.document-preview-heading button{background:none;font-size:26px;padding:0 8px;cursor:pointer}
+.church-empty{text-align:center;padding:35px}
+.church-empty button{background:none;text-decoration:underline;color:#285c73}
+.quiz-section{display:grid;grid-template-columns:1.2fr 1fr;align-items:center;gap:50px;background:radial-gradient(ellipse at center,rgba(229,242,248,0.85),rgba(245,250,252,0.95))}
+.quiz-section .church-action{margin-top:15px}
+.quiz-visual{position:relative;display:grid;place-items:center;min-height:360px}
+.quiz-emblem{width:270px;height:270px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,0.94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,0.98);box-shadow:0 20px 50px rgba(75,159,185,0.16),inset 0 2px 4px rgba(255,255,255,1);z-index:1}
+.quiz-emblem>svg{color:#4b92ae;margin-bottom:15px}
+.quiz-emblem>span{font-size:8px;letter-spacing:2px;color:#6a91a3;font-weight:700}
+.quiz-emblem strong{font-family:'Playfair Display',serif;font-size:75px;font-weight:400;line-height:1.2;color:#214b60}
+.quiz-emblem p{font-size:11px;margin:0 0 15px;color:#71818a}
+.quiz-emblem .quiz-streak{font-size:7px;letter-spacing:1.2px;padding:9px 14px;background:rgba(220,238,245,0.8);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.9);border-radius:20px;font-weight:700;color:#285c73}
+.quiz-orbit{position:absolute;width:330px;height:330px;border:1px dashed rgba(171,203,217,0.7);border-radius:50%;animation:quiz-orbit 30s linear infinite;will-change:transform;transform:translateZ(0)}
+.quiz-orbit::before,.quiz-orbit::after{content:'';position:absolute;border-radius:50%;width:10px;height:10px;background:#9ebfcc;left:50%;top:-5px;box-shadow:0 0 10px rgba(75,159,185,0.5)}
+.quiz-orbit::after{top:auto;bottom:-5px;background:#c2dce7}
+@keyframes quiz-orbit{to{transform:rotate(360deg)}}
+.zen-section{background:radial-gradient(circle at top right,rgba(224,242,254,0.4) 0%,transparent 50%),#f8fafc}
+.zen-modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:25px}
+.zen-modes article{padding:32px;border:1px solid rgba(255,255,255,0.9);border-radius:18px;background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 10px 30px -5px rgba(33,75,96,0.05),inset 0 1px 1px rgba(255,255,255,0.95);transition:all .25s ease}
+.zen-modes article:hover{transform:translateY(-4px);background:rgba(255,255,255,0.96);box-shadow:0 16px 35px -5px rgba(33,75,96,0.1)}
+.zen-modes .church-icon{margin-bottom:22px}
+.zen-modes .section-label{font-size:8px}
+.zen-modes h3{margin-top:12px}
+.zen-modes p{margin-bottom:0}
+.zen-join{display:flex;align-items:center;justify-content:space-between;gap:30px;background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:25px 32px;margin-top:25px;border-radius:18px;border:1px solid rgba(255,255,255,0.95);box-shadow:0 10px 30px -5px rgba(33,75,96,0.06)}
+.zen-join>span{font-size:12px;color:#6d8a98;line-height:1.7}
+.zen-join .church-action{flex-shrink:0}
+.quick-resources{display:flex;align-items:center;justify-content:space-between;gap:70px;background:radial-gradient(ellipse at 50% 50%,rgba(237,246,250,0.8) 0%,rgba(248,250,252,0.9) 100%);border-block:1px solid rgba(217,233,240,0.8);padding-block:60px}
+.quick-resources h2{font-size:38px}
+.quick-resource-links{min-width:300px;flex:1;max-width:450px}
+.contact-section{display:grid;grid-template-columns:1fr 1fr;gap:8%;align-items:center;background:radial-gradient(ellipse at 80% 20%,rgba(224,242,254,0.45) 0%,transparent 60%),#f8fafc}
+.contact-copy>p{max-width:380px}
+.contact-detail{display:flex;flex-direction:column;gap:8px;margin:22px 0}
+.contact-detail>span{font-size:8px;letter-spacing:1.6px;color:#7595a5;font-weight:700}
+.contact-detail>strong,.contact-detail>a{font-size:13px;font-weight:500;color:#214b60;overflow-wrap:anywhere}
+.contact-links{display:flex;gap:25px}
+.contact-copy>.church-content-link{max-width:280px}
+.contact-map{border:1.5px solid rgba(255,255,255,0.95);border-radius:80px 18px 18px 18px;overflow:hidden;background:rgba(255,255,255,0.85);backdrop-filter:blur(20px);box-shadow:0 16px 40px rgba(33,75,96,0.08),inset 0 1px 2px rgba(255,255,255,1)}
+.contact-map iframe{height:430px;width:100%;border:0;display:block}
+.contact-map>.church-content-link{padding:18px 22px;border-bottom:0;font-size:11px}
+@media(max-width:1000px){.ministry-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.youth-overview{flex-wrap:wrap}.youth-overview>.church-content-link{width:100%;margin:0}.youth-groups{gap:15px}.youth-groups article{padding:20px 15px;gap:12px}.youth-group-mark{font-size:30px}.calendar-feature{flex-wrap:wrap}.calendar-feature>.church-action{margin:0}.choir-section{gap:5%}.quick-resources{gap:35px}.church-section h2{font-size:44px}}
+@media(max-width:640px){.church-section{padding:60px 6%}.church-section h2{font-size:38px;letter-spacing:-1px}.church-section-heading{margin-bottom:30px}.church-section-heading p br{display:none}.church-split-heading{display:block;margin-bottom:25px}.church-split-heading>p{max-width:none}.ministry-grid{grid-template-columns:1fr;gap:15px}.ministry-card{padding:25px}.ministry-card-top{margin-bottom:20px}.ministry-card h3{font-size:23px}.youth-overview{padding:22px;gap:15px}.youth-overview h3{font-size:18px}.youth-overview .church-icon{width:40px;height:40px}.youth-leader{width:100%;margin:5px 0}.youth-groups{grid-template-columns:1fr}.youth-groups article{padding:22px;gap:25px}.youth-group-mark{font-size:42px}.choir-section,.quiz-section,.contact-section{grid-template-columns:1fr;gap:35px}.choir-resources{padding:30px 25px}.calendar-feature{padding:25px;gap:20px}.calendar-symbol{width:70px;height:85px}.calendar-feature h3{font-size:24px}.calendar-feature .church-action{width:100%}.church-document-toolbar{flex-direction:column;align-items:stretch;gap:20px}.church-document-toolbar h3{font-size:20px}.church-document-toolbar input{width:100%}.church-document-list article{gap:12px;padding:20px 0}.church-document-list h3{font-size:16px;flex:1}.church-document-list .church-number,.document-type{display:none}.church-document-list article>svg{width:20px;flex-shrink:0}.church-document-list button{font-size:10px;padding:9px 12px;gap:8px;flex-shrink:0}.church-document-frame iframe{height:450px}.quiz-visual{min-height:310px}.quiz-emblem{width:235px;height:235px}.quiz-orbit{width:285px;height:285px}.quiz-emblem strong{font-size:65px}.zen-modes{grid-template-columns:1fr;gap:15px}.zen-join{flex-direction:column;align-items:stretch;padding:25px;gap:20px}.quick-resources{flex-direction:column;align-items:stretch;gap:20px}.quick-resource-links{min-width:0;max-width:none}.contact-map iframe{height:350px}.contact-links{gap:20px}}
+@media(prefers-reduced-motion:reduce){.quiz-orbit{animation:none}.ministry-card:hover{transform:none}}

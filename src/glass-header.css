@@ -1,0 +1,60 @@
+/* Keep the ocean behind the glass instead of a solid header surface. */
+main > .header {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 2;
+  height: 90px;
+  color: #f5fbff;
+  background: linear-gradient(120deg, rgb(222 243 252 / 20%), rgb(192 224 239 / 9%));
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+  backdrop-filter: blur(18px) saturate(130%);
+  border-bottom: 1px solid rgb(255 255 255 / 23%);
+  box-shadow: 0 4px 24px rgb(18 53 69 / 7%);
+}
+
+main > .header .wordmark-dot {
+  color: #c3eaf8;
+}
+
+main > .header .reserve-nav {
+  border-color: rgb(255 255 255 / 45%);
+  background: rgb(236 248 255 / 10%);
+  border-radius: 6px;
+  transition: background 180ms ease;
+}
+
+main > .header .reserve-nav:hover {
+  background: rgb(236 248 255 / 22%);
+}
+
+main > .header nav a:hover,
+main > .header nav button:hover {
+  color: #c3eaf8;
+}
+
+main > .hero {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+main > .hero .hero-content {
+  padding-top: 237px;
+}
+
+main > .hero .hero-topline {
+  top: 133px;
+}
+
+@media (min-width: 1600px) {
+  main > .hero { height: 100vh; height: 100dvh; min-height: 100vh; min-height: 100dvh; }
+  main > .hero .hero-content { padding-top: 265px; }
+}
+
+@media (max-width: 760px) {
+  main > .header { height: 80px; }
+  main > .hero { height: 100vh; height: 100dvh; min-height: 100vh; min-height: 100dvh; }
+  main > .hero .hero-content { padding-top: 225px; }
+  main > .hero .hero-topline { top: 113px; }
+}
